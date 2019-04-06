@@ -2,8 +2,10 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation deps.support.app_compat
-    annotationProcessor deps.butterknife.compiler
+    // kotlin, implementation in java
+    kapt deps.butterknife.compiler
 
+    api deps.kotlin.stdlib
     api deps.butterknife.core
     api deps.fragmentation
 

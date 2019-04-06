@@ -11,7 +11,8 @@ dependencies {
     implementation deps.retrofit.scalars
     implementation deps.retrofit.rxjava2
 
-    annotationProcessor deps.butterknife.compiler
+    // kotlin, implementation in java
+    kapt deps.butterknife.compiler
 
     api deps.andromeda
     api deps.okhttp.interceptor

@@ -32,8 +32,12 @@ subprojects {
     } else {
         apply plugin: 'com.android.library'
     }
-    if (name == 'business') {
-    }
+    // kotlin support for every module
+    apply plugin: 'kotlin-android'
+    apply plugin: 'kotlin-android-extensions'
+    apply plugin: 'kotlin-kapt'
+    // kotlin support end
+
     // if (name != "lib.style"
     //         && name != "widgetkit") {
     //     resourcePrefix project.getName() + "_"

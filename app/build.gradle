@@ -7,7 +7,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     defaultConfig {
         applicationId "com.ltan.music"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
     buildTypes {
@@ -59,13 +59,15 @@ dependencies {
     annotationProcessor deps.butterknife.compiler
     implementation deps.kotlin.stdlib
 
+    implementation deps.multidex
     implementation deps.constraint_layout
     implementation deps.BottomNavigationViewEx
+
     implementation deps.support.design
-    implementation deps.room.rxjava2
     implementation deps.support.app_compat
-    implementation deps.support.cardviewv7
-    implementation deps.support.multidex
+    implementation deps.support.cardview
+
+    implementation deps.room.rxjava2
 
     implementation project(path: ':style')
     implementation project(path: ':common')

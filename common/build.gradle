@@ -1,0 +1,17 @@
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation deps.support.recyclerview
+    implementation deps.support.app_compat
+    api deps.SmartRefreshLayout
+
+    api deps.gson
+    api deps.reactivex.rx_android
+    api deps.rxbinding.rxbinding
+    api deps.rxlifecycle.rxlifecycle
+    api deps.leakcanary.debug_android
+
+    testImplementation deps.junit
+    androidTestImplementation deps.test.runner
+    androidTestImplementation deps.test.espresso
+}

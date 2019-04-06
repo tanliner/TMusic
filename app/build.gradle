@@ -1,0 +1,77 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    defaultConfig {
+        applicationId "com.ltan.music"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+    buildTypes {
+        release {
+            shrinkResources true
+            minifyEnabled true
+            zipAlignEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    dexOptions {
+        preDexLibraries false
+        jumboMode true
+        maxProcessCount 8
+        javaMaxHeapSize "8g"
+    }
+
+    flavorDimensions "app"
+    productFlavors {
+        Product {
+            dimension "app"
+            // manifestPlaceholders = [
+            //         "SERVER_URL" : "https://api.tik.com/v",
+            //         "APP_CHANNEL": "Product"
+            // ]
+        }
+        Dev {
+            dimension "app"
+            // manifestPlaceholders = [
+            // ]
+        }
+    }
+
+    // If you run into the following issue: "More than one file was found with OS independent path
+    // 'META-INF/proguard/androidx-annotations.pro'", please put the following in your gradle file
+    // as a temporary workaround while we fix the issue in alpha10:
+    packagingOptions {
+        exclude 'META-INF/proguard/androidx-annotations.pro'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    annotationProcessor deps.butterknife.compiler
+    implementation deps.kotlin.stdlib
+
+    implementation deps.constraint_layout
+    implementation deps.BottomNavigationViewEx
+    implementation deps.support.design
+    implementation deps.room.rxjava2
+    implementation deps.support.app_compat
+    implementation deps.support.cardviewv7
+    implementation deps.support.multidex
+
+    implementation project(path: ':style')
+    implementation project(path: ':common')
+    implementation project(path: ':business')
+
+    testImplementation deps.junit
+    androidTestImplementation deps.test.runner
+    androidTestImplementation deps.test.espresso
+}

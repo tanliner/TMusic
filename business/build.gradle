@@ -1,0 +1,27 @@
+// WARNING: API 'variantOutput.getProcessResources()' is obsolete and has been replaced with 'variantOutput.getProcessResourcesProvider()'.
+// It will be removed at the end of 2019.
+apply plugin: 'com.jakewharton.butterknife'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation deps.support.app_compat
+    implementation deps.okhttp.okhttp
+    implementation deps.retrofit.gson
+    implementation deps.retrofit.scalars
+    implementation deps.retrofit.rxjava2
+
+    annotationProcessor deps.butterknife.compiler
+
+    api deps.andromeda
+    api deps.okhttp.interceptor
+    // bugly report
+    api deps.bugly_crashreport
+    api deps.retrofit.retrofit
+
+    api project(path: ':basemvp')
+
+    testImplementation deps.junit
+    androidTestImplementation deps.test.runner
+    androidTestImplementation deps.test.espresso
+}

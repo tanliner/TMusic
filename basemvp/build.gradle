@@ -1,0 +1,17 @@
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation deps.support.app_compat
+    annotationProcessor deps.butterknife.compiler
+
+    api deps.butterknife.core
+    api deps.fragmentation
+
+    api project(path: ':common')
+    api project(path: ':widget')
+    api project(path: ':style')
+
+    testImplementation deps.junit
+    androidTestImplementation deps.test.runner
+    androidTestImplementation deps.test.espresso
+}

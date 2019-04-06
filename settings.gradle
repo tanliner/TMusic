@@ -1,1 +1,7 @@
-include ':app', ':widget', ':style', ':common', ':basemvp', ':business'
+include ':app',
+        ':widget',
+        ':style',
+        ':common',
+        ':basemvp',
+        ':business',
+        ':index'

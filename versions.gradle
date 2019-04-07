@@ -49,13 +49,13 @@ versions.mockwebserver = "3.8.1"
 versions.navigation = "2.1.0-alpha01"
 versions.okhttp_logging_interceptor = "3.9.0"
 versions.paging = "2.1.0-rc01"
-versions.okhttp = '3.9.0'
+versions.okhttp = "3.9.0"
 versions.retrofit = "2.5.0"
 versions.robolectric = "4.2"
 versions.room = "2.1.0-alpha06"
 versions.rx_android = "2.1.0"
 versions.rxjava2 = "2.1.3"
-versions.support = '1.0.0'
+versions.support = "1.0.0"
 versions.supportv7 = "28.0.0"
 versions.timber = "4.5.1"
 versions.work = "2.0.0-rc01"
@@ -65,11 +65,11 @@ versions.mpchart = "v3.1.0-alpha"
 versions.multitype = "3.5.0"
 versions.multitypekt = "3.4.4"
 versions.SmartRefreshLayout = "1.0.5.1"
-versions.leakcanary = '1.6.1'
-versions.gson = '2.8.5'
-versions.bugly = '2.6.6.1'
-versions.multidex = '2.0.0'
-versions.multidexv7 = '1.0.3'
+versions.leakcanary = "1.6.1"
+versions.gson = "2.8.5"
+versions.bugly = "2.6.6.1"
+versions.multidex = "2.0.0"
+versions.multidexv7 = "1.0.3"
 
 
 def deps = [:]
@@ -263,12 +263,13 @@ deps.SmartRefreshHeader =  "com.scwang.smartrefresh:SmartRefreshHeader:$versions
 
 deps.andromeda_plugin = "org.qiyi.video.svg:plugin:1.1.1"
 deps.butterknife_gradle_plugin = "com.jakewharton:butterknife-gradle-plugin:9.0.0-rc2"
+deps.kotterknife = "com.jakewharton:kotterknife:0.1.0-SNAPSHOT"
 deps.BottomNavigationViewEx = "com.github.ittianyu:BottomNavigationViewEx:2.0.2"
 
 deps.pgyersdk = "com.pgyersdk:sdk:2.8.1"
 deps.bugly_crashreport = "com.tencent.bugly:crashreport:$versions.bugly"
 deps.bugly_nativecrashreport = "com.tencent.bugly:nativecrashreport:3.3.1"
-deps.flexbox = 'com.google.android:flexbox:1.0.0'
+deps.flexbox = "com.google.android:flexbox:1.0.0"
 
 ext.deps = deps
 

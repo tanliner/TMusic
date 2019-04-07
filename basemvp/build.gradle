@@ -7,6 +7,7 @@ dependencies {
 
     api deps.kotlin.stdlib
     api deps.butterknife.core
+    api deps.kotterknife
     api deps.fragmentation
 
     api project(path: ':common')

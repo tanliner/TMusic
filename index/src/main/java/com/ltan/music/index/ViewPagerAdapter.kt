@@ -34,7 +34,7 @@ class ViewPagerAdapter(context: Context, pages: ArrayList<View>) : PagerAdapter(
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val page = mPages[position]
-        container.addView(page, position)
+        container.addView(page)
         return page
     }
 

@@ -2,8 +2,6 @@ package com.ltan.music.index
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
@@ -34,29 +32,15 @@ class IndexActivity : AppCompatActivity() {
     // val mViewPager: ViewPager
     var mViewPager: ViewPager by bindView(R.id.index_vp)
 
-    private var unBinder : Unbinder? = null
+    private var unBinder: Unbinder? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_index)
         unBinder = ButterKnife.bind(this)
 
-        val inflater = LayoutInflater.from(this)
-        val page1 = inflater.inflate(R.layout.page_mine, null, false)
-        val page2 = inflater.inflate(R.layout.page_discovery, null, false)
-        val page3 = inflater.inflate(R.layout.page_friends, null, false)
-        val page4 = inflater.inflate(R.layout.page_videos, null, false)
-        val viewList = ArrayList<View>()
-        viewList.add(page1)
-        viewList.add(page2)
-        viewList.add(page3)
-        viewList.add(page4)
-        for (i in 0..3) {
-            Log.d(TAG, "this is a for loop $i")
-        }
-        val adapter = ViewPagerAdapter(this, viewList)
+        val adapter = IndexPagerAdapter(this.supportFragmentManager)
         mPageIndicator.setViewPager(mViewPager)
-        // adapter.setViewList(viewList)
         mViewPager.adapter = adapter
     }
 

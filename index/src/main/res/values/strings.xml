@@ -1,7 +1,4 @@
 <resources>
-    <string name="app_name">TMusic Index</string>
-    <string name="index_page_mine">Mine</string>
-    <string name="index_page_discovery">Discovery</string>
-    <string name="index_page_friends">Friends</string>
-    <string name="index_page_videos">Video</string>
+    <string name="lib_index_name">Mine</string>
+    <string name="lib_index_header_text">This is a test message of Lib-Index</string>
 </resources>

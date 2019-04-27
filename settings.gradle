@@ -4,4 +4,7 @@ include ':app',
         ':common',
         ':basemvp',
         ':business',
+        ':discovery',
+        ':friends',
+        ':videos',
         ':index'

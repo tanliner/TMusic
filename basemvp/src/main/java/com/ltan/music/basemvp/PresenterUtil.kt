@@ -6,6 +6,8 @@ import java.lang.reflect.ParameterizedType
 /**
  * TMusic.com.ltan.music.basemvp
  *
+ * to get the Presenter Type Value
+ *
  * @ClassName: PresenterUtil
  * @Description:
  * @Author: tanlin

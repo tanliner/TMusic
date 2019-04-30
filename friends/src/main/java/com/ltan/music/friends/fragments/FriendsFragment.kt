@@ -1,10 +1,10 @@
 package com.ltan.music.friends.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import com.ltan.music.business.MusicBaseFragment
-import com.ltan.music.business.setValue
+import com.ltan.music.basemvp.MusicBaseFragment
+import com.ltan.music.basemvp.setValue
+import com.ltan.music.common.MusicLog
 import com.ltan.music.friends.R
 import kotterknife.bindView
 
@@ -43,7 +43,7 @@ class FriendsFragment : MusicBaseFragment() {
     }
 
     fun justTest(v: View) {
-        Log.d(TAG, "\nthis is a test message from$this, and mHeader is:$v")
+        MusicLog.d(TAG, "\nthis is a test message from$this, and mHeader is:$v")
     }
 }
 

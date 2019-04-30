@@ -2,9 +2,9 @@ package com.ltan.music.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.widget.LinearLayout
 import androidx.viewpager.widget.ViewPager
+import com.ltan.music.common.MusicLog
 
 /**
  * TMusic.com.ltan.music.view
@@ -37,7 +37,7 @@ class PageIndicator @JvmOverloads constructor(
             }
 
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                Log.v(TAG, "positionOffset: $positionOffset , positionOffsetPixels: $positionOffsetPixels")
+                MusicLog.v(TAG, "positionOffset: $positionOffset , positionOffsetPixels: $positionOffsetPixels")
             }
 
             override fun onPageSelected(position: Int) {

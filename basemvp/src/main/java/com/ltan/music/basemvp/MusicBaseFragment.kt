@@ -1,4 +1,4 @@
-package com.ltan.music.business
+package com.ltan.music.basemvp
 
 import android.os.Bundle
 import android.view.LayoutInflater

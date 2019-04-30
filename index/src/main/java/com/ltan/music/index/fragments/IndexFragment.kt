@@ -21,7 +21,7 @@ import kotterknife.bindView
  */
 class IndexFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     companion object {
-        const val TAG = "ltan/Index-"
+        const val TAG = "Index/Frag/"
         fun newInstance(): IndexFragment {
             return IndexFragment()
         }

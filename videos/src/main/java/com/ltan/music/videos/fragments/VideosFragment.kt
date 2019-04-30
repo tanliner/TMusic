@@ -20,7 +20,7 @@ import kotterknife.bindView
 class VideosFragment : MusicBaseFragment() {
 
     companion object {
-        const val TAG = "ltan/Videos-"
+        const val TAG = "Videos/Frag"
         fun newInstance(): VideosFragment {
             return VideosFragment()
         }

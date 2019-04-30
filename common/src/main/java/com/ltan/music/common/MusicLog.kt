@@ -12,7 +12,7 @@ import android.util.Log
  * @Version: 1.0
  */
 object MusicLog {
-    private const val TAG: String = "ltan-tmusic/"
+    private const val TAG: String = "TMusic/"
 
     @JvmStatic
     fun v(TAG: String, msg: String) {

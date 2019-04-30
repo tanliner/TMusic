@@ -19,7 +19,7 @@ class PageIndicator @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
     companion object {
-        const val TAG = "ltan/PageIndicator"
+        const val TAG = "App/PageIndic"
     }
 
     private val mContext: Context = context

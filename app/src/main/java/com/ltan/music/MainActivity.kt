@@ -8,6 +8,7 @@ import androidx.viewpager.widget.ViewPager
 import butterknife.ButterKnife
 import butterknife.Unbinder
 import com.ltan.music.adapter.MusicPagerAdapter
+import com.ltan.music.common.StatusBarUtil
 import com.ltan.music.view.PageIndicator
 import kotterknife.bindView
 import kotlin.reflect.KProperty
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.app_activity_main)
+        StatusBarUtil.setColor(this, resources.getColor(R.color.colorPrimary))
         unBinder = ButterKnife.bind(this)
 
         val adapter = MusicPagerAdapter(this.supportFragmentManager)

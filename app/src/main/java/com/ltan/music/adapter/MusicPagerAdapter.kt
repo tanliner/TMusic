@@ -27,7 +27,7 @@ class MusicPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     }
 
     private val pages: IntArray =
-        intArrayOf(R.layout.page_index, R.layout.page_discovery, R.layout.page_friends, R.layout.page_videos)
+        intArrayOf(R.layout.index_fragment, R.layout.discovery_fragment, R.layout.friends_fragment, R.layout.videos_fragment)
     // todo factory pattern generate the fragment instance
     private val frag = arrayOf(IndexFragment.newInstance(), DiscoveryFragment.newInstance(), FriendsFragment.newInstance(), VideosFragment.newInstance())
     private val fragClass = arrayOf(IndexFragment::class.java, DiscoveryFragment::class.java, FriendsFragment::class.java, VideosFragment::class.java)

@@ -29,7 +29,7 @@ class DiscoveryFragment : MusicBaseFragment() {
     var mHeader: View by bindView(R.id.page_header)
 
     override fun initLayout(): Int {
-        return R.layout.page_discovery
+        return R.layout.discovery_fragment
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

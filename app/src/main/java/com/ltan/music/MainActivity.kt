@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     private var unBinder: Unbinder? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.app_activity_main)
         unBinder = ButterKnife.bind(this)
 
         val adapter = MusicPagerAdapter(this.supportFragmentManager)

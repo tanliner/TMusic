@@ -1,4 +1,4 @@
 <resources>
-    <string name="lib_index_name">Mine</string>
-    <string name="lib_index_header_text">This is a test message of Lib-Index</string>
+    <string name="index_name">Mine</string>
+    <string name="index_header_text">This is a test message of Lib-Index</string>
 </resources>

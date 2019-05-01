@@ -30,7 +30,7 @@ class IndexFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     var mHeader: View by bindView(R.id.page_header)
 
     override fun initLayout(): Int {
-        return R.layout.page_index
+        return R.layout.index_fragment
     }
 
     override fun testView(p: IMineContract.Presenter) {

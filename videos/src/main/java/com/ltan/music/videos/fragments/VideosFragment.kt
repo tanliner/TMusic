@@ -29,7 +29,7 @@ class VideosFragment : MusicBaseFragment() {
     var mHeader: View by bindView(R.id.page_header)
 
     override fun initLayout(): Int {
-        return R.layout.page_videos
+        return R.layout.videos_fragment
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

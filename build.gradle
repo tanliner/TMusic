@@ -38,14 +38,14 @@ subprojects {
     apply plugin: 'kotlin-kapt'
     // kotlin support end
 
-    // if (name != "lib.style"
-    //         && name != "widgetkit") {
-    //     resourcePrefix project.getName() + "_"
-    // }
     android {
         compileSdkVersion build_versions.compile_sdk
         buildToolsVersion build_versions.build_tools
 
+        // for module name rule
+        if (name != "style" && name != "widget") {
+            resourcePrefix project.getName() + "_"
+        }
         defaultConfig {
             minSdkVersion build_versions.min_sdk
             targetSdkVersion build_versions.target_sdk

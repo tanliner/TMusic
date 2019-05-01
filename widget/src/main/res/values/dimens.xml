@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="menu_item_text_size">14sp</dimen>
+    <integer name="menu_item_text_size">14</integer>
+    <dimen name="menu_item_width">60dp</dimen>
+    <dimen name="menu_item_height">48dp</dimen>
+</resources>

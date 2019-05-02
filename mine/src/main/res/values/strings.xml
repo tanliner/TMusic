@@ -1,4 +1,15 @@
 <resources>
     <string name="mine_name">Mine</string>
     <string name="mine_header_text">This is a test message of Lib-Index</string>
+    <string name="mine_header_shortcut_fm">私人FM</string>
+    <string name="mine_header_shortcut_new">最新电台</string>
+    <string name="mine_header_shortcut_sati">Sati空间</string>
+    <string name="mine_header_shortcut_fav">私藏推荐</string>
+    <string name="mine_header_shortcut_chi_par">亲子频道</string>
+    <string name="mine_header_shortcut_classic">古典专区</string>
+    <string name="mine_header_shortcut_run">跑步FM</string>
+    <string name="mine_header_shortcut_xb">小冰电台</string>
+    <string name="mine_header_shortcut_jazz">爵士电台</string>
+    <string name="mine_header_shortcut_drive">驾驶模式</string>
+    <string name="mine_header_shortcut_menu">编辑</string>
 </resources>

@@ -52,7 +52,7 @@ class MenuItem @JvmOverloads constructor(
     }
 
     fun setActiveState(status: Float) {
-        mTitleTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, resources.getInteger(R.integer.menu_item_text_size) + (status * 6))
+        mTitleTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, resources.getInteger(R.integer.menu_item_text_size) + (status * 2))
         mTitleTv.alpha = DEFAULT_TITLE_ALPHA + status * (1 - DEFAULT_TITLE_ALPHA)
     }
 }

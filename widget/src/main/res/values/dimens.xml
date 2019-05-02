@@ -4,4 +4,9 @@
     <integer name="menu_item_text_size">14</integer>
     <dimen name="menu_item_width">60dp</dimen>
     <dimen name="menu_item_height">48dp</dimen>
+
+    <dimen name="pager_header_item_padding_h">16dp</dimen>
+    <dimen name="pager_header_item_margin_v">8dp</dimen>
+    <dimen name="pager_header_item_title_size">12dp</dimen>
+    <dimen name="page_header_item_space">8dp</dimen>
 </resources>

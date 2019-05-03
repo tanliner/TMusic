@@ -16,6 +16,10 @@
 
     <dimen name="list_item_divider_h">8dp</dimen>
     <dimen name="song_list_item_left_padding">16dp</dimen>
+    <dimen name="song_list_item_right_padding">6dp</dimen>
     <dimen name="song_list_item_name_left_margin">4dp</dimen>
     <dimen name="song_list_item_name_padding_v">8dp</dimen>
+    <dimen name="song_list_item_shortcut_w">26dp</dimen>
+    <dimen name="song_list_item_shortcut_h">18dp</dimen>
+    <dimen name="song_list_item_shortcut_txt_size">16dp</dimen>
 </resources>

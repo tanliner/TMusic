@@ -35,4 +35,15 @@ class CollectorItemBinder(context: Context) : ItemViewBinder<CollectorItemObject
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val item = itemView as CollectorItem
     }
+
+    /**
+     * recycle view item-click listener
+     * TODO exposure out to fragment
+     */
+    interface OnItemClickListener {
+        /**
+         * push the position
+         */
+        fun onItemClick(position: Int)
+    }
 }

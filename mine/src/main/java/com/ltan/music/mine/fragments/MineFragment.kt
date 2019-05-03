@@ -159,6 +159,9 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         )
         for (i in 1..2) {
             val item = SongListItemObject(getString(titles[i - 1]), i * 4)
+            if (i == 1) {
+                item.creatable = true
+            }
             list.add(item)
         }
         return list

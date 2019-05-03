@@ -5,4 +5,5 @@
     <color name="colorAccent">#D81B60</color>
 
     <color name="color_collector_item_count">#80081B0f</color>
+    <color name="color_song_list_item_count">#80081B0f</color>
 </resources>

@@ -13,4 +13,9 @@
     <dimen name="collector_item_preview_img_w">72dp</dimen>
     <dimen name="collector_item_preview_img_h">48dp</dimen>
     <dimen name="collector_item_count_margin_start">2dp</dimen>
+
+    <dimen name="list_item_divider_h">8dp</dimen>
+    <dimen name="song_list_item_left_padding">16dp</dimen>
+    <dimen name="song_list_item_name_left_margin">4dp</dimen>
+    <dimen name="song_list_item_name_padding_v">8dp</dimen>
 </resources>

@@ -12,4 +12,13 @@
     <string name="mine_header_shortcut_jazz">爵士电台</string>
     <string name="mine_header_shortcut_drive">驾驶模式</string>
     <string name="mine_header_shortcut_menu">编辑</string>
+
+    <string name="mine_content_collector_item_local">本地音乐</string>
+    <string name="mine_content_collector_item_recent">最近播放</string>
+    <string name="mine_content_collector_item_download">下载管理</string>
+    <string name="mine_content_collector_item_my_fm">我的电台</string>
+    <string name="mine_content_collector_item_my_fav">我的收藏</string>
+
+    <string name="mine_song_list_item_created">创建的歌单</string>
+    <string name="mine_song_list_item_favorite">搜藏的歌单</string>
 </resources>

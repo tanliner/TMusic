@@ -10,8 +10,11 @@ import com.ltan.music.common.MusicLog
 import com.ltan.music.mine.CollectorItemObject
 import com.ltan.music.mine.PageItemObject
 import com.ltan.music.mine.R
+import com.ltan.music.mine.SongListItemObject
 import com.ltan.music.mine.adapter.CollectorItemBinder
+import com.ltan.music.mine.adapter.EmptyItemBinder
 import com.ltan.music.mine.adapter.MineHeaderBinder
+import com.ltan.music.mine.adapter.SongListItemBinder
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
 import kotterknife.bindView
@@ -36,8 +39,6 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
 
     private var mFooter: View by bindView(R.id.index_pagers_footer)
     var mRclView: RecyclerView by bindView(R.id.rclv_mine)
-    // header
-    // var mRclView: RecyclerView by bindView(R.id.rclv_mine_header)
 
     private lateinit var mMultiAdapter: MultiTypeAdapter
     private lateinit var items: MutableList<Any>
@@ -66,8 +67,10 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mRclView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         mMultiAdapter = MultiTypeAdapter()
         // recycle
-        mMultiAdapter.register(MineHeaderBinder(requireContext(), generateHeaderItems()))
+        mMultiAdapter.register(String::class, MineHeaderBinder(requireContext(), generateHeaderItems()))
         mMultiAdapter.register(CollectorItemObject::class.java, CollectorItemBinder(requireContext()))
+        mMultiAdapter.register(Integer::class.java, EmptyItemBinder())
+        mMultiAdapter.register(SongListItemObject::class.java, SongListItemBinder())
         genItems()
         mMultiAdapter.items = items
 
@@ -115,11 +118,49 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
 
     private fun genItems() {
         items = ArrayList()
-        items.add(Any()) // recycle view
-        for (i in 1..15) {
-            val title = "this is item $i"
-            val item = CollectorItemObject(R.drawable.page_header_item_fm, title, i * 2)
-            items.add(item)
+        items.add("") // recycle view
+        items.addAll(genCollectorItems())
+        items.add(0)
+        items.addAll(genSongList())
+    }
+
+    /**
+     * create collector items
+     */
+    private fun genCollectorItems(): ArrayList<CollectorItemObject> {
+        val collectImgs = intArrayOf(
+            R.drawable.t_actionbar_music_normal,
+            R.drawable.t_actionbar_friends_normal,
+            R.drawable.t_actionbar_discover_normal,
+            R.drawable.t_actionbar_video_normal,
+            R.drawable.t_actionbar_music_normal
+        )
+        val collectNames = intArrayOf(
+            R.string.mine_content_collector_item_local,
+            R.string.mine_content_collector_item_recent,
+            R.string.mine_content_collector_item_download,
+            R.string.mine_content_collector_item_my_fm,
+            R.string.mine_content_collector_item_my_fav
+        )
+        val collectors = ArrayList<CollectorItemObject>()
+        for (i in 1..5) {
+            val title = getString(collectNames[i - 1])
+            val item = CollectorItemObject(collectImgs[i - 1], title, i)
+            collectors.add(item)
         }
+        return collectors
+    }
+
+    private fun genSongList(): ArrayList<SongListItemObject> {
+        val list = ArrayList<SongListItemObject>()
+        val titles = intArrayOf(
+            R.string.mine_song_list_item_created,
+            R.string.mine_song_list_item_favorite
+        )
+        for (i in 1..2) {
+            val item = SongListItemObject(getString(titles[i - 1]), i * 4)
+            list.add(item)
+        }
+        return list
     }
 }

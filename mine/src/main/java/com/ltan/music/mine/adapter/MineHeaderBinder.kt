@@ -21,7 +21,7 @@ import me.drakeet.multitype.MultiTypeAdapter
  * @Date:   2019-05-03
  * @Version: 1.0
  */
-class MineHeaderBinder(context: Context, dataS: ArrayList<PageItemObject>) : ItemViewBinder<Any, MineHeaderBinder.ViewHolder>() {
+class MineHeaderBinder(context: Context, dataS: ArrayList<PageItemObject>) : ItemViewBinder<String, MineHeaderBinder.ViewHolder>() {
 
     private val mData = dataS
     private val ctx = context
@@ -39,7 +39,7 @@ class MineHeaderBinder(context: Context, dataS: ArrayList<PageItemObject>) : Ite
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, item: Any) {
+    override fun onBindViewHolder(holder: ViewHolder, item: String) {
         holder.rclView?.layoutManager = layoutManager
         holder.rclView?.adapter = mHeaderAdapter
 

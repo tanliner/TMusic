@@ -9,4 +9,8 @@
     <dimen name="pager_header_item_margin_v">8dp</dimen>
     <dimen name="pager_header_item_title_size">12dp</dimen>
     <dimen name="page_header_item_space">8dp</dimen>
+
+    <dimen name="collector_item_preview_img_w">72dp</dimen>
+    <dimen name="collector_item_preview_img_h">48dp</dimen>
+    <dimen name="collector_item_count_margin_start">2dp</dimen>
 </resources>

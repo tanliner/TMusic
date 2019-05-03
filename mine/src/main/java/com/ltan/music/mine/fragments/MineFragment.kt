@@ -7,12 +7,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ltan.music.basemvp.BaseMVPFragment
 import com.ltan.music.basemvp.setValue
 import com.ltan.music.common.MusicLog
+import com.ltan.music.mine.CollectorItemObject
 import com.ltan.music.mine.PageItemObject
 import com.ltan.music.mine.R
-import com.ltan.music.mine.adapter.MineHeaderAdapter
+import com.ltan.music.mine.adapter.CollectorItemBinder
+import com.ltan.music.mine.adapter.MineHeaderBinder
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
 import kotterknife.bindView
+import me.drakeet.multitype.MultiTypeAdapter
 
 /**
  * TMusic.com.ltan.music.index.fragments
@@ -31,8 +34,13 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         }
     }
 
-    var mHeader: View by bindView(R.id.page_header)
-    var mRclView: RecyclerView by bindView(R.id.rclv_mine_header)
+    private var mFooter: View by bindView(R.id.index_pagers_footer)
+    var mRclView: RecyclerView by bindView(R.id.rclv_mine)
+    // header
+    // var mRclView: RecyclerView by bindView(R.id.rclv_mine_header)
+
+    private lateinit var mMultiAdapter: MultiTypeAdapter
+    private lateinit var items: MutableList<Any>
 
     override fun initLayout(): Int {
         return R.layout.mine_fragment
@@ -52,18 +60,25 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     }
 
     private fun init() {
-        mHeader.setOnClickListener { v -> testClick(v); testClick(mHeader) }
-        mRclView.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-        val headerAdapter = MineHeaderAdapter(mRclView)
-        headerAdapter.setDataSource(generateItems())
-        mRclView.adapter = headerAdapter
+        mFooter.setOnClickListener { v -> testClick(v); testClick(mFooter) }
+        // mRclView.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+
+        mRclView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        mMultiAdapter = MultiTypeAdapter()
+        // recycle
+        mMultiAdapter.register(MineHeaderBinder(requireContext(), generateHeaderItems()))
+        mMultiAdapter.register(CollectorItemObject::class.java, CollectorItemBinder(requireContext()))
+        genItems()
+        mMultiAdapter.items = items
+
+        mRclView.adapter = mMultiAdapter
     }
 
     fun testClick(v: View) {
         MusicLog.d(TAG, "\nthis is a test message from$this, and mHeader is:$v")
     }
 
-    private fun generateItems(): ArrayList<PageItemObject> {
+    private fun generateHeaderItems(): ArrayList<PageItemObject> {
         val items = ArrayList<PageItemObject>()
 
         val drawableRes = intArrayOf(
@@ -96,5 +111,15 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             items.add(item)
         }
         return items
+    }
+
+    private fun genItems() {
+        items = ArrayList()
+        items.add(Any()) // recycle view
+        for (i in 1..15) {
+            val title = "this is item $i"
+            val item = CollectorItemObject(R.drawable.page_header_item_fm, title, i * 2)
+            items.add(item)
+        }
     }
 }

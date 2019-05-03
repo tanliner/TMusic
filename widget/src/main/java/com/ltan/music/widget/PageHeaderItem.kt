@@ -36,7 +36,7 @@ class PageHeaderItem @JvmOverloads constructor(
         mTipsView.text = t
     }
 
-    fun setPreviewImg(v: Drawable) {
+    fun setPreviewImg(v: Drawable?) {
         mPrevImgView.setImageDrawable(v)
     }
 

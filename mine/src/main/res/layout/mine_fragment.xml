@@ -4,27 +4,14 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
     <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rclv_mine_header"
+            android:id="@+id/rclv_mine"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
     </androidx.recyclerview.widget.RecyclerView>
-
-    <FrameLayout
-            android:id="@+id/page_header"
-            android:background="@color/colorAccent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="30sp"
-                android:gravity="center"
-                android:text="@string/mine_header_text"/>
-    </FrameLayout>
     <TextView
-            android:id="@+id/index_pagers_title"
+            android:id="@+id/index_pagers_footer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:textAlignment="center"
             android:gravity="center"
             android:textSize="20sp"

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Widget</string>
+    <string name="collector_item_count">(0)</string>
 </resources>

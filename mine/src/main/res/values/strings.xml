@@ -19,6 +19,16 @@
     <string name="mine_content_collector_item_my_fm">我的电台</string>
     <string name="mine_content_collector_item_my_fav">我的收藏</string>
 
-    <string name="mine_song_list_item_created">创建的歌单</string>
-    <string name="mine_song_list_item_favorite">搜藏的歌单</string>
+    <string name="mine_song_list_category_created">创建的歌单</string>
+    <string name="mine_song_list_category_favorite">搜藏的歌单</string>
+
+    <string name="mine_song_list_item_favorite">我喜欢的音乐</string>
+    <string name="mine_song_list_item_test">测试</string>
+    <string name="mine_song_list_item_ldm">刘丹萌</string>
+    <string name="mine_song_list_item_mine">Jams_konnor</string>
+    <string name="mine_song_list_item_ftm">冯提莫 热门50单曲</string>
+    <string name="mine_song_list_item_english">English</string>
+    <string name="mine_song_list_item_bee">蜜蜂少女队</string>
+    <string name="mine_song_list_item_try">try</string>
+
 </resources>

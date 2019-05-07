@@ -6,8 +6,8 @@ package com.ltan.music.mine
  * @ClassName: SongListItemObject
  * @Description:
  * @Author: tanlin
- * @Date:   2019-05-03
+ * @Date:   2019-05-08
  * @Version: 1.0
  */
-class SongListItemObject constructor(val title: String = "", val count: Int = 0, var creatable: Boolean = false) {
+class SongListItemObject constructor(val imgId: Int,  val title: String = "", val count: Int = 0, var isHeartMode: Boolean = false) {
 }

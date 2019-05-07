@@ -7,14 +7,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ltan.music.basemvp.BaseMVPFragment
 import com.ltan.music.basemvp.setValue
 import com.ltan.music.common.MusicLog
-import com.ltan.music.mine.CollectorItemObject
-import com.ltan.music.mine.PageItemObject
-import com.ltan.music.mine.R
-import com.ltan.music.mine.SongListItemObject
-import com.ltan.music.mine.adapter.CollectorItemBinder
-import com.ltan.music.mine.adapter.EmptyItemBinder
-import com.ltan.music.mine.adapter.MineHeaderBinder
-import com.ltan.music.mine.adapter.SongListItemBinder
+import com.ltan.music.mine.*
+import com.ltan.music.mine.adapter.*
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
 import kotterknife.bindView
@@ -70,7 +64,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mMultiAdapter.register(String::class, MineHeaderBinder(requireContext(), generateHeaderItems()))
         mMultiAdapter.register(CollectorItemObject::class.java, CollectorItemBinder(requireContext()))
         mMultiAdapter.register(Integer::class.java, EmptyItemBinder())
-        mMultiAdapter.register(SongListItemObject::class.java, SongListItemBinder())
+        mMultiAdapter.register(SongListCategoryObject::class.java, SongListCategoryBinder())
+        mMultiAdapter.register(SongListItemObject::class.java, SongListItemBinder(requireContext()))
         genItems()
         mMultiAdapter.items = items
 
@@ -121,7 +116,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         items.add("") // recycle view
         items.addAll(genCollectorItems())
         items.add(0)
-        items.addAll(genSongList())
+        items.addAll(getSongCategories())
     }
 
     /**
@@ -151,19 +146,75 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         return collectors
     }
 
-    private fun genSongList(): ArrayList<SongListItemObject> {
+    private fun getSongCategories(): ArrayList<Any> {
+        val list = ArrayList<Any>()
+        val item = SongListCategoryObject(getString(R.string.mine_song_list_category_created), 10, true)
+        list.add(item)
+        list.addAll(getSongList())
+
+        val item2 = SongListCategoryObject(getString(R.string.mine_song_list_category_favorite), 3)
+        list.add(item2)
+        list.addAll(getSongList2())
+
+        return list
+    }
+
+    private fun getSongList(): ArrayList<SongListItemObject> {
         val list = ArrayList<SongListItemObject>()
+        val drawableRes = intArrayOf(
+            R.drawable.page_header_item_download,
+            R.drawable.page_header_item_fm,
+            R.drawable.page_header_item_identify,
+            R.drawable.page_header_item_logo,
+            R.drawable.page_header_item_search,
+            R.drawable.page_header_item_download,
+            R.drawable.page_header_item_fm,
+            R.drawable.page_header_item_identify,
+            R.drawable.page_header_item_logo,
+            R.drawable.page_header_item_search
+            )
         val titles = intArrayOf(
-            R.string.mine_song_list_item_created,
-            R.string.mine_song_list_item_favorite
+            R.string.mine_song_list_item_favorite,
+            R.string.mine_song_list_item_test,
+            R.string.mine_song_list_item_test,
+            R.string.mine_song_list_item_test,
+            R.string.mine_song_list_item_ldm,
+            R.string.mine_song_list_item_mine,
+            R.string.mine_song_list_item_ftm,
+            R.string.mine_song_list_item_english,
+            R.string.mine_song_list_item_bee,
+            R.string.mine_song_list_item_try
         )
-        for (i in 1..2) {
-            val item = SongListItemObject(getString(titles[i - 1]), i * 4)
+        // page_header_item_logo
+        for (i in 1..titles.size) {
+            val item = SongListItemObject(drawableRes[i - 1], getString(titles[i - 1]), i * 3)
             if (i == 1) {
-                item.creatable = true
+                item.isHeartMode = true
             }
             list.add(item)
         }
+
+        return list
+    }
+
+    private fun getSongList2(): ArrayList<SongListItemObject> {
+        val list = ArrayList<SongListItemObject>()
+        val drawableRes = intArrayOf(
+            R.drawable.page_header_item_download,
+            R.drawable.page_header_item_fm,
+            R.drawable.page_header_item_identify
+        )
+        val titles = intArrayOf(
+            R.string.mine_song_list_item_favorite,
+            R.string.mine_song_list_item_bee,
+            R.string.mine_song_list_item_try
+        )
+
+        for (i in 1..titles.size) {
+            val item = SongListItemObject(drawableRes[i - 1], getString(titles[i - 1]), i * 3)
+            list.add(item)
+        }
+
         return list
     }
 }

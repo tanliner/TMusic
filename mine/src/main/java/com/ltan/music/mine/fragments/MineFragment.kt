@@ -7,10 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ltan.music.basemvp.BaseMVPFragment
 import com.ltan.music.basemvp.setValue
 import com.ltan.music.common.MusicLog
+import com.ltan.music.common.ToastUtil
 import com.ltan.music.mine.*
 import com.ltan.music.mine.adapter.*
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
+import com.ltan.music.widget.SongListCategoryItem
 import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
 
@@ -36,6 +38,9 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
 
     private lateinit var mMultiAdapter: MultiTypeAdapter
     private lateinit var items: MutableList<Any>
+
+    private var category1 = ArrayList<SongListItemObject>()
+    private var category2 = ArrayList<SongListItemObject>()
 
     override fun initLayout(): Int {
         return R.layout.mine_fragment
@@ -64,10 +69,13 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mMultiAdapter.register(String::class, MineHeaderBinder(requireContext(), generateHeaderItems()))
         mMultiAdapter.register(CollectorItemObject::class.java, CollectorItemBinder(requireContext()))
         mMultiAdapter.register(Integer::class.java, EmptyItemBinder())
-        mMultiAdapter.register(SongListCategoryObject::class.java, SongListCategoryBinder())
+        val categoryBinder = SongListCategoryBinder()
+        mMultiAdapter.register(SongListCategoryObject::class.java, categoryBinder)
         mMultiAdapter.register(SongListItemObject::class.java, SongListItemBinder(requireContext()))
         genItems()
         mMultiAdapter.items = items
+
+        categoryBinder.setOnItemClick(CategoryClickListener(items, category1, mMultiAdapter))
 
         mRclView.adapter = mMultiAdapter
     }
@@ -150,11 +158,13 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         val list = ArrayList<Any>()
         val item = SongListCategoryObject(getString(R.string.mine_song_list_category_created), 10, true)
         list.add(item)
-        list.addAll(getSongList())
+        category1 = getSongList()
+        list.addAll(category1)
 
         val item2 = SongListCategoryObject(getString(R.string.mine_song_list_category_favorite), 3)
         list.add(item2)
-        list.addAll(getSongList2())
+        category2 = getSongList2()
+        list.addAll(category2)
 
         return list
     }
@@ -172,7 +182,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             R.drawable.page_header_item_identify,
             R.drawable.page_header_item_logo,
             R.drawable.page_header_item_search
-            )
+        )
         val titles = intArrayOf(
             R.string.mine_song_list_item_favorite,
             R.string.mine_song_list_item_test,
@@ -216,5 +226,29 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         }
 
         return list
+    }
+
+    class CategoryClickListener(
+        private val items: MutableList<Any>,
+        private val dataSource: ArrayList<SongListItemObject>,
+        private val adapter: MultiTypeAdapter
+    ) : SongListCategoryBinder.OnItemClickListener {
+        override fun onItemClick(position: Int, type: SongListCategoryItem.ClickType) {
+            ToastUtil.showToastShort("this $position , type: $type, item size: ${items.size}")
+            // TODO, category shrink
+            if (position > 7) {
+                return
+            }
+            val item = items[position] as SongListCategoryObject
+            if (item.state == SongListCategoryObject.STATE.EXPAND) {
+                item.state = SongListCategoryObject.STATE.SHRINK
+                items.removeAll(dataSource)
+                adapter.notifyItemRangeRemoved(position + 1, dataSource.size)
+            } else {
+                item.state = SongListCategoryObject.STATE.EXPAND
+                items.addAll(position + 1, dataSource)
+                adapter.notifyItemRangeInserted(position + 1, dataSource.size)
+            }
+        }
     }
 }

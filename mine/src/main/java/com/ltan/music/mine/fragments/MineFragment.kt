@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ltan.music.basemvp.BaseMVPFragment
 import com.ltan.music.basemvp.setValue
 import com.ltan.music.common.MusicLog
-import com.ltan.music.common.ToastUtil
 import com.ltan.music.mine.*
 import com.ltan.music.mine.adapter.*
 import com.ltan.music.mine.contract.IMineContract
@@ -28,6 +27,8 @@ import me.drakeet.multitype.MultiTypeAdapter
 class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     companion object {
         const val TAG = "Mine/Frag/"
+        const val ID_CATEGORY_CREATED_LIST = 0
+        const val ID_CATEGORY_FAVORITE_LIST = 1
         fun newInstance(): MineFragment {
             return MineFragment()
         }
@@ -39,8 +40,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     private lateinit var mMultiAdapter: MultiTypeAdapter
     private lateinit var items: MutableList<Any>
 
-    private var category1 = ArrayList<SongListItemObject>()
-    private var category2 = ArrayList<SongListItemObject>()
+    private var createdCategory = ArrayList<SongListItemObject>()
+    private var favoriteCategory = ArrayList<SongListItemObject>()
 
     override fun initLayout(): Int {
         return R.layout.mine_fragment
@@ -75,7 +76,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         genItems()
         mMultiAdapter.items = items
 
-        categoryBinder.setOnItemClick(CategoryClickListener(items, category1, mMultiAdapter))
+        categoryBinder.setOnItemClick(CategoryClickListener(items, createdCategory, favoriteCategory, mMultiAdapter))
 
         mRclView.adapter = mMultiAdapter
     }
@@ -156,15 +157,15 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
 
     private fun getSongCategories(): ArrayList<Any> {
         val list = ArrayList<Any>()
-        val item = SongListCategoryObject(getString(R.string.mine_song_list_category_created), 10, true)
+        val item = SongListCategoryObject(ID_CATEGORY_CREATED_LIST, getString(R.string.mine_song_list_category_created), 10, true)
         list.add(item)
-        category1 = getSongList()
-        list.addAll(category1)
+        createdCategory = getSongList()
+        list.addAll(createdCategory)
 
-        val item2 = SongListCategoryObject(getString(R.string.mine_song_list_category_favorite), 3)
+        val item2 = SongListCategoryObject(ID_CATEGORY_FAVORITE_LIST, getString(R.string.mine_song_list_category_favorite), 3)
         list.add(item2)
-        category2 = getSongList2()
-        list.addAll(category2)
+        favoriteCategory = getSongList2()
+        list.addAll(favoriteCategory)
 
         return list
     }
@@ -230,24 +231,27 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
 
     class CategoryClickListener(
         private val items: MutableList<Any>,
-        private val dataSource: ArrayList<SongListItemObject>,
+        private val category1: ArrayList<SongListItemObject>,
+        private val category2: ArrayList<SongListItemObject>,
         private val adapter: MultiTypeAdapter
     ) : SongListCategoryBinder.OnItemClickListener {
         override fun onItemClick(position: Int, type: SongListCategoryItem.ClickType) {
-            ToastUtil.showToastShort("this $position , type: $type, item size: ${items.size}")
-            // TODO, category shrink
-            if (position > 7) {
-                return
-            }
             val item = items[position] as SongListCategoryObject
+            // this index will update, click the items container
+            val index = position + 1
+            var dataSource = category1
+            if (item.id == ID_CATEGORY_FAVORITE_LIST) {
+                dataSource = category2
+            }
+
             if (item.state == SongListCategoryObject.STATE.EXPAND) {
                 item.state = SongListCategoryObject.STATE.SHRINK
                 items.removeAll(dataSource)
-                adapter.notifyItemRangeRemoved(position + 1, dataSource.size)
+                adapter.notifyItemRangeRemoved(index, dataSource.size)
             } else {
                 item.state = SongListCategoryObject.STATE.EXPAND
-                items.addAll(position + 1, dataSource)
-                adapter.notifyItemRangeInserted(position + 1, dataSource.size)
+                items.addAll(index, dataSource)
+                adapter.notifyItemRangeInserted(index, dataSource.size)
             }
         }
     }

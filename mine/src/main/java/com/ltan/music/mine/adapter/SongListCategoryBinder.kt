@@ -30,6 +30,7 @@ class SongListCategoryBinder : ItemViewBinder<SongListCategoryObject, SongListCa
         holder.item.setName(item.title)
         holder.item.setCount(item.count)
         holder.item.setCreateable(item.creatable)
+        holder.item.setState(item.state)
         listener = ClickListener(this, holder)
         holder.item.setClickListener(listener)
     }

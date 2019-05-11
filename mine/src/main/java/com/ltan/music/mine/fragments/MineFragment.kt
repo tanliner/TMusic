@@ -12,6 +12,7 @@ import com.ltan.music.mine.adapter.*
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
 import com.ltan.music.widget.SongListCategoryItem
+import com.ltan.music.widget.constants.State
 import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
 
@@ -160,12 +161,17 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         val item = SongListCategoryObject(ID_CATEGORY_CREATED_LIST, getString(R.string.mine_song_list_category_created), 10, true)
         list.add(item)
         createdCategory = getSongList()
-        list.addAll(createdCategory)
+        item.state = State.COLLAPSE
+        if (item.state == State.EXPAND) {
+            list.addAll(createdCategory)
+        }
 
         val item2 = SongListCategoryObject(ID_CATEGORY_FAVORITE_LIST, getString(R.string.mine_song_list_category_favorite), 3)
         list.add(item2)
         favoriteCategory = getSongList2()
-        list.addAll(favoriteCategory)
+        if (item2.state == State.EXPAND) {
+            list.addAll(favoriteCategory)
+        }
 
         return list
     }
@@ -245,7 +251,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             }
             val itemView = view as SongListCategoryItem
 
-            if (itemView.mState == SongListCategoryItem.State.EXPAND) {
+            if (itemView.mState == State.EXPAND) {
                 items.addAll(index, dataSource)
                 adapter.notifyItemRangeInserted(index, dataSource.size)
             } else {

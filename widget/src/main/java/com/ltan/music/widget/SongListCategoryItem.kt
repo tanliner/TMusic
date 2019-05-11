@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import com.ltan.music.widget.constants.State
 
 /**
  * TMusic.com.ltan.music.widget
@@ -33,10 +34,6 @@ class SongListCategoryItem @JvmOverloads constructor(
         MENU("menu"), CREATOR("plus"), ITEM("item");
     }
 
-    enum class State {
-        EXPAND, SHRINK
-    }
-
     override fun onClick(v: View) {
         when(v) {
             mMenuImgIv -> listener.onClick(v, ClickType.MENU)
@@ -55,14 +52,7 @@ class SongListCategoryItem @JvmOverloads constructor(
     private var mCreateImgIv: ImageView
     private var mMenuImgIv: ImageView
 
-    public fun setState(s: State) {
-        mState = s
-    }
-
-    public fun getState(): State {
-        return mState
-    }
-    var mState = State.EXPAND
+    lateinit var mState: State
 
     init {
         val inflater = LayoutInflater.from(context)
@@ -83,10 +73,14 @@ class SongListCategoryItem @JvmOverloads constructor(
         setOnClickListener(this)
         mMenuImgIv.setOnClickListener(this)
         mCreateImgIv.setOnClickListener(this)
+    }
 
-        // set the default rotate
-        if (mState == State.EXPAND) {
+    fun setState(state: State) {
+        mState = state
+        if (state == State.EXPAND) {
             mPrevImgIv.rotation = EXPAND_DEGREE
+        } else {
+            mPrevImgIv.rotation = SHRINK_DEGREE
         }
     }
 
@@ -113,7 +107,7 @@ class SongListCategoryItem @JvmOverloads constructor(
 
     private fun doAnimation() {
         if (mState == State.EXPAND) {
-            mState = State.SHRINK
+            mState = State.COLLAPSE
             doAnimationShrink()
         } else {
             mState = State.EXPAND

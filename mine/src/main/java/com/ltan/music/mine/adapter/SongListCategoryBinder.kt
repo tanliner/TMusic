@@ -45,8 +45,8 @@ class SongListCategoryBinder : ItemViewBinder<SongListCategoryObject, SongListCa
     class ClickListener(b: SongListCategoryBinder, h: ViewHolder) : SongListCategoryItem.ClickListener {
         private val binder = b
         private val holder = h
-        override fun onClick(v: View?, type: SongListCategoryItem.ClickType) {
-            binder.itemClick.onItemClick(binder.getPosition(holder), type)
+        override fun onClick(v: View, type: SongListCategoryItem.ClickType) {
+            binder.itemClick.onItemClick(binder.getPosition(holder), holder.itemView, type)
         }
     }
 
@@ -58,6 +58,6 @@ class SongListCategoryBinder : ItemViewBinder<SongListCategoryObject, SongListCa
         /**
          * push the position
          */
-        fun onItemClick(position: Int, type: SongListCategoryItem.ClickType)
+        fun onItemClick(position: Int, view: View, type: SongListCategoryItem.ClickType)
     }
 }

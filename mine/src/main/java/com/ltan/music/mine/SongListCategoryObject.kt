@@ -10,10 +10,4 @@ package com.ltan.music.mine
  * @Version: 1.0
  */
 class SongListCategoryObject constructor(val id: Int, val title: String = "", val count: Int = 0, var creatable: Boolean = false) {
-    enum class STATE {
-        EXPAND,
-        SHRINK
-    }
-
-    var state = STATE.EXPAND
 }

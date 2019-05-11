@@ -235,7 +235,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         private val category2: ArrayList<SongListItemObject>,
         private val adapter: MultiTypeAdapter
     ) : SongListCategoryBinder.OnItemClickListener {
-        override fun onItemClick(position: Int, type: SongListCategoryItem.ClickType) {
+        override fun onItemClick(position: Int, view: View, type: SongListCategoryItem.ClickType) {
             val item = items[position] as SongListCategoryObject
             // this index will update, click the items container
             val index = position + 1
@@ -243,15 +243,14 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             if (item.id == ID_CATEGORY_FAVORITE_LIST) {
                 dataSource = category2
             }
+            val itemView = view as SongListCategoryItem
 
-            if (item.state == SongListCategoryObject.STATE.EXPAND) {
-                item.state = SongListCategoryObject.STATE.SHRINK
-                items.removeAll(dataSource)
-                adapter.notifyItemRangeRemoved(index, dataSource.size)
-            } else {
-                item.state = SongListCategoryObject.STATE.EXPAND
+            if (itemView.mState == SongListCategoryItem.State.EXPAND) {
                 items.addAll(index, dataSource)
                 adapter.notifyItemRangeInserted(index, dataSource.size)
+            } else {
+                items.removeAll(dataSource)
+                adapter.notifyItemRangeRemoved(index, dataSource.size)
             }
         }
     }

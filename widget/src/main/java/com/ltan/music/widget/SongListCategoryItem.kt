@@ -1,5 +1,7 @@
 package com.ltan.music.widget
 
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -21,15 +23,28 @@ class SongListCategoryItem @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr), View.OnClickListener {
 
+    companion object {
+        const val ANIM_DURATION = 300L
+        const val EXPAND_DEGREE = 90.0F
+        const val SHRINK_DEGREE = 0.0F
+    }
+
     enum class ClickType(val tName: String) {
         MENU("menu"), CREATOR("plus"), ITEM("item");
     }
 
-    override fun onClick(v: View?) {
+    enum class State {
+        EXPAND, SHRINK
+    }
+
+    override fun onClick(v: View) {
         when(v) {
             mMenuImgIv -> listener.onClick(v, ClickType.MENU)
             mCreateImgIv -> listener.onClick(v, ClickType.CREATOR)
-            this -> listener.onClick(v, ClickType.ITEM)
+            this -> {
+                doAnimation()
+                listener.onClick(v, ClickType.ITEM)
+            }
         }
     }
     private lateinit var listener: ClickListener
@@ -39,6 +54,15 @@ class SongListCategoryItem @JvmOverloads constructor(
     private var mCountTv: TextView
     private var mCreateImgIv: ImageView
     private var mMenuImgIv: ImageView
+
+    public fun setState(s: State) {
+        mState = s
+    }
+
+    public fun getState(): State {
+        return mState
+    }
+    var mState = State.EXPAND
 
     init {
         val inflater = LayoutInflater.from(context)
@@ -59,6 +83,11 @@ class SongListCategoryItem @JvmOverloads constructor(
         setOnClickListener(this)
         mMenuImgIv.setOnClickListener(this)
         mCreateImgIv.setOnClickListener(this)
+
+        // set the default rotate
+        if (mState == State.EXPAND) {
+            mPrevImgIv.rotation = EXPAND_DEGREE
+        }
     }
 
     fun setName(name: String) {
@@ -82,11 +111,38 @@ class SongListCategoryItem @JvmOverloads constructor(
         }
     }
 
+    private fun doAnimation() {
+        if (mState == State.EXPAND) {
+            mState = State.SHRINK
+            doAnimationShrink()
+        } else {
+            mState = State.EXPAND
+            doAnimationExpand()
+        }
+    }
+
+    private fun doAnimationExpand() {
+        val animExpand = PropertyValuesHolder.ofFloat("rotation", SHRINK_DEGREE, EXPAND_DEGREE)
+        /* other animation way, {@link doAnimationShrink} */
+        val rotateAnim = ObjectAnimator.ofPropertyValuesHolder(mPrevImgIv, animExpand)
+        rotateAnim.duration = ANIM_DURATION
+        rotateAnim.start()
+    }
+
+    private fun doAnimationShrink() {
+        val animShrink = PropertyValuesHolder.ofFloat("rotation", EXPAND_DEGREE, SHRINK_DEGREE)
+        val rotateAnim = ObjectAnimator()
+        rotateAnim.target = mPrevImgIv
+        rotateAnim.duration = ANIM_DURATION
+        rotateAnim.setValues(animShrink)
+        rotateAnim.start()
+    }
+
     interface ClickListener {
         /**
          * [v] which view has been clicked
          * [type] as the [v], a useful Integer value
          */
-        fun onClick(v: View?, type: ClickType)
+        fun onClick(v: View, type: ClickType)
     }
 }

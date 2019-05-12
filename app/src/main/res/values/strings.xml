@@ -4,4 +4,6 @@
     <string name="app_vp_indicator_discoveries">Wow</string>
     <string name="app_vp_indicator_friends">Friend</string>
     <string name="app_vp_indicator_videos">Video</string>
+
+    <string name="app_act_login_btn" translatable="false">登录</string>
 </resources>

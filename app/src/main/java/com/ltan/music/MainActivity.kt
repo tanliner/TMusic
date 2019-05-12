@@ -3,18 +3,16 @@ package com.ltan.music
 import android.app.Activity
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
-import butterknife.ButterKnife
-import butterknife.Unbinder
 import com.ltan.music.adapter.MusicPagerAdapter
+import com.ltan.music.basemvp.MusicBaseActivity
 import com.ltan.music.common.StatusBarUtil
 import com.ltan.music.view.PageIndicator
 import com.ltan.music.widget.MenuItem
 import kotterknife.bindView
 import kotlin.reflect.KProperty
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : MusicBaseActivity() {
 
     // I's works fine in Java
     // @BindView(R2.id.index_vp)
@@ -22,12 +20,13 @@ class MainActivity : AppCompatActivity() {
     private val mViewPager: ViewPager by bindView(R.id.music_view_pager)
     private val mPageIndicator: PageIndicator by bindView(R.id.music_indicator)
 
-    private var unBinder: Unbinder? = null
+    override fun initLayout(): Int {
+        return R.layout.app_activity_main
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.app_activity_main)
         StatusBarUtil.setColor(this, resources.getColor(R.color.colorPrimary))
-        unBinder = ButterKnife.bind(this)
 
         val adapter = MusicPagerAdapter(this.supportFragmentManager)
         mPageIndicator.setViewPager(mViewPager)
@@ -50,11 +49,6 @@ class MainActivity : AppCompatActivity() {
         items.add(itemFriend)
         items.add(itemVideo)
         return items
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unBinder?.unbind()
     }
 }
 

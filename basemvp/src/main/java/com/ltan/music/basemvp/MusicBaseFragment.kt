@@ -20,12 +20,12 @@ import kotlin.reflect.KProperty
  */
 abstract class MusicBaseFragment : Fragment() {
 
-    private var unBinder: Unbinder? = null
+    private lateinit var unBinder: Unbinder
 
     abstract fun initLayout(): Int
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(initLayout(), container, false);
+        return inflater.inflate(initLayout(), container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -35,7 +35,7 @@ abstract class MusicBaseFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        unBinder?.unbind()
+        unBinder.unbind()
     }
 }
 // for butterknife in Kotlin

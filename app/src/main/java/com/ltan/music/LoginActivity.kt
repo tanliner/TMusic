@@ -9,6 +9,7 @@ import com.ltan.music.contract.LoginContract
 import com.ltan.music.presenter.LoginPresenter
 import kotterknife.bindView
 import java.math.BigInteger
+import java.nio.charset.Charset
 import java.security.MessageDigest
 import android.text.Editable as TextEditable
 
@@ -47,7 +48,7 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
         mLogin.setOnClickListener {
             val name = mUsrName.text.toString()
             val md5 = MessageDigest.getInstance("MD5")
-            val hash = md5.digest(mUsrPass.text.toString().toByteArray(Charsets.UTF_8))
+            val hash = md5.digest(mUsrPass.text.toString().toByteArray(Charset.defaultCharset()))
             val bi = BigInteger(1, hash)
             val passHexString = bi.toString(16).padStart(32, '0')
 
@@ -56,10 +57,21 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
             MusicLog.d(TAG, "onclick userName: $name $passHexString")
 
             mPresenter.login(name, passHexString)
+            // mPresenter.query()
+            // mPresenter.test()
         }
-        mUsrName.setText("tl_friend@163.com")
-        // mUsrPass.setText("TanLin9211")
-        mUsrPass.setText("123456789aAd")
+
+        mUsrName.setText("test@163.com")
+        mUsrPass.setText("test_password")
+
+        // Encryptor.randomBytes(16)
+        // val key = "0CoJUm6Qyw8W8jud"
+        // val estr = Encryptor.encrypt("tanlin", Encryptor.strToByteArray(key))
+        // val cstr = Encryptor.decrypt(estr, Encryptor.strToByteArray(key))
+
+        // MusicLog.d(TAG, "init enstr: $estr end")
+        // MusicLog.d(TAG, "init clear str: $cstr")
+        // mUsrPass.setText("123456789aAd")
     }
 
     override fun onLoginSuccess() {

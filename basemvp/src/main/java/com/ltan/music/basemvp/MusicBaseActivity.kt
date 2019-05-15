@@ -33,7 +33,7 @@ abstract class MusicBaseActivity : AppCompatActivity() {
             MusicLog.e(TAG, "must have a validate the layout")
             return
         }
-        setContentView(initLayout())
+        setContentView(layoutId)
         unBinder = ButterKnife.bind(this)
     }
 

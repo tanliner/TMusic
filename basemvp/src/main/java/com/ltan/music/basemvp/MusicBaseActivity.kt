@@ -19,9 +19,8 @@ import kotlin.reflect.KProperty
  * @Version: 1.0
  */
 abstract class MusicBaseActivity : AppCompatActivity() {
-    companion object {
-        var TAG: String = this::class.java.simpleName
-    }
+
+    protected val TAG: String = this::class.java.simpleName
     private lateinit var unBinder: Unbinder
 
     abstract fun initLayout(): Int
@@ -29,12 +28,12 @@ abstract class MusicBaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val layoutId = initLayout()
+        unBinder = ButterKnife.bind(this)
         if (layoutId <= 0) {
             MusicLog.e(TAG, "must have a validate the layout")
             return
         }
         setContentView(layoutId)
-        unBinder = ButterKnife.bind(this)
     }
 
     override fun onDestroy() {

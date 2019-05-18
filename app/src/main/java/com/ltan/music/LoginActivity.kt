@@ -1,11 +1,12 @@
 package com.ltan.music
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import com.ltan.music.account.utils.AccountUtil
 import com.ltan.music.basemvp.BaseMVPActivity
 import com.ltan.music.common.MusicLog
+import com.ltan.music.common.ToastUtil
 import com.ltan.music.contract.LoginContract
 import com.ltan.music.presenter.LoginPresenter
 import kotterknife.bindView
@@ -67,10 +68,6 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
         // mUsrName.setText("test@163.com")
         // mUsrPass.setText("test_password")
 
-        val account = AccountUtil.getAccountInfo()
-        val profile = AccountUtil.getProfileInfo()
-        MusicLog.d(TAG, "account is: $account\nprofile is: $profile")
-
         // Encryptor.randomBytes(16)
         // val key = "0CoJUm6Qyw8W8jud"
         // val estr = Encryptor.encrypt("tanlin", Encryptor.strToByteArray(key))
@@ -81,9 +78,19 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
         // mUsrPass.setText("123456789aAd")
     }
 
-    override fun onLoginSuccess() {
+    private fun onLoginSuccess() {
+        startActivity(Intent(baseContext, MainActivity::class.java))
     }
 
     override fun onLogoutSuccess() {
+    }
+
+    override fun onLoginStatus(code: Int) {
+        when (code) {
+            501 -> ToastUtil.showToastShort(getString(R.string.app_act_login_user_not_found))
+            502 -> ToastUtil.showToastShort(getString(R.string.app_act_login_user_pass_error))
+            200 -> onLoginSuccess()
+            else -> MusicLog.i(TAG, "onLoginStatus, code: $code")
+        }
     }
 }

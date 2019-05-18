@@ -1,8 +1,6 @@
 package com.ltan.music
 
-import android.app.Activity
 import android.os.Bundle
-import android.view.View
 import androidx.viewpager.widget.ViewPager
 import com.ltan.music.adapter.MusicPagerAdapter
 import com.ltan.music.basemvp.MusicBaseActivity
@@ -10,7 +8,6 @@ import com.ltan.music.common.StatusBarUtil
 import com.ltan.music.view.PageIndicator
 import com.ltan.music.widget.MenuItem
 import kotterknife.bindView
-import kotlin.reflect.KProperty
 
 class MainActivity : MusicBaseActivity() {
 
@@ -50,9 +47,4 @@ class MainActivity : MusicBaseActivity() {
         items.add(itemVideo)
         return items
     }
-}
-
-// for butterknife in Kotlin, cannot initialize the view!!
-private operator fun Any.setValue(activity: Activity, property: KProperty<*>, v: View) {
-
 }

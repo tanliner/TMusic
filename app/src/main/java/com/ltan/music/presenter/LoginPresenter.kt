@@ -35,10 +35,11 @@ class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presente
             .unsubscribeOn(Schedulers.io())
             .subscribe(object : NormalSubscriber<LoginResult>(), Subscriber<LoginResult> {
                 override fun onNext(t: LoginResult) {
+
                     MusicLog.d(LoginPresenter.TAG, "login onNext   $t")
                     AccountUtil.saveAccountInfo(t.account)
                     AccountUtil.saveProfileInfo(t.profile)
-                    mView.onLoginSuccess()
+                    mView.onLoginStatus(t.code)
                 }
 
                 override fun onError(errorCode: Int, errorMsg: String) {

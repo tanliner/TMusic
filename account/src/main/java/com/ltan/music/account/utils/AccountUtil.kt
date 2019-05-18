@@ -1,6 +1,7 @@
 package com.ltan.music.account.utils
 
 import android.content.Context
+import android.text.TextUtils
 import com.google.gson.Gson
 import com.ltan.music.account.beans.Account
 import com.ltan.music.account.beans.Profile
@@ -45,8 +46,11 @@ object AccountUtil {
         val gson = Gson()
         val spf = BaseApplication.getAPPContext()
             .getSharedPreferences(Constants.LOCAL_SP_ACCOUNT_NAME, Context.MODE_PRIVATE)
-        val str = spf.getString(Constants.LOCAL_SP_ACCOUNT_SECTION, "{a: b}")
+        val str = spf.getString(Constants.LOCAL_SP_ACCOUNT_SECTION, "")
 
+        if(TextUtils.isEmpty(str)) {
+            return null
+        }
         return gson.fromJson(str, Account::class.java)
     }
 
@@ -55,8 +59,11 @@ object AccountUtil {
         val gson = Gson()
         val spf = BaseApplication.getAPPContext()
             .getSharedPreferences(Constants.LOCAL_SP_ACCOUNT_NAME, Context.MODE_PRIVATE)
-        val str = spf.getString(Constants.LOCAL_SP_PROFILE_SECTION, "{a: b}")
+        val str = spf.getString(Constants.LOCAL_SP_PROFILE_SECTION, "")
 
+        if(TextUtils.isEmpty(str)) {
+            return null
+        }
         return gson.fromJson(str, Profile::class.java)
     }
 }

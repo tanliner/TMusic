@@ -11,9 +11,9 @@ package com.ltan.music.account.beans
  * @Version: 1.0
  */
 data class LoginResult(
-    private val loginType: Int = 0,
+    val loginType: Int = 0,
 
-    private val code: Int = 0,
+    val code: Int = 0,
 
     val account: Account? = null,
 

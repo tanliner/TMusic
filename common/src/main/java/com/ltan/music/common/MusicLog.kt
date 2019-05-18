@@ -44,7 +44,7 @@ object MusicLog {
 
     @JvmStatic
     fun e(TAG: String, msg: String) {
-        Log.e(TAG, msg)
+        Log.e(this.TAG + TAG, msg)
     }
 
     // -------------- log with throwable -------------- //

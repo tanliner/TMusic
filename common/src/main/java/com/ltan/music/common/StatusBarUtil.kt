@@ -9,11 +9,6 @@ import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.IntRange
 
-
-
-
-
-
 /**
  * TMusic.com.ltan.music.common
  *

@@ -6,4 +6,5 @@
     <string name="app_vp_indicator_videos">Video</string>
 
     <string name="app_act_login_btn" translatable="false">登录</string>
+    <string name="app_act_logout_btn" translatable="false">退出</string>
 </resources>

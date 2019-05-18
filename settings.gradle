@@ -7,4 +7,5 @@ include ':app',
         ':discovery',
         ':friends',
         ':videos',
+        ':account',
         ':mine'

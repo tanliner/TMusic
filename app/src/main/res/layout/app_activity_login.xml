@@ -20,4 +20,10 @@
             android:id="@+id/btn_app_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+    <Button
+            android:text="@string/app_act_logout_btn"
+            android:id="@+id/btn_app_logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 </LinearLayout>

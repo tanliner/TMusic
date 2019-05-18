@@ -7,6 +7,7 @@ dependencies {
 
     implementation deps.support.app_compat
     implementation deps.okhttp.okhttp
+    implementation deps.okhttp.interceptor
     implementation deps.retrofit.gson
     implementation deps.retrofit.scalars
     implementation deps.retrofit.rxjava2
@@ -16,11 +17,13 @@ dependencies {
 
     api deps.andromeda
     api deps.okhttp.interceptor
+    api deps.cookie
     // bugly report
     api deps.bugly_crashreport
     api deps.retrofit.retrofit
 
     api project(path: ':basemvp')
+    api project(path: ':account')
 
     testImplementation deps.junit
     androidTestImplementation deps.test.runner

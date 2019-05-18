@@ -58,6 +58,11 @@ subprojects {
             targetCompatibility build_versions.target_compatibility
         }
 
+        // for android test, like Base64
+        testOptions {
+            unitTests.returnDefaultValues = true
+        }
+
         buildTypes {
             debug {
                 minifyEnabled false

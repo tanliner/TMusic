@@ -31,7 +31,7 @@ object Encryptor {
 
     const val ENCRYPT_TYPE_HEX = "hex"
     const val ENCRYPT_TYPE_BASE64 = "base64"
-    const val ENCRYPT_TYPE_DEF = ENCRYPT_TYPE_HEX
+    const val ENCRYPT_TYPE_DEF = ENCRYPT_TYPE_BASE64
 
     val KEY = "0CoJUm6Qyw8W8jud".toByteArray()
     private val ivx = "0102030405060708".toByteArray()
@@ -120,13 +120,13 @@ object Encryptor {
         //     filledSecKey = buffer.array()
         // }
 
-        // 得到公钥对象
+        // to get the public key
         // val keySpec = X509EncodedKeySpec(strToByteArray(publicKey))
         val keySpec = X509EncodedKeySpec(Base64.decode(publicKey, Base64.NO_PADDING))
         val keyFactory = KeyFactory.getInstance("RSA")
         val pubKey: RSAPublicKey = keyFactory.generatePublic(keySpec) as RSAPublicKey
 
-        // 加密数据
+        // encryption core
         val cp = Cipher.getInstance(RSA_TRANSFORMATION)
         cp.init(Cipher.ENCRYPT_MODE, pubKey)
 
@@ -141,11 +141,11 @@ object Encryptor {
 
     @JvmStatic
     fun rsaDecryption(privateKey: String, encrypted: String): String {
-        // 得到私钥对象
+        // to get the public key
         val keySpec = PKCS8EncodedKeySpec(strToByteArray(privateKey))
         val kf = KeyFactory.getInstance("RSA")
         val keyPrivate = kf.generatePrivate(keySpec)
-        // 解密数据
+        // decrypt txt
         val cipher = Cipher.getInstance(RSA_TRANSFORMATION)
         cipher.init(Cipher.DECRYPT_MODE, keyPrivate)
         val originBytes = cipher.doFinal(strToByteArray(encrypted))

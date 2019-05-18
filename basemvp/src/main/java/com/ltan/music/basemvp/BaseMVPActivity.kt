@@ -12,9 +12,14 @@ import com.ltan.music.common.MusicLog
  * @Date:   2019-05-12
  * @Version: 1.0
  */
-abstract class BaseMVPActivity<P : IBaseContract.Presenter> : MusicBaseActivity(), IBaseContract.View {
+abstract class BaseMVPActivity<P : IBaseContract.Presenter<*>> : MusicBaseActivity() {
 
     protected lateinit var mPresenter: P
+
+    /**
+     * init the presenter, such as attach the view
+     */
+    abstract fun initPresenter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,11 +27,11 @@ abstract class BaseMVPActivity<P : IBaseContract.Presenter> : MusicBaseActivity(
         val p: P? = PresenterUtil.getBasePresenter(this.javaClass)
         p?.let { mPresenter = it }
         if(p == null) {
-            MusicLog.e(TAG, "must have a presenter")
+            MusicLog.e(TAG, "The MVP activity must have a presenter")
             return
         }
         mPresenter = p
-        mPresenter.attachView(this)
+        initPresenter()
     }
 
     override fun onDestroy() {

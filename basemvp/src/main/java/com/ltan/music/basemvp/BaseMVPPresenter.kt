@@ -9,5 +9,5 @@ package com.ltan.music.basemvp
  * @Date:   2019-04-30
  * @Version: 1.0
  */
-abstract class BaseMVPPresenter : IBaseContract.Presenter {
+abstract class BaseMVPPresenter<V> : IBasePresenter<V> {
 }

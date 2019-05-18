@@ -31,14 +31,14 @@ object MusicLog {
     @JvmStatic
     fun i(TAG: String, msg: String) {
         if (BuildConfig.DEBUG) {
-            Log.i(TAG, msg)
+            Log.i(this.TAG + TAG, msg)
         }
     }
 
     @JvmStatic
     fun w(TAG: String, msg: String) {
         if (BuildConfig.DEBUG) {
-            Log.w(TAG, msg)
+            Log.w(this.TAG + TAG, msg)
         }
     }
 
@@ -57,26 +57,26 @@ object MusicLog {
     @JvmStatic
     fun d(TAG: String, msg: String, tr: Throwable) {
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, msg, tr)
+            Log.d(this.TAG + TAG, msg, tr)
         }
     }
 
     @JvmStatic
     fun i(TAG: String, msg: String, tr: Throwable) {
         if (BuildConfig.DEBUG) {
-            Log.i(TAG, msg, tr)
+            Log.i(this.TAG + TAG, msg, tr)
         }
     }
 
     @JvmStatic
     fun w(TAG: String, msg: String, tr: Throwable) {
         if (BuildConfig.DEBUG) {
-            Log.w(TAG, msg, tr)
+            Log.w(this.TAG + TAG, msg, tr)
         }
     }
 
     @JvmStatic
     fun e(TAG: String, msg: String, tr: Throwable) {
-        Log.e(TAG, msg, tr)
+        Log.e(this.TAG + TAG, msg, tr)
     }
 }

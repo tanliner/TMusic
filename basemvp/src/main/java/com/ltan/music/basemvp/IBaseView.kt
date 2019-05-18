@@ -16,5 +16,5 @@ package com.ltan.music.basemvp
  * @Date:   2019-04-28
  * @Version: 1.0
  */
-interface IBaseView<P : IBasePresenter<*>> {
+interface IBaseView<P> {
 }

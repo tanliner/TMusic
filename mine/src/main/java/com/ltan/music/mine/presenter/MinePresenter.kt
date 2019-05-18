@@ -1,6 +1,5 @@
 package com.ltan.music.mine.presenter
 
-import com.ltan.music.basemvp.IBaseContract
 import com.ltan.music.business.api.RxPresenter
 import com.ltan.music.common.MusicLog
 import com.ltan.music.mine.contract.IMineContract
@@ -14,7 +13,7 @@ import com.ltan.music.mine.contract.IMineContract
  * @Date:   2019-04-30
  * @Version: 1.0
  */
-open class MinePresenter : RxPresenter(), IMineContract.Presenter, IMineContract.View {
+class MinePresenter : RxPresenter<IMineContract.View>(), IMineContract.Presenter {
 
     companion object {
         const val TAG: String = "ltan/MinePresenter-"
@@ -29,7 +28,7 @@ open class MinePresenter : RxPresenter(), IMineContract.Presenter, IMineContract
         MusicLog.d(TAG, "queryData")
     }
 
-    override fun attachView(view: IBaseContract.View?) {
+     override fun attachView(view: IMineContract.View) {
         super.attachView(view)
         MusicLog.d(TAG, "attachView $view vs $mView")
     }
@@ -37,9 +36,5 @@ open class MinePresenter : RxPresenter(), IMineContract.Presenter, IMineContract
     override fun detachView() {
         super.detachView()
         MusicLog.d(TAG, "detachView $mView")
-    }
-
-    override fun testView(p: IMineContract.Presenter) {
-        MusicLog.d(TAG, "testView $p")
     }
 }

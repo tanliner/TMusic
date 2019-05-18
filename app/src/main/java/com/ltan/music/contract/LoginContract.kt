@@ -12,11 +12,12 @@ import com.ltan.music.basemvp.IBaseContract
  * @Version: 1.0
  */
 interface LoginContract {
-    interface View : IBaseContract.View {
-        fun testView(p: Presenter)
+    interface View : IBaseContract.View<Presenter> {
+        fun onLoginSuccess()
+        fun onLogoutSuccess()
     }
 
-    interface Presenter : IBaseContract.Presenter {
+    interface Presenter : IBaseContract.Presenter<View> {
         fun login(name: String, pass: String)
     }
 }

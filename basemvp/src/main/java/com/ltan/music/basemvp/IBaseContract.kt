@@ -10,7 +10,7 @@ package com.ltan.music.basemvp
  * @Version: 1.0
  */
 interface IBaseContract {
-    interface View : IBaseView<Presenter>
+    interface View<P> : IBaseView<P>
 
-    interface Presenter : IBasePresenter<View>
+    interface Presenter<V: View<*>> : IBasePresenter<V>
 }

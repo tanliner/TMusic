@@ -5,10 +5,10 @@ import android.widget.Button
 import android.widget.EditText
 import com.ltan.music.basemvp.BaseMVPActivity
 import com.ltan.music.common.MusicLog
+import com.ltan.music.contract.LoginContract
 import com.ltan.music.presenter.LoginPresenter
 import kotterknife.bindView
 import java.math.BigInteger
-import java.nio.charset.Charset
 import java.security.MessageDigest
 import android.text.Editable as TextEditable
 
@@ -22,7 +22,7 @@ import android.text.Editable as TextEditable
  * @Version: 1.0
  */
 
-class LoginActivity : BaseMVPActivity<LoginPresenter>() {
+class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
 
     companion object {
         const val TAG = "Login/Act"
@@ -30,6 +30,10 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>() {
 
     override fun initLayout(): Int {
         return R.layout.app_activity_login
+    }
+
+    override fun initPresenter() {
+        mPresenter.attachView(this)
     }
 
     private val mUsrName: EditText by bindView(R.id.et_app_usr_name)
@@ -43,7 +47,7 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>() {
         mLogin.setOnClickListener {
             val name = mUsrName.text.toString()
             val md5 = MessageDigest.getInstance("MD5")
-            val hash = md5.digest(mUsrPass.text.toString().toByteArray(Charset.forName("utf-8")))
+            val hash = md5.digest(mUsrPass.text.toString().toByteArray(Charsets.UTF_8))
             val bi = BigInteger(1, hash)
             val passHexString = bi.toString(16).padStart(32, '0')
 
@@ -56,5 +60,11 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>() {
         mUsrName.setText("tl_friend@163.com")
         // mUsrPass.setText("TanLin9211")
         mUsrPass.setText("123456789aAd")
+    }
+
+    override fun onLoginSuccess() {
+    }
+
+    override fun onLogoutSuccess() {
     }
 }

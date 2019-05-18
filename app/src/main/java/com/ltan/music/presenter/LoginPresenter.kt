@@ -18,7 +18,7 @@ import io.reactivex.schedulers.Schedulers
  * @Date:   2019-05-12
  * @Version: 1.0
  */
-class LoginPresenter : RxPresenter(), LoginContract.Presenter, LoginContract.View {
+class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presenter {
     override fun login(name: String, pass: String) {
         ApiProxy.instance.getApi(UserApi::class.java)
             .login(name, pass, true)
@@ -33,6 +33,4 @@ class LoginPresenter : RxPresenter(), LoginContract.Presenter, LoginContract.Vie
 
     }
 
-    override fun testView(p: LoginContract.Presenter) {
-    }
 }

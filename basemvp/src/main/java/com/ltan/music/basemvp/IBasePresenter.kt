@@ -9,11 +9,11 @@ package com.ltan.music.basemvp
  * @Date:   2019-04-28
  * @Version: 1.0
  */
-interface IBasePresenter<T> {
+interface IBasePresenter<V> {
     /**
      * T? means, maybe no T, will be called after viewCreated
      * */
-    fun attachView(view: T?)
+    fun attachView(view: V)
     /**
      * will be called after resume
      * */

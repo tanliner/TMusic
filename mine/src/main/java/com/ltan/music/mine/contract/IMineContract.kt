@@ -13,11 +13,11 @@ import com.ltan.music.basemvp.IBaseContract
  */
 interface IMineContract {
 
-    interface View : IBaseContract.View {
+    interface View : IBaseContract.View<Presenter> {
         fun testView(p: Presenter)
     }
 
-    interface Presenter : IBaseContract.Presenter {
+    interface Presenter : IBaseContract.Presenter<View> {
         fun queryData()
     }
 }

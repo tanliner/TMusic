@@ -48,6 +48,10 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         return R.layout.mine_fragment
     }
 
+    override fun initPresenter() {
+        mPresenter.attachView(this)
+    }
+
     override fun testView(p: IMineContract.Presenter) {
         MusicLog.d(TAG, "testView called")
     }
@@ -55,9 +59,9 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // just a several log, TODO remove it
-        mPresenter?.attachView(this)
-        mPresenter?.start()
-        mPresenter?.queryData()
+        mPresenter.attachView(this)
+        mPresenter.start()
+        mPresenter.queryData()
         init()
     }
 
@@ -242,6 +246,12 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         private val adapter: MultiTypeAdapter
     ) : SongListCategoryBinder.OnItemClickListener {
         override fun onItemClick(position: Int, view: View, type: SongListCategoryItem.ClickType) {
+            if (type == SongListCategoryItem.ClickType.ITEM) {
+                itemClick(position, view)
+            }
+        }
+
+        private fun itemClick(position: Int, view: View) {
             val item = items[position] as SongListCategoryObject
             // this index will update, click the items container
             val index = position + 1

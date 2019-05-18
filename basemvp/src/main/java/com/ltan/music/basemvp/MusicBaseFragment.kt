@@ -20,6 +20,10 @@ import kotlin.reflect.KProperty
  */
 abstract class MusicBaseFragment : Fragment() {
 
+    companion object {
+        var TAG: String = this::class.java.simpleName
+    }
+
     private lateinit var unBinder: Unbinder
 
     abstract fun initLayout(): Int

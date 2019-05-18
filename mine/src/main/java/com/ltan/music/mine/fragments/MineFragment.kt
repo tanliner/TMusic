@@ -4,11 +4,15 @@ import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ltan.music.account.utils.AccountUtil
 import com.ltan.music.basemvp.BaseMVPFragment
 import com.ltan.music.basemvp.setValue
 import com.ltan.music.common.MusicLog
+import com.ltan.music.common.ToastUtil
 import com.ltan.music.mine.*
 import com.ltan.music.mine.adapter.*
+import com.ltan.music.mine.beans.PlayList
+import com.ltan.music.mine.beans.SongSubCunt
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
 import com.ltan.music.widget.SongListCategoryItem
@@ -52,16 +56,10 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mPresenter.attachView(this)
     }
 
-    override fun testView(p: IMineContract.Presenter) {
-        MusicLog.d(TAG, "testView called")
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // just a several log, TODO remove it
-        mPresenter.attachView(this)
-        mPresenter.start()
-        mPresenter.queryData()
+        mPresenter.subcount()
+        AccountUtil.getAccountInfo()?.let { mPresenter.getPlayList(it.id) }
         init()
     }
 
@@ -84,6 +82,20 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         categoryBinder.setOnItemClick(CategoryClickListener(items, createdCategory, favoriteCategory, mMultiAdapter))
 
         mRclView.adapter = mMultiAdapter
+    }
+
+    override fun onSubcount(data: SongSubCunt?) {
+        if(data == null) {
+            ToastUtil.showToastShort(getString(R.string.mine_song_list_failed))
+        }
+        MusicLog.d(TAG, "data is: $data")
+    }
+
+    override fun onPlayList(data: List<PlayList>?) {
+        if(data == null) {
+            ToastUtil.showToastShort(getString(R.string.mine_play_list_failed))
+        }
+        MusicLog.d(TAG, "play list is: $data")
     }
 
     fun testClick(v: View) {

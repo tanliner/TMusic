@@ -1,7 +1,11 @@
 package com.ltan.music.mine.presenter
 
+import com.ltan.music.business.api.ApiProxy
+import com.ltan.music.business.api.NormalSubscriber
 import com.ltan.music.business.api.RxPresenter
-import com.ltan.music.common.MusicLog
+import com.ltan.music.mine.MineApi
+import com.ltan.music.mine.beans.PlayListRsp
+import com.ltan.music.mine.beans.SongSubCunt
 import com.ltan.music.mine.contract.IMineContract
 
 /**
@@ -19,22 +23,25 @@ class MinePresenter : RxPresenter<IMineContract.View>(), IMineContract.Presenter
         const val TAG: String = "ltan/MinePresenter-"
     }
 
-    override fun start() {
-        super.start()
-        MusicLog.d(TAG, "start $mView")
+    override fun subcount() {
+        observe(ApiProxy.instance.getApi(MineApi::class.java)
+            .subCount())
+            .safeSubscribe(object : NormalSubscriber<SongSubCunt>() {
+                override fun onNext(t: SongSubCunt?) {
+                    mView.onSubcount(t)
+                }
+            })
     }
 
-    override fun queryData() {
-        MusicLog.d(TAG, "queryData")
-    }
-
-     override fun attachView(view: IMineContract.View) {
-        super.attachView(view)
-        MusicLog.d(TAG, "attachView $view vs $mView")
-    }
-
-    override fun detachView() {
-        super.detachView()
-        MusicLog.d(TAG, "detachView $mView")
+    override fun getPlayList(uid: Long) {
+        observe(ApiProxy.instance.getApi(MineApi::class.java)
+            .getPlayList(uid))
+            .safeSubscribe(object : NormalSubscriber<PlayListRsp>() {
+                override fun onNext(t: PlayListRsp?) {
+                    if(t != null) {
+                        mView.onPlayList(t.playlist)
+                    }
+                }
+            })
     }
 }

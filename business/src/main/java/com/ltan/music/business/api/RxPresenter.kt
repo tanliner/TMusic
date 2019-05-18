@@ -1,7 +1,10 @@
 package com.ltan.music.business.api
 
 import com.ltan.music.basemvp.IBaseContract
+import com.ltan.music.basemvp.RxUtils
 import com.ltan.music.common.MusicLog
+import io.reactivex.Flowable
+import io.reactivex.schedulers.Schedulers
 
 /**
  * TMusic.com.ltan.music.business.api
@@ -37,5 +40,19 @@ open class RxPresenter<V: IBaseContract.View<*>> : IBaseContract.Presenter<V> {
 
     override fun detachView() {
         mViewAttached = false
+    }
+
+    /**
+     * multi call on sub thread, will not switch to UI
+     */
+    protected fun <T> observeOnIO(observable: Flowable<T>): Flowable<T> {
+        return observable
+            .subscribeOn(Schedulers.io())
+            .unsubscribeOn(Schedulers.io())
+    }
+
+    protected fun <T> observe(observable: Flowable<T>): Flowable<T> {
+        return observable
+            .compose(RxUtils.rxFlowableHelper())
     }
 }

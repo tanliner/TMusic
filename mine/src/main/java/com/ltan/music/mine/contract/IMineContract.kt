@@ -1,6 +1,8 @@
 package com.ltan.music.mine.contract
 
 import com.ltan.music.basemvp.IBaseContract
+import com.ltan.music.mine.beans.PlayList
+import com.ltan.music.mine.beans.SongSubCunt
 
 /**
  * TMusic.com.ltan.music.index.contract
@@ -14,10 +16,12 @@ import com.ltan.music.basemvp.IBaseContract
 interface IMineContract {
 
     interface View : IBaseContract.View<Presenter> {
-        fun testView(p: Presenter)
+        fun onSubcount(data: SongSubCunt?)
+        fun onPlayList(data: List<PlayList>?)
     }
 
     interface Presenter : IBaseContract.Presenter<View> {
-        fun queryData()
+        fun subcount()
+        fun getPlayList(uid: Long)
     }
 }

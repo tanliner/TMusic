@@ -8,9 +8,6 @@ import com.ltan.music.business.api.NormalSubscriber
 import com.ltan.music.business.api.RxPresenter
 import com.ltan.music.common.MusicLog
 import com.ltan.music.contract.LoginContract
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
-import org.reactivestreams.Subscriber
 
 /**
  * TMusic.com.ltan.music.presenter
@@ -28,12 +25,9 @@ class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presente
     }
 
     override fun login(name: String, pass: String) {
-        ApiProxy.instance.getApi(UserApi::class.java)
-            .login(name, pass)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .unsubscribeOn(Schedulers.io())
-            .subscribe(object : NormalSubscriber<LoginResult>(), Subscriber<LoginResult> {
+        observe(ApiProxy.instance.getApi(UserApi::class.java)
+            .login(name, pass))
+            .safeSubscribe(object : NormalSubscriber<LoginResult>() {
                 override fun onNext(t: LoginResult) {
 
                     MusicLog.d(LoginPresenter.TAG, "login onNext   $t")
@@ -49,12 +43,9 @@ class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presente
     }
 
     override fun logout() {
-        ApiProxy.instance.getApi(UserApi::class.java)
-            .logout()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .unsubscribeOn(Schedulers.io())
-            .subscribe(object : NormalSubscriber<Any?>(), Subscriber<Any?> {
+        observe(ApiProxy.instance.getApi(UserApi::class.java)
+            .logout())
+            .safeSubscribe(object : NormalSubscriber<Any?>() {
                 override fun onNext(rsp: Any?) {
                     MusicLog.d(LoginPresenter.TAG, "logout, onNext $rsp")
                     AccountUtil.saveAccountInfo(null)
@@ -71,11 +62,8 @@ class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presente
     }
 
     override fun query() {
-        ApiProxy.instance.getApi(UserApi::class.java)
-            .query()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .unsubscribeOn(Schedulers.io())
+        observe(ApiProxy.instance.getApi(UserApi::class.java)
+            .query())
             .safeSubscribe(object : NormalSubscriber<String>() {
                 override fun onNext(t: String) {
                     MusicLog.d(LoginPresenter.TAG, "query onNext any\n$t ")

@@ -31,4 +31,7 @@
     <string name="mine_song_list_item_bee">蜜蜂少女队</string>
     <string name="mine_song_list_item_try">try</string>
 
+    <string name="mine_song_list_failed">获取歌单失败</string>
+    <string name="mine_play_list_failed">获取音乐列表失败</string>
+
 </resources>

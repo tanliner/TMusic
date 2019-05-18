@@ -11,31 +11,31 @@ package com.ltan.music.account.beans
  * @Version: 1.0
  */
 data class Account(
-    private val id: Long = 0,
+    val id: Long = 0,
 
-    private val userName: String? = null,
+    val userName: String? = null,
 
-    private val type: Int = 0,
+    val type: Int = 0,
 
-    private val status: Int = 0,
+    val status: Int = 0,
 
-    private val whitelistAuthority: Int = 0,
+    val whitelistAuthority: Int = 0,
 
-    private val createTime: Long = 0,
+    val createTime: Long = 0,
 
-    private val salt: String? = null,
+    val salt: String? = null,
 
-    private val tokenVersion: Int = 0,
+    val tokenVersion: Int = 0,
 
-    private val ban: Int = 0,
+    val ban: Int = 0,
 
-    private val baoyueVersion: Int = 0,
+    val baoyueVersion: Int = 0,
 
-    private val donateVersion: Int = 0,
+    val donateVersion: Int = 0,
 
-    private val vipType: Int = 0,
+    val vipType: Int = 0,
 
-    private val viptypeVersion: Long = 0,
+    val viptypeVersion: Long = 0,
 
-    private val anonimousUser: Boolean = false
+    val anonimousUser: Boolean = false
 )

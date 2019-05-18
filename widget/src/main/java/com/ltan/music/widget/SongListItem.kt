@@ -47,7 +47,7 @@ class SongListItem @JvmOverloads constructor(
     fun setPreview(preview: Drawable?) {
         mPrevImgIv.setImageDrawable(preview)
     }
-    fun setName(name: String) {
+    fun setName(name: String?) {
         mItemNameTv.text = name
     }
 

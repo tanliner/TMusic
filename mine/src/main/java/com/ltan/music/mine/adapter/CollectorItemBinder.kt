@@ -27,8 +27,8 @@ class CollectorItemBinder(context: Context) : ItemViewBinder<CollectorItemObject
 
     override fun onBindViewHolder(holder: ViewHolder, item: CollectorItemObject) {
         // ctx.getDrawable(item.mImgId)?.let { holder.item.setImage(it) }
-        holder.item.setImage(ctx.getDrawable(item.mImgId))
-        holder.item.setName(item.mTitle)
+        holder.item.setImage(ctx.getDrawable(item.imgId))
+        holder.item.setName(item.title)
         holder.item.setCount(item.count)
     }
 

@@ -9,5 +9,9 @@ package com.ltan.music.mine
  * @Date:   2019-05-08
  * @Version: 1.0
  */
-class SongListItemObject constructor(val imgId: Int,  val title: String = "", val count: Int = 0, var isHeartMode: Boolean = false) {
-}
+class SongListItemObject (
+    val imgId: Int,
+    val title: String? = "",
+    val count: Int = 0,
+    var isHeartMode: Boolean = false
+)

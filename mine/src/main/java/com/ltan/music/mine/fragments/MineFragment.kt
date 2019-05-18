@@ -19,6 +19,7 @@ import com.ltan.music.widget.SongListCategoryItem
 import com.ltan.music.widget.constants.State
 import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
+import kotlin.math.min
 
 /**
  * TMusic.com.ltan.music.index.fragments
@@ -34,6 +35,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         const val TAG = "Mine/Frag/"
         const val ID_CATEGORY_CREATED_LIST = 0
         const val ID_CATEGORY_FAVORITE_LIST = 1
+        const val CATEGORY_LIST_INDEX = 8
         fun newInstance(): MineFragment {
             return MineFragment()
         }
@@ -84,18 +86,57 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mRclView.adapter = mMultiAdapter
     }
 
+    private var artistCount = 0
+    private var createdPlaylistCount = 0
+    private var subPlaylistCount = 0
+    private lateinit var collectionList: ArrayList<CollectorItemObject>
+    private lateinit var songPlayList: ArrayList<SongListCategoryObject>
+
     override fun onSubcount(data: SongSubCunt?) {
         if(data == null) {
             ToastUtil.showToastShort(getString(R.string.mine_song_list_failed))
+            return
         }
         MusicLog.d(TAG, "data is: $data")
+        artistCount = data.artistCount
+        createdPlaylistCount = data.createdPlaylistCount
+        subPlaylistCount = data.subPlaylistCount
+
+        collectionList[4].count = data.artistCount
+        songPlayList[0].count = data.createdPlaylistCount
+        songPlayList[1].count = data.subPlaylistCount
+        mMultiAdapter.notifyDataSetChanged()
+        // mMultiAdapter.notifyItemRangeChanged(5, 4)
     }
 
     override fun onPlayList(data: List<PlayList>?) {
         if(data == null) {
             ToastUtil.showToastShort(getString(R.string.mine_play_list_failed))
+            return
         }
         MusicLog.d(TAG, "play list is: $data")
+        val imgId = R.drawable.page_header_item_search
+
+        // category created
+        for (i in 0 until min(createdPlaylistCount, data.size)) {
+            val item = SongListItemObject(imgId, data[i].name, data[i].trackCount)
+            createdCategory.add(item)
+        }
+        // category subscribed
+        for (i in createdPlaylistCount until data.size) {
+            val item = SongListItemObject(imgId, data[i].name, data[i].trackCount)
+            favoriteCategory.add(item)
+        }
+        var favoriteOffset = CATEGORY_LIST_INDEX + 1
+        if(songPlayList[0].state == State.EXPAND) {
+            favoriteOffset += createdPlaylistCount
+            items.addAll(CATEGORY_LIST_INDEX, createdCategory)
+        }
+        if(songPlayList[1].state == State.EXPAND) {
+            items.addAll(favoriteOffset, favoriteCategory)
+        }
+        mMultiAdapter.notifyDataSetChanged()
+        // mMultiAdapter.notifyItemRangeInserted(CATEGORY_LIST_INDEX, createdPlaylistCount + subPlaylistCount)
     }
 
     fun testClick(v: View) {
@@ -138,11 +179,14 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     }
 
     private fun genItems() {
+        collectionList = genCollectorItems()
+        songPlayList = getSongCategories()
+
         items = ArrayList()
         items.add("") // recycle view
-        items.addAll(genCollectorItems())
+        items.addAll(collectionList)
         items.add(0)
-        items.addAll(getSongCategories())
+        items.addAll(songPlayList)
     }
 
     /**
@@ -164,90 +208,23 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             R.string.mine_content_collector_item_my_fav
         )
         val collectors = ArrayList<CollectorItemObject>()
-        for (i in 1..5) {
-            val title = getString(collectNames[i - 1])
-            val item = CollectorItemObject(collectImgs[i - 1], title, i)
+        for (i in 0 until collectImgs.size) {
+            val title = getString(collectNames[i])
+            val item = CollectorItemObject(collectImgs[i], title, 0)
             collectors.add(item)
         }
         return collectors
     }
 
-    private fun getSongCategories(): ArrayList<Any> {
-        val list = ArrayList<Any>()
-        val item = SongListCategoryObject(ID_CATEGORY_CREATED_LIST, getString(R.string.mine_song_list_category_created), 10, true)
-        list.add(item)
-        createdCategory = getSongList()
-        item.state = State.COLLAPSE
-        if (item.state == State.EXPAND) {
-            list.addAll(createdCategory)
-        }
+    private fun getSongCategories(): ArrayList<SongListCategoryObject> {
+        val list = ArrayList<SongListCategoryObject>()
+        val category1 = SongListCategoryObject(ID_CATEGORY_CREATED_LIST, getString(R.string.mine_song_list_category_created), 0, true)
+        category1.state = State.COLLAPSE
+        list.add(category1)
 
-        val item2 = SongListCategoryObject(ID_CATEGORY_FAVORITE_LIST, getString(R.string.mine_song_list_category_favorite), 3)
-        list.add(item2)
-        favoriteCategory = getSongList2()
-        if (item2.state == State.EXPAND) {
-            list.addAll(favoriteCategory)
-        }
-
-        return list
-    }
-
-    private fun getSongList(): ArrayList<SongListItemObject> {
-        val list = ArrayList<SongListItemObject>()
-        val drawableRes = intArrayOf(
-            R.drawable.page_header_item_download,
-            R.drawable.page_header_item_fm,
-            R.drawable.page_header_item_identify,
-            R.drawable.page_header_item_logo,
-            R.drawable.page_header_item_search,
-            R.drawable.page_header_item_download,
-            R.drawable.page_header_item_fm,
-            R.drawable.page_header_item_identify,
-            R.drawable.page_header_item_logo,
-            R.drawable.page_header_item_search
-        )
-        val titles = intArrayOf(
-            R.string.mine_song_list_item_favorite,
-            R.string.mine_song_list_item_test,
-            R.string.mine_song_list_item_test,
-            R.string.mine_song_list_item_test,
-            R.string.mine_song_list_item_ldm,
-            R.string.mine_song_list_item_mine,
-            R.string.mine_song_list_item_ftm,
-            R.string.mine_song_list_item_english,
-            R.string.mine_song_list_item_bee,
-            R.string.mine_song_list_item_try
-        )
-        // page_header_item_logo
-        for (i in 1..titles.size) {
-            val item = SongListItemObject(drawableRes[i - 1], getString(titles[i - 1]), i * 3)
-            if (i == 1) {
-                item.isHeartMode = true
-            }
-            list.add(item)
-        }
-
-        return list
-    }
-
-    private fun getSongList2(): ArrayList<SongListItemObject> {
-        val list = ArrayList<SongListItemObject>()
-        val drawableRes = intArrayOf(
-            R.drawable.page_header_item_download,
-            R.drawable.page_header_item_fm,
-            R.drawable.page_header_item_identify
-        )
-        val titles = intArrayOf(
-            R.string.mine_song_list_item_favorite,
-            R.string.mine_song_list_item_bee,
-            R.string.mine_song_list_item_try
-        )
-
-        for (i in 1..titles.size) {
-            val item = SongListItemObject(drawableRes[i - 1], getString(titles[i - 1]), i * 3)
-            list.add(item)
-        }
-
+        val category2 = SongListCategoryObject(ID_CATEGORY_FAVORITE_LIST, getString(R.string.mine_song_list_category_favorite), 0)
+        category2.state = State.COLLAPSE
+        list.add(category2)
         return list
     }
 

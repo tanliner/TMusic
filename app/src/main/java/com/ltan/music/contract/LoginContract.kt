@@ -19,6 +19,8 @@ interface LoginContract {
 
     interface Presenter : IBaseContract.Presenter<View> {
         fun login(name: String, pass: String)
+        /** Note: do http request */
+        fun logout()
         fun query()
         fun test()
     }

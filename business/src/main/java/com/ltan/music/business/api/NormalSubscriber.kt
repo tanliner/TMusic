@@ -15,6 +15,9 @@ import io.reactivex.subscribers.DisposableSubscriber
  * @Version: 1.0
  */
 abstract class NormalSubscriber<T> : DisposableSubscriber<T>() {
+    companion object {
+        const val TAG = "NormalSubscriber"
+    }
     val STATUS_TOKEN_INVALID = 1001401002 //token失效
     val JSON_PARSE_EXCEPTION = -1000 //json解析异常
     val UNKOWN = -1001
@@ -23,8 +26,8 @@ abstract class NormalSubscriber<T> : DisposableSubscriber<T>() {
     override fun onComplete() {}
 
     override fun onError(e: Throwable) {
-        // MusicLog.e("NormalSubscriber", "onError: $e")
-        MusicLog.e("NormalSubscriber", "onError: ${e.printStackTrace()}")
+        MusicLog.e(TAG, "onError: $e")
+        MusicLog.e(TAG, "onError: ${e.printStackTrace()}")
         if (e is ResponseException) {
             e.message?.let { onError(e.code, it) }
         } else if (e is JsonParseException) {

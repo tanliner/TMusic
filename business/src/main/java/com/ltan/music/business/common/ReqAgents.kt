@@ -1,15 +1,23 @@
 package com.ltan.music.business.common
 
 /**
- * @describe :
- * @usage :
+ * TMusic.com.ltan.music.business.common
  *
- * </p>
- * Created by tanlin on 2019/5/15
+ * http response may be empty
+ * 1. let the server write something out
+ * 2. inject a empty obj via converter
+ *
+ * @ClassName: ReqAgents
+ * @Description:
+ * @Author: tanlin
+ * @Date:   2019-05-15
+ * @Version: 1.0
  */
 object ReqAgents {
 
-    val userAgentList = arrayOf(
+    const val UA_TYPE_MOBILE = "mobile"
+    const val UA_TYPE_PC = "pc"
+    private val userAgentList = arrayOf(
         "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1",
         "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1",
         "Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Mobile Safari/537.36",
@@ -34,8 +42,8 @@ object ReqAgents {
                 index = Math.floor(Math.random() * userAgentList.size).toInt()
                 return userAgentList[index]
             }
-            "mobile" -> index = Math.floor(Math.random() * 7).toInt()
-            "pc" -> index = Math.floor(Math.random() * 5).toInt() + 8
+            UA_TYPE_MOBILE -> index = Math.floor(Math.random() * 7).toInt()
+            UA_TYPE_PC -> index = Math.floor(Math.random() * 5).toInt() + 8
             else -> return agent
         }
         return userAgentList[index]

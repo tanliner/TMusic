@@ -2,39 +2,51 @@ package com.ltan.music.common
 
 import android.util.Base64
 import java.io.UnsupportedEncodingException
-import java.nio.ByteBuffer
 import java.nio.charset.Charset
-import java.security.*
+import java.security.InvalidAlgorithmParameterException
+import java.security.InvalidKeyException
+import java.security.KeyFactory
+import java.security.NoSuchAlgorithmException
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
-import java.util.*
-import javax.crypto.*
+import javax.crypto.BadPaddingException
+import javax.crypto.Cipher
+import javax.crypto.IllegalBlockSizeException
+import javax.crypto.NoSuchPaddingException
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * @describe :
- * @usage :
+ * TMusic.com.ltan.music.common
  *
- * </p>
- * Created by tanlin on 2019/5/15
+ * @ClassName: Encryptor
+ * @Description:
+ * @Author: tanlin
+ * @Date:   2019-05-01
+ * @Version: 1.0
  */
 object Encryptor {
     const val TAG = "Encryptor"
-    val KEY = strToByteArray("0CoJUm6Qyw8W8jud")
-    private val ivx = strToByteArray("0102030405060708")
+
+    const val ENCRYPT_TYPE_HEX = "hex"
+    const val ENCRYPT_TYPE_BASE64 = "base64"
+    const val ENCRYPT_TYPE_DEF = ENCRYPT_TYPE_HEX
+
+    val KEY = "0CoJUm6Qyw8W8jud".toByteArray()
+    private val ivx = "0102030405060708".toByteArray()
     private const val TRANSFORMATION = "AES/CBC/PKCS5Padding"
-    // private const val RSA_TRANSFORMATION = "RSA/ECB/PKCS1Padding" // or padding 0 by yourself
+    // encrypt/algorithm/padding [ref-jianshu](https://juejin.im/post/5be103685188255e9b617dd7)
+    // "RSA/ECB/PKCS1Padding" // or padding 0 by yourself
     private const val RSA_TRANSFORMATION = "RSA/None/NoPadding"      // system inject 0 default
-    // private const val RSA_TRANSFORMATION = "RSA/None/PKCS1Padding"
+    private const val RSA_MSG_MIN_LENGTH = 128
 
     // Random character
     const val BASE64 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\\/+"
     const val BASE62 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     const val BASE36 = "abcdefghijklmnopqrstuvwxyz0123456789"
 
-    // const val PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDgtQn2JZ34ZC28NWYpAUd98iZ37BUrX/aKzmFbt7clFSs6sXqHauqKWqdtLkF2KexO40H1YTX8z2lSgBBOAxLsvaklV8k4cBFK9snQXE9/DDaFt6Rr7iVZMldczhC0JNgTz+SHXT6CBHuX3e9SdB1Ua44oncaTWz7OBGLbCiK45wIDAQAB\n-----END PUBLIC KEY-----"
+    // const val PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\nTHE_PUBLIC_KEY_CONTENT\n-----END PUBLIC KEY-----"
     const val PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDgtQn2JZ34ZC28NWYpAUd98iZ37BUrX/aKzmFbt7clFSs6sXqHauqKWqdtLkF2KexO40H1YTX8z2lSgBBOAxLsvaklV8k4cBFK9snQXE9/DDaFt6Rr7iVZMldczhC0JNgTz+SHXT6CBHuX3e9SdB1Ua44oncaTWz7OBGLbCiK45wIDAQAB"
 
     @Throws(
@@ -48,7 +60,6 @@ object Encryptor {
     )
     @JvmStatic
     fun encrypt(message: String, seckey: ByteArray): String {
-        val srcBuff = strToByteArray(message)
         return encrypt(message.toByteArray(), seckey)
     }
 
@@ -58,27 +69,7 @@ object Encryptor {
         val ivSpec = IvParameterSpec(ivx)
         val cipher = Cipher.getInstance(TRANSFORMATION)
 
-        val keyGenerator = KeyGenerator.getInstance("AES")
-        keyGenerator.init(128)
-        val key = keyGenerator.generateKey()
-
-        // val IV = ByteArray(16)
-        // val random = SecureRandom()
-        // random.nextBytes(IV)
-
-        val keySpec = SecretKeySpec(key.encoded, "AES")
-
-        // val ivSpec2 = IvParameterSpec(IV)
-        // cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec)
-
         cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivSpec)
-        // val byte1 = cipher.update(msgByteArray)
-        // val byte2 = cipher.doFinal()
-        //
-        // val dstBuff = ByteBuffer.allocate(byte1.size + byte2.size)
-        //     .put(byte1)
-        //     .put(byte2)
-        //     .array()
         val dstBuff = cipher.doFinal(msgByteArray)
 
         return Base64.encodeToString(dstBuff, Base64.NO_WRAP)
@@ -117,24 +108,21 @@ object Encryptor {
         return rsaEncrypt(strToByteArray(message), publicKey)
     }
 
-    fun rsaEncrypt(msgByte: ByteArray, publicKey: String): String {
-
-        MusicLog.d(TAG, "msgByte length: ${msgByte.size}")
+    fun rsaEncrypt(msgByte: ByteArray, publicKey: String, type: String = ENCRYPT_TYPE_DEF): String {
         var filledSecKey = msgByte
-        val msgBytesLen = msgByte.size
-        if (msgBytesLen < 128) {
-            val buffer = ByteBuffer.allocate(128)
-            buffer.position(128 - msgBytesLen)
-            buffer.put(msgByte)
-            filledSecKey = buffer.array()
-        }
 
+        // the `RSA/None/NoPadding` will insert 0 automatically
+        // val msgBytesLen = msgByte.size
+        // if (msgBytesLen < RSA_MSG_MIN_LENGTH) {
+        //     val buffer = ByteBuffer.allocate(RSA_MSG_MIN_LENGTH)
+        //     buffer.position(RSA_MSG_MIN_LENGTH - msgBytesLen)
+        //     buffer.put(msgByte)
+        //     filledSecKey = buffer.array()
+        // }
 
         // 得到公钥对象
         // val keySpec = X509EncodedKeySpec(strToByteArray(publicKey))
-        // publicKey.toByteArray(Charsets.US_ASCII)
         val keySpec = X509EncodedKeySpec(Base64.decode(publicKey, Base64.NO_PADDING))
-        // val keySpec = X509EncodedKeySpec(getPublicKey().encoded)
         val keyFactory = KeyFactory.getInstance("RSA")
         val pubKey: RSAPublicKey = keyFactory.generatePublic(keySpec) as RSAPublicKey
 
@@ -144,8 +132,11 @@ object Encryptor {
 
         val dstBuff = cp.doFinal(filledSecKey)
 
-        return byteArrayToHexString(dstBuff)
-        // return Base64.encodeToString(dstBuff, Base64.NO_WRAP)
+        return when (type) {
+            ENCRYPT_TYPE_BASE64 -> Base64.encodeToString(dstBuff, Base64.DEFAULT)
+            ENCRYPT_TYPE_HEX -> byteArrayToHexString(dstBuff)
+            else -> ""
+        }
     }
 
     @JvmStatic
@@ -178,38 +169,13 @@ object Encryptor {
         return ret
     }
 
-    fun printByteArray(byteArray: ByteArray) {
-        for (i in byteArray) {
-            MusicLog.d(TAG, "find $i")
-        }
-        MusicLog.d(TAG, "printByteArray length: ${byteArray.size}")
-    }
-
+    @JvmStatic
     fun byteArrayToHexString(bytes: ByteArray): String {
         val hexStr = StringBuilder(bytes.size * 2)
         for (b in bytes) {
             hexStr.append(String.format("%02x", b))
         }
         return hexStr.toString()
-    }
-
-    fun generateNuid(): String {
-        // CX448q%2F%2FDngy3mmIMWpmHVDyyo47tNN7tzGhOo9RNoRTc2PntSgA0%5CugKt9mhCiaxtjYPp%2B%5C31dRxiEryHZuIdqP5NcitCvNV5pU%2Fz53UAOlCHjereOORVvZDa1g7uSIa6nCHEjG72bIP%5CFOmAf70QqraHKBTEi%2B9CMBB3tO6jS%2BHJ%2Fd%3A1558026758515
-        val md5 = MessageDigest.getInstance("MD5")
-        val strBuilder = StringBuilder()
-        val time = Date().toString()
-        val name = "android-t-music"
-        val addr = "chengdu"
-        val ua = "android-chrome"
-        val stringTxt = strBuilder.append(time)
-            .append(name)
-            .append(addr)
-            .append(ua)
-            .toString()
-            .toByteArray()
-
-
-        return md5.digest(stringTxt).toString()
     }
 
     @JvmStatic

@@ -1,8 +1,6 @@
 package com.ltan.music
 
 import com.ltan.music.account.beans.LoginResult
-import com.ltan.music.business.api.Module
-import com.ltan.music.business.api.Root
 import io.reactivex.Flowable
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -34,6 +32,4 @@ interface UserApi {
     @GET("api/radio/get")
     fun query() : Flowable<String>
 
-    @GET("json/")
-    fun test() : Flowable<Module<List<Root>>>
 }

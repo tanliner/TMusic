@@ -3,7 +3,9 @@ package com.ltan.music.presenter
 import com.ltan.music.UserApi
 import com.ltan.music.account.beans.LoginResult
 import com.ltan.music.account.utils.AccountUtil
-import com.ltan.music.business.api.*
+import com.ltan.music.business.api.ApiProxy
+import com.ltan.music.business.api.NormalSubscriber
+import com.ltan.music.business.api.RxPresenter
 import com.ltan.music.common.MusicLog
 import com.ltan.music.contract.LoginContract
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -80,23 +82,6 @@ class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presente
 
                 override fun onComplete() {
                     MusicLog.d(LoginPresenter.TAG, "query onComplete")
-                }
-            })
-    }
-
-    override fun test() {
-        ApiProxy.instance.getApi(UserApi::class.java)
-            .test()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .unsubscribeOn(Schedulers.io())
-            .safeSubscribe(object : NormalSubscriber<Module<List<Root>>>() {
-                override fun onNext(t: Module<List<Root>>) {
-                    MusicLog.d(LoginPresenter.TAG, "test onNext any $t")
-                }
-
-                override fun onComplete() {
-                    MusicLog.d(LoginPresenter.TAG, "test onComplete")
                 }
             })
     }

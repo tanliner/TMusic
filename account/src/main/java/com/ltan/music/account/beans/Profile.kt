@@ -1,11 +1,14 @@
 package com.ltan.music.account.beans
 
 /**
- * @describe :
- * @usage :
+ * TMusic.com.ltan.music.account
+ * data-class
  *
- * </p>
- * Created by tanlin on 2019/5/17
+ * @ClassName: Profile
+ * @Description:
+ * @Author: tanlin
+ * @Date:   2019-05-17
+ * @Version: 1.0
  */
 data class Profile (
     private val description: String? = null,

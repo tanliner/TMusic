@@ -1,18 +1,24 @@
 package com.ltan.music.business.common
 
 import com.ltan.music.common.MusicLog
-import retrofit2.Converter
 import okhttp3.ResponseBody
 import org.json.JSONObject
+import retrofit2.Converter
 import retrofit2.Retrofit
 import java.lang.reflect.Type
 
 /**
- * @describe :
- * @usage :
+ * TMusic.com.ltan.music.business.common
  *
- * </p>
- * Created by tanlin on 2019/5/17
+ * http response may be empty
+ * 1. let the server write something out
+ * 2. inject a empty obj via converter
+ *
+ * @ClassName: NullOnEmptyConverterFactory
+ * @Description:
+ * @Author: tanlin
+ * @Date:   2019-05-17
+ * @Version: 1.0
  */
 class NullOnEmptyConverterFactory : Converter.Factory() {
     companion object {

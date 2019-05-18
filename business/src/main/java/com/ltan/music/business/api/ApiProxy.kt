@@ -38,7 +38,7 @@ class ApiProxy private constructor() {
         val instance: ApiProxy by lazy (mode =  LazyThreadSafetyMode.SYNCHRONIZED) { ApiProxy() }
 
         private val TAG = ApiProxy::class.java.simpleName
-        private val TYPE = arrayOf("pc", "mobile")
+        private val TYPE = arrayOf(ReqAgents.UA_TYPE_PC, ReqAgents.UA_TYPE_MOBILE)
 
         const val BASE_URL = "https://music.163.com/"
         // const val BASE_URL = "http://192.168.201.2:9090/"
@@ -61,7 +61,7 @@ class ApiProxy private constructor() {
 
         requestHeader = Interceptor { chain ->
             val builder = chain.request().newBuilder()
-            val index = (Math.random() * 2).toInt()
+            val index = (Math.random() * TYPE.size).toInt()
             val agent = ReqAgents.chooseUserAgent(TYPE[index])
             // val agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
 
@@ -83,7 +83,6 @@ class ApiProxy private constructor() {
     fun <T> getApi(service: Class<T>): T {
         return sRetrofit.create(service)
     }
-
 
     // val headerInterceptor = Interceptor { chain ->
     //     // val authorization = LocalAccountInfoManager.getInstance().getAuthorization()
@@ -125,8 +124,8 @@ class ApiProxy private constructor() {
             .addInterceptor(httpLoggingInterceptor)
             .connectTimeout(10, TimeUnit.SECONDS)
             .callTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(20, TimeUnit.SECONDS)
-            .writeTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
             .cookieJar(cookieJar)
             .build()
 

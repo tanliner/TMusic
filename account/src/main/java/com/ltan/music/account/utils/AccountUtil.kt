@@ -8,11 +8,14 @@ import com.ltan.music.common.BaseApplication
 import com.ltan.music.common.Constants
 
 /**
- * @describe :
- * @usage :
+ * TMusic.com.ltan.music.account
+ * data-class
  *
- * </p>
- * Created by tanlin on 2019/5/17
+ * @ClassName: Profile
+ * @Description:
+ * @Author: tanlin
+ * @Date:   2019-05-17
+ * @Version: 1.0
  */
 object AccountUtil {
     @JvmStatic

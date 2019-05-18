@@ -22,6 +22,5 @@ interface LoginContract {
         /** Note: do http request */
         fun logout()
         fun query()
-        fun test()
     }
 }

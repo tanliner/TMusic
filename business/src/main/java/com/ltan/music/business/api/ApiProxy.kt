@@ -41,12 +41,14 @@ class ApiProxy private constructor() {
         private val TYPE = arrayOf(ReqAgents.UA_TYPE_PC, ReqAgents.UA_TYPE_MOBILE)
 
         const val BASE_URL = "https://music.163.com/"
-        // const val BASE_URL = "http://192.168.201.2:9090/"
         const val HEADER_INIT = "_ga=GA1.1.1970532667.1556805403; os=pc"
         const val HEADER_COOKIE = "Cookie"
         const val HEADER_SET_COOKIE = "Set-Cookie"
         const val BODY_QUERY_CSRF = "csrf_token"
         const val HEADER_COOKIE_CSRF_PATTERN = "/_csrf =([^(;|\$)]+)/"
+
+        const val REQ_PARAMS = "params" // http request params will be put in
+        const val REQ_AES_SEC_KEY = "encSecKey" // the aes sec key, random generated, length is 16
     }
 
     private var sRetrofit: Retrofit
@@ -63,7 +65,6 @@ class ApiProxy private constructor() {
             val builder = chain.request().newBuilder()
             val index = (Math.random() * TYPE.size).toInt()
             val agent = ReqAgents.chooseUserAgent(TYPE[index])
-            // val agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
 
             builder.addHeader("Accept", "*/*")
             // response gzip encoded
@@ -83,30 +84,6 @@ class ApiProxy private constructor() {
     fun <T> getApi(service: Class<T>): T {
         return sRetrofit.create(service)
     }
-
-    // val headerInterceptor = Interceptor { chain ->
-    //     // val authorization = LocalAccountInfoManager.getInstance().getAuthorization()
-    //     // val builder = chain.request().newBuilder()
-    //     // if (!TextUtils.isEmpty(authorization)) {
-    //     //     builder.addHeader(HEADER_AUTH, authorization)
-    //     // }
-    //
-    //     // builder.addHeader(HEADER_APPID, 3001.toString())
-    //     // chain.proceed(builder.build())
-    // }
-
-    //只有 网络拦截器环节 才会写入缓存,在有网络的时候 设置缓存时间
-    private val rewriteCacheControlInterceptor = Interceptor { chain ->
-        val request = chain.request()
-        val originalResponse = chain.proceed(request)
-        val maxAge = 3 // 在线缓存在1分钟内可读取 单位:秒
-        originalResponse.newBuilder()
-            .removeHeader("Pragma") // 清除头信息，因为服务器如果不支持，会返回一些干扰信息，不清除下面无法生效
-            .removeHeader("Cache-Control")
-            .header("Cache-Control", "public, max-age=$maxAge")
-            .build()
-    }
-
 
     private fun initRetrofit(baseUri: String): Retrofit {
 
@@ -272,11 +249,12 @@ class ApiProxy private constructor() {
             val encTextPre = Encryptor.encrypt(Encryptor.strToByteArray(json.toString()), Encryptor.KEY)
             val paramsTxt = Encryptor.encrypt(encTextPre, secretKey)
 
-            val encSecKey = Encryptor.rsaEncrypt(secretKey, Encryptor.PUBLIC_KEY)
+            // Note: hex string required
+            val encSecKey = Encryptor.rsaEncrypt(secretKey, Encryptor.PUBLIC_KEY, Encryptor.ENCRYPT_TYPE_HEX)
 
             val newBuilder = url.newBuilder()
-            newBuilder.addQueryParameter("params", paramsTxt)
-            newBuilder.addQueryParameter("encSecKey", encSecKey)
+            newBuilder.addQueryParameter(REQ_PARAMS, paramsTxt)
+            newBuilder.addQueryParameter(REQ_AES_SEC_KEY, encSecKey)
             return newBuilder.build()
         }
 
@@ -288,25 +266,27 @@ class ApiProxy private constructor() {
                 for (i in 0 until oldFormBody.size()) {
                     json.addProperty(oldFormBody.name(i), oldFormBody.value(i))
                 }
-                MusicLog.d(TAG, "params json string: $json")
+                MusicLog.v(TAG, "params json string: $json")
             }
             return encryptParam(request, json)
 
         }
 
         private fun encryptParam(request: Request, json: JsonObject): Request {
-            // random key, len = 16
+            // random key, len = 16, used to encrypt the request body
             val secretKey = Encryptor.randomBytes(16)
 
             // encrypt twice
+            // 1. encrypt netease key
+            // 2. the last step encrypt txt, AES encrypt again via client random key
             val encTextPre = Encryptor.encrypt(json.toString(), Encryptor.KEY)
             val paramsTxt = Encryptor.encrypt(encTextPre, secretKey)
             secretKey.reverse()
-            val encSecKey = Encryptor.rsaEncrypt(secretKey, Encryptor.PUBLIC_KEY)
+            val encSecKey = Encryptor.rsaEncrypt(secretKey, Encryptor.PUBLIC_KEY, Encryptor.ENCRYPT_TYPE_HEX)
 
             val builder = FormBody.Builder()
-            builder.add("params", paramsTxt)
-            builder.add("encSecKey", encSecKey)
+            builder.add(REQ_PARAMS, paramsTxt)
+            builder.add(REQ_AES_SEC_KEY, encSecKey)
             return request.newBuilder()
                 .post(builder.build())
                 .build()

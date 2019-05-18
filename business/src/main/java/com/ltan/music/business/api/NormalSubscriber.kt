@@ -18,8 +18,8 @@ abstract class NormalSubscriber<T> : DisposableSubscriber<T>() {
     companion object {
         const val TAG = "NormalSubscriber"
     }
-    val STATUS_TOKEN_INVALID = 1001401002 //token失效
-    val JSON_PARSE_EXCEPTION = -1000 //json解析异常
+    val STATUS_TOKEN_INVALID = 1001401002 //token out of date
+    val JSON_PARSE_EXCEPTION = -1000 //json parse exception
     val UNKOWN = -1001
 
 
@@ -33,7 +33,7 @@ abstract class NormalSubscriber<T> : DisposableSubscriber<T>() {
         } else if (e is JsonParseException) {
             e.message?.let { onError(JSON_PARSE_EXCEPTION, it) }
         } else {
-            onError(UNKOWN, "未知错误...")
+            onError(UNKOWN, "Unknown Error...")
         }
     }
 

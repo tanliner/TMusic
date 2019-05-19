@@ -4,6 +4,7 @@ import com.ltan.music.common.ApiConstants
 import com.ltan.music.mine.beans.PlayListDetailRsp
 import com.ltan.music.mine.beans.PlayListRsp
 import com.ltan.music.mine.beans.SongSubCunt
+import com.ltan.music.mine.beans.SongUrlRsp
 import io.reactivex.Flowable
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -54,4 +55,11 @@ interface MineApi {
         @Field("n") num: Int = 10000,
         @Field("s") lastCollector: Int = 8
     ): Flowable<PlayListDetailRsp>
+
+    @FormUrlEncoded
+    @POST(ApiConstants.SONG_URL)
+    fun getSongUrl(
+        @Field("ids") ids: String,
+        @Field("br") num: Int = 999000
+    ): Flowable<SongUrlRsp>
 }

@@ -9,14 +9,4 @@
             android:layout_width="match_parent"
             android:layout_height="0dp">
     </androidx.recyclerview.widget.RecyclerView>
-    <TextView
-            android:id="@+id/index_pagers_footer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:textSize="20sp"
-            android:text="@string/mine_name"
-            />
-
 </LinearLayout>

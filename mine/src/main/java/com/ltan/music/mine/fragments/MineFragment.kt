@@ -45,14 +45,23 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         }
     }
 
-    private var mFooter: View by bindView(R.id.index_pagers_footer)
-    var mRclView: RecyclerView by bindView(R.id.rclv_mine)
-
     private lateinit var mMultiAdapter: MultiTypeAdapter
-    private lateinit var items: MutableList<Any>
+    private lateinit var mRcyItems: MutableList<Any>
 
-    private var createdCategory = ArrayList<SongListItemObject>()
-    private var favoriteCategory = ArrayList<SongListItemObject>()
+    // local, recent, download, FM, collection
+    private lateinit var mStableList: ArrayList<CollectorItemObject>
+    // created song list, collected song list
+    private lateinit var mSongCategoryList: ArrayList<SongListCategoryObject>
+
+    private var mRclView: RecyclerView by bindView(R.id.rclv_mine)
+    // collection count
+    private var mArtistCount = 0
+    // song list / subscribe song list
+    private var mCreatedSongListCount = 0
+    private var mSubSongListCount = 0
+
+    private var mCreatedCategory = ArrayList<SongListItemObject>()
+    private var mSubCategory = ArrayList<SongListItemObject>()
 
     override fun initLayout(): Int {
         return R.layout.mine_fragment
@@ -70,33 +79,25 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     }
 
     private fun init() {
-        mFooter.setOnClickListener { v -> testClick(v); testClick(mFooter) }
-        // mRclView.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-
         mRclView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         mMultiAdapter = MultiTypeAdapter()
         // recycle
         mMultiAdapter.register(String::class, MineHeaderBinder(requireContext(), generateHeaderItems()))
         mMultiAdapter.register(CollectorItemObject::class.java, CollectorItemBinder(requireContext()))
-        mMultiAdapter.register(Integer::class.java, EmptyItemBinder())
+        mMultiAdapter.register(HorizontalLine::class.java, HorizontalLineBinder())
         val categoryBinder = SongListCategoryBinder()
         mMultiAdapter.register(SongListCategoryObject::class.java, categoryBinder)
         val songListBinder = SongListItemBinder(requireContext())
         mMultiAdapter.register(SongListItemObject::class.java, songListBinder)
+        mMultiAdapter.register(PlaceItem::class.java, PlaceItemBinder())
         genItems()
-        mMultiAdapter.items = items
+        mMultiAdapter.items = mRcyItems
 
-        categoryBinder.setOnItemClick(CategoryClickListener(items, createdCategory, favoriteCategory, mMultiAdapter))
-        songListBinder.setOnItemClick(SongListClickListener(this, items))
+        categoryBinder.setOnItemClick(CategoryClickListener(mRcyItems, mCreatedCategory, mSubCategory, mMultiAdapter))
+        songListBinder.setOnItemClick(SongListClickListener(this, mRcyItems))
 
         mRclView.adapter = mMultiAdapter
     }
-
-    private var artistCount = 0
-    private var createdPlaylistCount = 0
-    private var subPlaylistCount = 0
-    private lateinit var collectionList: ArrayList<CollectorItemObject>
-    private lateinit var songPlayList: ArrayList<SongListCategoryObject>
 
     override fun onSubcount(data: SongSubCunt?) {
         if(data == null) {
@@ -104,13 +105,13 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             return
         }
         MusicLog.d(TAG, "data is: $data")
-        artistCount = data.artistCount
-        createdPlaylistCount = data.createdPlaylistCount
-        subPlaylistCount = data.subPlaylistCount
+        mArtistCount = data.artistCount
+        mCreatedSongListCount = data.createdPlaylistCount
+        mSubSongListCount = data.subPlaylistCount
 
-        collectionList[4].count = data.artistCount
-        songPlayList[0].count = data.createdPlaylistCount
-        songPlayList[1].count = data.subPlaylistCount
+        mStableList[4].count = data.artistCount
+        mSongCategoryList[0].count = data.createdPlaylistCount
+        mSongCategoryList[1].count = data.subPlaylistCount
         mMultiAdapter.notifyDataSetChanged()
         // mMultiAdapter.notifyItemRangeChanged(5, 4)
     }
@@ -124,32 +125,28 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         val imgId = R.drawable.page_header_item_search
 
         // category created
-        for (i in 0 until min(createdPlaylistCount, data.size)) {
+        for (i in 0 until min(mCreatedSongListCount, data.size)) {
             val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
-            createdCategory.add(item)
+            mCreatedCategory.add(item)
         }
-        if(createdPlaylistCount > 0) {
-            createdCategory[0].isHeartMode = true;
+        if(mCreatedSongListCount > 0) {
+            mCreatedCategory[0].isHeartMode = true;
         }
         // category subscribed
-        for (i in createdPlaylistCount until data.size) {
+        for (i in mCreatedSongListCount until data.size) {
             val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
-            favoriteCategory.add(item)
+            mSubCategory.add(item)
         }
         var favoriteOffset = CATEGORY_LIST_INDEX + 1
-        if(songPlayList[0].state == State.EXPAND) {
-            favoriteOffset += createdPlaylistCount
-            items.addAll(CATEGORY_LIST_INDEX, createdCategory)
+        if(mSongCategoryList[0].state == State.EXPAND) {
+            favoriteOffset += mCreatedSongListCount
+            mRcyItems.addAll(CATEGORY_LIST_INDEX, mCreatedCategory)
         }
-        if(songPlayList[1].state == State.EXPAND) {
-            items.addAll(favoriteOffset, favoriteCategory)
+        if(mSongCategoryList[1].state == State.EXPAND) {
+            mRcyItems.addAll(favoriteOffset, mSubCategory)
         }
         mMultiAdapter.notifyDataSetChanged()
-        // mMultiAdapter.notifyItemRangeInserted(CATEGORY_LIST_INDEX, createdPlaylistCount + subPlaylistCount)
-    }
-
-    fun testClick(v: View) {
-        MusicLog.d(TAG, "\nthis is a test message from$this, and mHeader is:$v")
+        // mMultiAdapter.notifyItemRangeInserted(CATEGORY_LIST_INDEX, mCreatedSongListCount + mSubSongListCount)
     }
 
     private fun generateHeaderItems(): ArrayList<PageItemObject> {
@@ -188,18 +185,19 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     }
 
     private fun genItems() {
-        collectionList = genCollectorItems()
-        songPlayList = getSongCategories()
+        mStableList = genCollectorItems()
+        mSongCategoryList = getSongCategories()
 
-        items = ArrayList()
-        items.add("") // recycle view
-        items.addAll(collectionList)
-        items.add(0)
-        items.addAll(songPlayList)
+        mRcyItems = ArrayList()
+        mRcyItems.add("") // recycle view
+        mRcyItems.addAll(mStableList)
+        mRcyItems.add(HorizontalLine())
+        mRcyItems.addAll(mSongCategoryList)
+        mRcyItems.add(PlaceItem())
     }
 
     /**
-     * create collector items
+     * create stable items
      */
     private fun genCollectorItems(): ArrayList<CollectorItemObject> {
         val collectImgs = intArrayOf(
@@ -275,11 +273,10 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     ) : ListItemClickListener {
         override fun onItemClick(position: Int, v: View, type: ClickType) {
             val item = items[position] as SongListItemObject
-            MusicLog.i(TAG, "SongListClickListener/ item=$item")
+            MusicLog.d(TAG, "SongListClickListener/ item=$item")
             val intent = Intent(frag.context, SongListActivity::class.java)
             intent.putExtra(SongListActivity.ARG_SONG_ID, item.songId)
             frag.startActivity(intent)
-            // p.getPlayListDetail(item.songId)
         }
     }
 }

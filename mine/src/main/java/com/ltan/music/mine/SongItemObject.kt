@@ -9,10 +9,11 @@ package com.ltan.music.mine
  * @Date:   2019-05-19
  * @Version: 1.0
  */
-class SongItemObject {
-    var number: Int = 0
-    var title: String? = null
-    var subTitle: String? = null
-    var video: Boolean = false
+data class SongItemObject(
+    var number: Int = 0,
+    var title: String? = null,
+    var songId: Long = 0,
+    var subTitle: String? = null,
+    var video: Boolean = false,
     var songUrl: String? = null
-}
+)

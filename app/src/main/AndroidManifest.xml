@@ -29,6 +29,8 @@
         </activity>
         <activity android:name=".mine.SongListActivity">
         </activity>
+
+        <service android:name=".service.MusicService" android:exported="false"/>
     </application>
 
 </manifest>

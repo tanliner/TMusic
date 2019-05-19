@@ -2,6 +2,7 @@ package com.ltan.music.mine.contract
 
 import com.ltan.music.basemvp.IBaseContract
 import com.ltan.music.mine.beans.PlayListDetailRsp
+import com.ltan.music.mine.beans.SongUrl
 
 /**
  * TMusic.com.ltan.music.mine.contract
@@ -15,8 +16,10 @@ import com.ltan.music.mine.beans.PlayListDetailRsp
 interface ISongListContract {
     interface View : IBaseContract.View<Presenter> {
         fun onPlayListDetail(data: PlayListDetailRsp?)
+        fun onSongUrl(songs: List<SongUrl>?)
     }
     interface Presenter : IBaseContract.Presenter<View> {
         fun getPlayListDetail(id: Long)
+        fun getSongUrl(ids: String)
     }
 }

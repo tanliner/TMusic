@@ -176,7 +176,7 @@ data class Tracks(
 
     val h: H? = null,
 
-    val id: Int = 0,
+    val id: Long = 0,
 
     val l: L? = null,
 

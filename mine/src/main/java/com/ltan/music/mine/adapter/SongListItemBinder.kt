@@ -21,8 +21,15 @@ import me.drakeet.multitype.ItemViewBinder
 class SongListItemBinder(context: Context) : ItemViewBinder<SongListItemObject, SongListItemBinder.ViewHolder>() {
 
     private val ctx = context
+    private var itemClick: OnItemClick? = null
+    // private lateinit var viewClick: ItemClick
+
+    interface OnItemClick {
+        fun onItemClick(position: Int)
+    }
 
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {
+        // viewClick = ItemClick(itemClick, null)
         return ViewHolder(SongListItem(ctx))
     }
 
@@ -31,9 +38,22 @@ class SongListItemBinder(context: Context) : ItemViewBinder<SongListItemObject, 
         holder.item.setName(item.title)
         holder.item.setCount(item.count)
         holder.item.setHeartMode(item.isHeartMode)
+        itemClick?.let { holder.item.setOnClickListener(ItemClick(it, holder)) }
+    }
+
+    fun setOnItemClick(l: OnItemClick) {
+        itemClick = l
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val item = itemView as SongListItem
+    }
+
+    class ItemClick(click: OnItemClick, holder: ViewHolder) : View.OnClickListener {
+        private val l = click
+        private var h = holder
+        override fun onClick(v: View?) {
+            l.onItemClick(h.adapterPosition)
+        }
     }
 }

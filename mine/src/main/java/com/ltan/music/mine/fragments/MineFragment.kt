@@ -12,6 +12,7 @@ import com.ltan.music.common.ToastUtil
 import com.ltan.music.mine.*
 import com.ltan.music.mine.adapter.*
 import com.ltan.music.mine.beans.PlayList
+import com.ltan.music.mine.beans.PlayListDetailRsp
 import com.ltan.music.mine.beans.SongSubCunt
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
@@ -77,11 +78,13 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mMultiAdapter.register(Integer::class.java, EmptyItemBinder())
         val categoryBinder = SongListCategoryBinder()
         mMultiAdapter.register(SongListCategoryObject::class.java, categoryBinder)
-        mMultiAdapter.register(SongListItemObject::class.java, SongListItemBinder(requireContext()))
+        val songListBinder = SongListItemBinder(requireContext())
+        mMultiAdapter.register(SongListItemObject::class.java, songListBinder)
         genItems()
         mMultiAdapter.items = items
 
         categoryBinder.setOnItemClick(CategoryClickListener(items, createdCategory, favoriteCategory, mMultiAdapter))
+        songListBinder.setOnItemClick(SongListClickListener(items, mPresenter))
 
         mRclView.adapter = mMultiAdapter
     }
@@ -119,12 +122,15 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
 
         // category created
         for (i in 0 until min(createdPlaylistCount, data.size)) {
-            val item = SongListItemObject(imgId, data[i].name, data[i].trackCount)
+            val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
             createdCategory.add(item)
+        }
+        if(createdPlaylistCount > 0) {
+            createdCategory[0].isHeartMode = true;
         }
         // category subscribed
         for (i in createdPlaylistCount until data.size) {
-            val item = SongListItemObject(imgId, data[i].name, data[i].trackCount)
+            val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
             favoriteCategory.add(item)
         }
         var favoriteOffset = CATEGORY_LIST_INDEX + 1
@@ -137,6 +143,15 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         }
         mMultiAdapter.notifyDataSetChanged()
         // mMultiAdapter.notifyItemRangeInserted(CATEGORY_LIST_INDEX, createdPlaylistCount + subPlaylistCount)
+    }
+
+    override fun onPlayListDetail(data: PlayListDetailRsp?) {
+        if(data == null) {
+            ToastUtil.showToastShort(getString(R.string.mine_play_list_failed))
+            return
+        }
+        //data.playlist
+        MusicLog.d(TAG, "view onPlayListDetail: ${data.playlist}")
     }
 
     fun testClick(v: View) {
@@ -257,6 +272,17 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
                 items.removeAll(dataSource)
                 adapter.notifyItemRangeRemoved(index, dataSource.size)
             }
+        }
+    }
+
+    class SongListClickListener(
+        private val items: MutableList<Any>,
+        private val p: MinePresenter
+    ) : SongListItemBinder.OnItemClick {
+        override fun onItemClick(position: Int) {
+            val item = items[position] as SongListItemObject
+            MusicLog.i(TAG, "SongListClickListener/ item=$item")
+            p.getPlayListDetail(item.songId)
         }
     }
 }

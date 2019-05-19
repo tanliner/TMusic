@@ -10,6 +10,7 @@ package com.ltan.music.mine
  * @Version: 1.0
  */
 class SongListItemObject (
+    val songId: Long,
     val imgId: Int,
     val title: String? = "",
     val count: Int = 0,

@@ -4,6 +4,7 @@ import com.ltan.music.business.api.ApiProxy
 import com.ltan.music.business.api.NormalSubscriber
 import com.ltan.music.business.api.RxPresenter
 import com.ltan.music.mine.MineApi
+import com.ltan.music.mine.beans.PlayListDetailRsp
 import com.ltan.music.mine.beans.PlayListRsp
 import com.ltan.music.mine.beans.SongSubCunt
 import com.ltan.music.mine.contract.IMineContract
@@ -41,6 +42,28 @@ class MinePresenter : RxPresenter<IMineContract.View>(), IMineContract.Presenter
                     if(t != null) {
                         mView.onPlayList(t.playlist)
                     }
+                }
+            })
+    }
+
+    override fun getFmRadio(uid: Long) {
+        observe(ApiProxy.instance.getApi(MineApi::class.java)
+            .getDjRadio(uid))
+            .safeSubscribe(object : NormalSubscriber<PlayListRsp>() {
+                override fun onNext(t: PlayListRsp?) {
+                    if(t != null) {
+                        mView.onPlayList(t.playlist)
+                    }
+                }
+            })
+    }
+
+    override fun getPlayListDetail(id: Long) {
+        observe(ApiProxy.instance.getApi(MineApi::class.java)
+            .getPlayLisDetail(id))
+            .safeSubscribe(object : NormalSubscriber<PlayListDetailRsp>() {
+                override fun onNext(t: PlayListDetailRsp?) {
+                    mView.onPlayListDetail(t)
                 }
             })
     }

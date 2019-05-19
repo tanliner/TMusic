@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:gravity="center_vertical"
+                android:layout_height="52dp">
+
+    <FrameLayout
+            android:id="@+id/fl_song_item_indicator_container"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_width="48dp"
+            android:layout_height="match_parent">
+
+        <TextView
+                android:id="@+id/tv_song_item_number"
+                tools:text="1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:textSize="@dimen/song_item_number_size"
+                android:gravity="center" />
+
+        <ImageView
+                android:id="@+id/iv_song_item_playing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center" />
+    </FrameLayout>
+
+    <ImageView
+            android:id="@+id/iv_song_item_menu"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/song_list_item_menu"
+            style="@style/SongItem.Menu" />
+
+    <ImageView
+            android:id="@+id/iv_song_item_video"
+            android:layout_toStartOf="@id/iv_song_item_menu"
+            android:src="@drawable/right_arrow_little"
+            android:visibility="gone"
+            tools:visibility="visible"
+            style="@style/SongItem.Video" />
+
+    <LinearLayout
+            android:layout_toEndOf="@+id/fl_song_item_indicator_container"
+            android:layout_toStartOf="@id/iv_song_item_video"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <TextView
+                android:id="@+id/tv_song_item_title"
+                tools:text="title"
+                style="@style/SongItem.Title" />
+
+        <TextView
+                android:layout_marginTop="@dimen/song_item_subtitle_margin_t"
+                tools:text="subtitle"
+                android:id="@+id/tv_song_item_subtitle"
+                style="@style/SongItem.SubTitle" />
+    </LinearLayout>
+
+</RelativeLayout>

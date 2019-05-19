@@ -1,7 +1,9 @@
 package com.ltan.music.mine.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ltan.music.account.utils.AccountUtil
@@ -12,10 +14,11 @@ import com.ltan.music.common.ToastUtil
 import com.ltan.music.mine.*
 import com.ltan.music.mine.adapter.*
 import com.ltan.music.mine.beans.PlayList
-import com.ltan.music.mine.beans.PlayListDetailRsp
 import com.ltan.music.mine.beans.SongSubCunt
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
+import com.ltan.music.widget.ClickType
+import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.SongListCategoryItem
 import com.ltan.music.widget.constants.State
 import kotterknife.bindView
@@ -84,7 +87,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mMultiAdapter.items = items
 
         categoryBinder.setOnItemClick(CategoryClickListener(items, createdCategory, favoriteCategory, mMultiAdapter))
-        songListBinder.setOnItemClick(SongListClickListener(items, mPresenter))
+        songListBinder.setOnItemClick(SongListClickListener(this, items))
 
         mRclView.adapter = mMultiAdapter
     }
@@ -143,15 +146,6 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         }
         mMultiAdapter.notifyDataSetChanged()
         // mMultiAdapter.notifyItemRangeInserted(CATEGORY_LIST_INDEX, createdPlaylistCount + subPlaylistCount)
-    }
-
-    override fun onPlayListDetail(data: PlayListDetailRsp?) {
-        if(data == null) {
-            ToastUtil.showToastShort(getString(R.string.mine_play_list_failed))
-            return
-        }
-        //data.playlist
-        MusicLog.d(TAG, "view onPlayListDetail: ${data.playlist}")
     }
 
     fun testClick(v: View) {
@@ -248,10 +242,10 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         private val category1: ArrayList<SongListItemObject>,
         private val category2: ArrayList<SongListItemObject>,
         private val adapter: MultiTypeAdapter
-    ) : SongListCategoryBinder.OnItemClickListener {
-        override fun onItemClick(position: Int, view: View, type: SongListCategoryItem.ClickType) {
-            if (type == SongListCategoryItem.ClickType.ITEM) {
-                itemClick(position, view)
+    ) : ListItemClickListener {
+        override fun onItemClick(position: Int, v: View, type: ClickType) {
+            if (type == ClickType.ITEM) {
+                itemClick(position, v)
             }
         }
 
@@ -276,13 +270,16 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     }
 
     class SongListClickListener(
-        private val items: MutableList<Any>,
-        private val p: MinePresenter
-    ) : SongListItemBinder.OnItemClick {
-        override fun onItemClick(position: Int) {
+        private val frag: Fragment,
+        private val items: MutableList<Any>
+    ) : ListItemClickListener {
+        override fun onItemClick(position: Int, v: View, type: ClickType) {
             val item = items[position] as SongListItemObject
             MusicLog.i(TAG, "SongListClickListener/ item=$item")
-            p.getPlayListDetail(item.songId)
+            val intent = Intent(frag.context, SongListActivity::class.java)
+            intent.putExtra(SongListActivity.ARG_SONG_ID, item.songId)
+            frag.startActivity(intent)
+            // p.getPlayListDetail(item.songId)
         }
     }
 }

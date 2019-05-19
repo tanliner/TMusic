@@ -30,10 +30,6 @@ class SongListCategoryItem @JvmOverloads constructor(
         const val SHRINK_DEGREE = 0.0F
     }
 
-    enum class ClickType(val tName: String) {
-        MENU("menu"), CREATOR("plus"), ITEM("item");
-    }
-
     override fun onClick(v: View) {
         when(v) {
             mMenuImgIv -> listener.onClick(v, ClickType.MENU)
@@ -44,7 +40,7 @@ class SongListCategoryItem @JvmOverloads constructor(
             }
         }
     }
-    private lateinit var listener: ClickListener
+    private lateinit var listener: ListItemViewClickListener
 
     private var mPrevImgIv: ImageView
     private var mItemNameTv: TextView
@@ -93,7 +89,7 @@ class SongListCategoryItem @JvmOverloads constructor(
         mCountTv.text = s.format(count)
     }
 
-    fun setClickListener(listener: ClickListener) {
+    fun setOnItemClickListener(listener: ListItemViewClickListener) {
         this.listener = listener
     }
 
@@ -130,13 +126,5 @@ class SongListCategoryItem @JvmOverloads constructor(
         rotateAnim.duration = ANIM_DURATION
         rotateAnim.setValues(animShrink)
         rotateAnim.start()
-    }
-
-    interface ClickListener {
-        /**
-         * [v] which view has been clicked
-         * [type] as the [v], a useful Integer value
-         */
-        fun onClick(v: View, type: ClickType)
     }
 }

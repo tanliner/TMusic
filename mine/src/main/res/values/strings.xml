@@ -33,5 +33,6 @@
 
     <string name="mine_song_list_failed">获取歌单失败</string>
     <string name="mine_play_list_failed">获取音乐列表失败</string>
+    <string name="mine_song_list_back">返回</string>
 
 </resources>

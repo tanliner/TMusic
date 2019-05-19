@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ltan.music.mine.SongListItemObject
+import com.ltan.music.widget.ClickType
+import com.ltan.music.widget.ListItemClickListener
+import com.ltan.music.widget.ListItemViewClickListener
 import com.ltan.music.widget.SongListItem
 import me.drakeet.multitype.ItemViewBinder
 
@@ -21,12 +24,7 @@ import me.drakeet.multitype.ItemViewBinder
 class SongListItemBinder(context: Context) : ItemViewBinder<SongListItemObject, SongListItemBinder.ViewHolder>() {
 
     private val ctx = context
-    private var itemClick: OnItemClick? = null
-    // private lateinit var viewClick: ItemClick
-
-    interface OnItemClick {
-        fun onItemClick(position: Int)
-    }
+    private var itemClick: ListItemClickListener? = null
 
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {
         // viewClick = ItemClick(itemClick, null)
@@ -38,10 +36,10 @@ class SongListItemBinder(context: Context) : ItemViewBinder<SongListItemObject, 
         holder.item.setName(item.title)
         holder.item.setCount(item.count)
         holder.item.setHeartMode(item.isHeartMode)
-        itemClick?.let { holder.item.setOnClickListener(ItemClick(it, holder)) }
+        itemClick?.let { holder.item.setOnItemClickListener(SongListItemClick(it, holder)) }
     }
 
-    fun setOnItemClick(l: OnItemClick) {
+    fun setOnItemClick(l: ListItemClickListener) {
         itemClick = l
     }
 
@@ -49,11 +47,12 @@ class SongListItemBinder(context: Context) : ItemViewBinder<SongListItemObject, 
         val item = itemView as SongListItem
     }
 
-    class ItemClick(click: OnItemClick, holder: ViewHolder) : View.OnClickListener {
+    private class SongListItemClick(click: ListItemClickListener, holder: ViewHolder) : ListItemViewClickListener {
         private val l = click
         private var h = holder
-        override fun onClick(v: View?) {
-            l.onItemClick(h.adapterPosition)
+
+        override fun onClick(v: View, type: ClickType) {
+            l.onItemClick(h.adapterPosition, v, type)
         }
     }
 }

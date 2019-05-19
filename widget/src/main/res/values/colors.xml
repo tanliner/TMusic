@@ -6,4 +6,7 @@
 
     <color name="color_collector_item_count">#80081B0f</color>
     <color name="color_song_list_item_count">#80081B0f</color>
+
+    <color name="color_list_item_title">#90000000</color>
+    <color name="color_list_item_subtitle">#6f000000</color>
 </resources>

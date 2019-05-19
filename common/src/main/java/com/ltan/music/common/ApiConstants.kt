@@ -20,6 +20,8 @@ object ApiConstants {
     const val USER_RECORD = "weapi/v1/play/record"
     // use cookie
     const val USER_SUB_COUNT = "weapi/subcount"
+    // user DJ radio
+    const val USER_DJ_RADIO = "weapi/dj/program/{uid}"
     //
     const val USER_UPDATE = "weapi/user/profile/update"
 
@@ -28,4 +30,8 @@ object ApiConstants {
     const val SONG_URL = "weapi/song/enhance/player/url"
     // param: {c: [{id1}, {id2}]} or {ids: [id1, ...]}
     const val SONG_DETAIL = "weapi/v3/song/detail"
+    /* play list category: app->discovery->song_list->all */
+    const val SONG_CATEGORY_LIST = "weapi/playlist/catalogue"
+    /* play list category: app->discovery->song_list->all */
+    const val SONG_PLAY_LIST_DETAIL = "weapi/v3/playlist/detail"
 }

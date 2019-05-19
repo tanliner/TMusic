@@ -19,14 +19,16 @@ import android.widget.TextView
  * @Version: 1.0
  */
 class SongListItem @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
-    : RelativeLayout(context, attrs, defStyleAttr) {
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : RelativeLayout(context, attrs, defStyleAttr), View.OnClickListener {
 
     private var mPrevImgIv: ImageView
     private var mItemNameTv: TextView
     private var mCountTv: TextView
-    private var mHeartModeImgIv: ImageView
-    private var mMenuImgIv: ImageView
+    private var mHeartModeIv: ImageView
+    private var mMenuIv: ImageView
+
+    private var itemClickListener: ListItemViewClickListener? = null
 
     init {
         val inflater = LayoutInflater.from(context)
@@ -35,19 +37,25 @@ class SongListItem @JvmOverloads constructor(
         mPrevImgIv = findViewById(R.id.iv_song_list_item_preview)
         mItemNameTv = findViewById(R.id.tv_song_list_item_name)
         mCountTv = findViewById(R.id.tv_song_list_item_count)
-        mMenuImgIv = findViewById(R.id.iv_song_list_item_menu)
-        mHeartModeImgIv = findViewById(R.id.iv_song_list_item_heart_mode)
+        mMenuIv = findViewById(R.id.iv_song_list_item_menu)
+        mHeartModeIv = findViewById(R.id.iv_song_list_item_heart_mode)
 
         // val pTop = resources.getDimensionPixelSize(R.dimen.song_list_item_name_padding_v)
         // val pBottom = resources.getDimensionPixelSize(R.dimen.song_list_item_name_padding_v)
         val pLeft = resources.getDimensionPixelSize(R.dimen.song_list_item_left_padding)
         val pRight = resources.getDimensionPixelSize(R.dimen.song_list_item_right_padding)
         setPadding(pLeft, 0, pRight, 0)
+
+        mMenuIv.setOnClickListener(this)
+        mHeartModeIv.setOnClickListener(this)
+        setOnClickListener(this)
     }
+
     fun setPreview(preview: Drawable?) {
         mPrevImgIv.setImageDrawable(preview)
     }
-    fun setName(name: String) {
+
+    fun setName(name: String?) {
         mItemNameTv.text = name
     }
 
@@ -58,11 +66,23 @@ class SongListItem @JvmOverloads constructor(
 
     fun setHeartMode(b: Boolean) {
         if (b) {
-            mHeartModeImgIv.visibility = View.VISIBLE
-            mMenuImgIv.visibility = View.GONE
+            mHeartModeIv.visibility = View.VISIBLE
+            mMenuIv.visibility = View.GONE
         } else {
-            mMenuImgIv.visibility = View.VISIBLE
-            mHeartModeImgIv.visibility = View.GONE
+            mMenuIv.visibility = View.VISIBLE
+            mHeartModeIv.visibility = View.GONE
+        }
+    }
+
+    fun setOnItemClickListener(l: ListItemViewClickListener) {
+        itemClickListener = l
+    }
+
+    override fun onClick(v: View?) {
+        when (v) {
+            mHeartModeIv -> itemClickListener?.onClick(mHeartModeIv, ClickType.HEART)
+            mMenuIv -> itemClickListener?.onClick(mMenuIv, ClickType.MENU)
+            else -> itemClickListener?.onClick(this, ClickType.ITEM)
         }
     }
 }

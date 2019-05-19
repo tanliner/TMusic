@@ -1,7 +1,9 @@
 package com.ltan.music.mine.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ltan.music.account.utils.AccountUtil
@@ -15,10 +17,13 @@ import com.ltan.music.mine.beans.PlayList
 import com.ltan.music.mine.beans.SongSubCunt
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
+import com.ltan.music.widget.ClickType
+import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.SongListCategoryItem
 import com.ltan.music.widget.constants.State
 import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
+import kotlin.math.min
 
 /**
  * TMusic.com.ltan.music.index.fragments
@@ -34,19 +39,29 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         const val TAG = "Mine/Frag/"
         const val ID_CATEGORY_CREATED_LIST = 0
         const val ID_CATEGORY_FAVORITE_LIST = 1
+        const val CATEGORY_LIST_INDEX = 8
         fun newInstance(): MineFragment {
             return MineFragment()
         }
     }
 
-    private var mFooter: View by bindView(R.id.index_pagers_footer)
-    var mRclView: RecyclerView by bindView(R.id.rclv_mine)
-
     private lateinit var mMultiAdapter: MultiTypeAdapter
-    private lateinit var items: MutableList<Any>
+    private lateinit var mRcyItems: MutableList<Any>
 
-    private var createdCategory = ArrayList<SongListItemObject>()
-    private var favoriteCategory = ArrayList<SongListItemObject>()
+    // local, recent, download, FM, collection
+    private lateinit var mStableList: ArrayList<CollectorItemObject>
+    // created song list, collected song list
+    private lateinit var mSongCategoryList: ArrayList<SongListCategoryObject>
+
+    private var mRclView: RecyclerView by bindView(R.id.rclv_mine)
+    // collection count
+    private var mArtistCount = 0
+    // song list / subscribe song list
+    private var mCreatedSongListCount = 0
+    private var mSubSongListCount = 0
+
+    private var mCreatedCategory = ArrayList<SongListItemObject>()
+    private var mSubCategory = ArrayList<SongListItemObject>()
 
     override fun initLayout(): Int {
         return R.layout.mine_fragment
@@ -64,22 +79,22 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     }
 
     private fun init() {
-        mFooter.setOnClickListener { v -> testClick(v); testClick(mFooter) }
-        // mRclView.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-
         mRclView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         mMultiAdapter = MultiTypeAdapter()
         // recycle
         mMultiAdapter.register(String::class, MineHeaderBinder(requireContext(), generateHeaderItems()))
         mMultiAdapter.register(CollectorItemObject::class.java, CollectorItemBinder(requireContext()))
-        mMultiAdapter.register(Integer::class.java, EmptyItemBinder())
+        mMultiAdapter.register(HorizontalLine::class.java, HorizontalLineBinder())
         val categoryBinder = SongListCategoryBinder()
         mMultiAdapter.register(SongListCategoryObject::class.java, categoryBinder)
-        mMultiAdapter.register(SongListItemObject::class.java, SongListItemBinder(requireContext()))
+        val songListBinder = SongListItemBinder(requireContext())
+        mMultiAdapter.register(SongListItemObject::class.java, songListBinder)
+        mMultiAdapter.register(PlaceItem::class.java, PlaceItemBinder())
         genItems()
-        mMultiAdapter.items = items
+        mMultiAdapter.items = mRcyItems
 
-        categoryBinder.setOnItemClick(CategoryClickListener(items, createdCategory, favoriteCategory, mMultiAdapter))
+        categoryBinder.setOnItemClick(CategoryClickListener(mRcyItems, mCreatedCategory, mSubCategory, mMultiAdapter))
+        songListBinder.setOnItemClick(SongListClickListener(this, mRcyItems))
 
         mRclView.adapter = mMultiAdapter
     }
@@ -87,19 +102,51 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     override fun onSubcount(data: SongSubCunt?) {
         if(data == null) {
             ToastUtil.showToastShort(getString(R.string.mine_song_list_failed))
+            return
         }
         MusicLog.d(TAG, "data is: $data")
+        mArtistCount = data.artistCount
+        mCreatedSongListCount = data.createdPlaylistCount
+        mSubSongListCount = data.subPlaylistCount
+
+        mStableList[4].count = data.artistCount
+        mSongCategoryList[0].count = data.createdPlaylistCount
+        mSongCategoryList[1].count = data.subPlaylistCount
+        mMultiAdapter.notifyDataSetChanged()
+        // mMultiAdapter.notifyItemRangeChanged(5, 4)
     }
 
     override fun onPlayList(data: List<PlayList>?) {
         if(data == null) {
             ToastUtil.showToastShort(getString(R.string.mine_play_list_failed))
+            return
         }
         MusicLog.d(TAG, "play list is: $data")
-    }
+        val imgId = R.drawable.page_header_item_search
 
-    fun testClick(v: View) {
-        MusicLog.d(TAG, "\nthis is a test message from$this, and mHeader is:$v")
+        // category created
+        for (i in 0 until min(mCreatedSongListCount, data.size)) {
+            val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
+            mCreatedCategory.add(item)
+        }
+        if(mCreatedSongListCount > 0) {
+            mCreatedCategory[0].isHeartMode = true;
+        }
+        // category subscribed
+        for (i in mCreatedSongListCount until data.size) {
+            val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
+            mSubCategory.add(item)
+        }
+        var favoriteOffset = CATEGORY_LIST_INDEX + 1
+        if(mSongCategoryList[0].state == State.EXPAND) {
+            favoriteOffset += mCreatedSongListCount
+            mRcyItems.addAll(CATEGORY_LIST_INDEX, mCreatedCategory)
+        }
+        if(mSongCategoryList[1].state == State.EXPAND) {
+            mRcyItems.addAll(favoriteOffset, mSubCategory)
+        }
+        mMultiAdapter.notifyDataSetChanged()
+        // mMultiAdapter.notifyItemRangeInserted(CATEGORY_LIST_INDEX, mCreatedSongListCount + mSubSongListCount)
     }
 
     private fun generateHeaderItems(): ArrayList<PageItemObject> {
@@ -138,15 +185,19 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     }
 
     private fun genItems() {
-        items = ArrayList()
-        items.add("") // recycle view
-        items.addAll(genCollectorItems())
-        items.add(0)
-        items.addAll(getSongCategories())
+        mStableList = genCollectorItems()
+        mSongCategoryList = getSongCategories()
+
+        mRcyItems = ArrayList()
+        mRcyItems.add("") // recycle view
+        mRcyItems.addAll(mStableList)
+        mRcyItems.add(HorizontalLine())
+        mRcyItems.addAll(mSongCategoryList)
+        mRcyItems.add(PlaceItem())
     }
 
     /**
-     * create collector items
+     * create stable items
      */
     private fun genCollectorItems(): ArrayList<CollectorItemObject> {
         val collectImgs = intArrayOf(
@@ -164,90 +215,23 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             R.string.mine_content_collector_item_my_fav
         )
         val collectors = ArrayList<CollectorItemObject>()
-        for (i in 1..5) {
-            val title = getString(collectNames[i - 1])
-            val item = CollectorItemObject(collectImgs[i - 1], title, i)
+        for (i in 0 until collectImgs.size) {
+            val title = getString(collectNames[i])
+            val item = CollectorItemObject(collectImgs[i], title, 0)
             collectors.add(item)
         }
         return collectors
     }
 
-    private fun getSongCategories(): ArrayList<Any> {
-        val list = ArrayList<Any>()
-        val item = SongListCategoryObject(ID_CATEGORY_CREATED_LIST, getString(R.string.mine_song_list_category_created), 10, true)
-        list.add(item)
-        createdCategory = getSongList()
-        item.state = State.COLLAPSE
-        if (item.state == State.EXPAND) {
-            list.addAll(createdCategory)
-        }
+    private fun getSongCategories(): ArrayList<SongListCategoryObject> {
+        val list = ArrayList<SongListCategoryObject>()
+        val category1 = SongListCategoryObject(ID_CATEGORY_CREATED_LIST, getString(R.string.mine_song_list_category_created), 0, true)
+        category1.state = State.COLLAPSE
+        list.add(category1)
 
-        val item2 = SongListCategoryObject(ID_CATEGORY_FAVORITE_LIST, getString(R.string.mine_song_list_category_favorite), 3)
-        list.add(item2)
-        favoriteCategory = getSongList2()
-        if (item2.state == State.EXPAND) {
-            list.addAll(favoriteCategory)
-        }
-
-        return list
-    }
-
-    private fun getSongList(): ArrayList<SongListItemObject> {
-        val list = ArrayList<SongListItemObject>()
-        val drawableRes = intArrayOf(
-            R.drawable.page_header_item_download,
-            R.drawable.page_header_item_fm,
-            R.drawable.page_header_item_identify,
-            R.drawable.page_header_item_logo,
-            R.drawable.page_header_item_search,
-            R.drawable.page_header_item_download,
-            R.drawable.page_header_item_fm,
-            R.drawable.page_header_item_identify,
-            R.drawable.page_header_item_logo,
-            R.drawable.page_header_item_search
-        )
-        val titles = intArrayOf(
-            R.string.mine_song_list_item_favorite,
-            R.string.mine_song_list_item_test,
-            R.string.mine_song_list_item_test,
-            R.string.mine_song_list_item_test,
-            R.string.mine_song_list_item_ldm,
-            R.string.mine_song_list_item_mine,
-            R.string.mine_song_list_item_ftm,
-            R.string.mine_song_list_item_english,
-            R.string.mine_song_list_item_bee,
-            R.string.mine_song_list_item_try
-        )
-        // page_header_item_logo
-        for (i in 1..titles.size) {
-            val item = SongListItemObject(drawableRes[i - 1], getString(titles[i - 1]), i * 3)
-            if (i == 1) {
-                item.isHeartMode = true
-            }
-            list.add(item)
-        }
-
-        return list
-    }
-
-    private fun getSongList2(): ArrayList<SongListItemObject> {
-        val list = ArrayList<SongListItemObject>()
-        val drawableRes = intArrayOf(
-            R.drawable.page_header_item_download,
-            R.drawable.page_header_item_fm,
-            R.drawable.page_header_item_identify
-        )
-        val titles = intArrayOf(
-            R.string.mine_song_list_item_favorite,
-            R.string.mine_song_list_item_bee,
-            R.string.mine_song_list_item_try
-        )
-
-        for (i in 1..titles.size) {
-            val item = SongListItemObject(drawableRes[i - 1], getString(titles[i - 1]), i * 3)
-            list.add(item)
-        }
-
+        val category2 = SongListCategoryObject(ID_CATEGORY_FAVORITE_LIST, getString(R.string.mine_song_list_category_favorite), 0)
+        category2.state = State.COLLAPSE
+        list.add(category2)
         return list
     }
 
@@ -256,10 +240,10 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         private val category1: ArrayList<SongListItemObject>,
         private val category2: ArrayList<SongListItemObject>,
         private val adapter: MultiTypeAdapter
-    ) : SongListCategoryBinder.OnItemClickListener {
-        override fun onItemClick(position: Int, view: View, type: SongListCategoryItem.ClickType) {
-            if (type == SongListCategoryItem.ClickType.ITEM) {
-                itemClick(position, view)
+    ) : ListItemClickListener {
+        override fun onItemClick(position: Int, v: View, type: ClickType) {
+            if (type == ClickType.ITEM) {
+                itemClick(position, v)
             }
         }
 
@@ -280,6 +264,19 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
                 items.removeAll(dataSource)
                 adapter.notifyItemRangeRemoved(index, dataSource.size)
             }
+        }
+    }
+
+    class SongListClickListener(
+        private val frag: Fragment,
+        private val items: MutableList<Any>
+    ) : ListItemClickListener {
+        override fun onItemClick(position: Int, v: View, type: ClickType) {
+            val item = items[position] as SongListItemObject
+            MusicLog.d(TAG, "SongListClickListener/ item=$item")
+            val intent = Intent(frag.context, SongListActivity::class.java)
+            intent.putExtra(SongListActivity.ARG_SONG_ID, item.songId)
+            frag.startActivity(intent)
         }
     }
 }

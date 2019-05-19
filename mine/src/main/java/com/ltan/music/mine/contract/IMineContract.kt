@@ -23,5 +23,6 @@ interface IMineContract {
     interface Presenter : IBaseContract.Presenter<View> {
         fun subcount()
         fun getPlayList(uid: Long)
+        fun getFmRadio(uid: Long)
     }
 }

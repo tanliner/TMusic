@@ -44,4 +44,16 @@ class MinePresenter : RxPresenter<IMineContract.View>(), IMineContract.Presenter
                 }
             })
     }
+
+    override fun getFmRadio(uid: Long) {
+        observe(ApiProxy.instance.getApi(MineApi::class.java)
+            .getDjRadio(uid))
+            .safeSubscribe(object : NormalSubscriber<PlayListRsp>() {
+                override fun onNext(t: PlayListRsp?) {
+                    if(t != null) {
+                        mView.onPlayList(t.playlist)
+                    }
+                }
+            })
+    }
 }

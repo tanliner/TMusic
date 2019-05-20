@@ -1,14 +1,17 @@
 package com.ltan.music.mine.fragments
 
+import android.app.Service
+import android.content.ComponentName
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ltan.music.account.utils.AccountUtil
 import com.ltan.music.basemvp.BaseMVPFragment
-import com.ltan.music.basemvp.setValue
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.ToastUtil
 import com.ltan.music.mine.*
@@ -17,8 +20,10 @@ import com.ltan.music.mine.beans.PlayList
 import com.ltan.music.mine.beans.SongSubCunt
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
+import com.ltan.music.service.MusicService
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
+import com.ltan.music.widget.MusicMediaPlayer
 import com.ltan.music.widget.SongListCategoryItem
 import com.ltan.music.widget.constants.State
 import kotterknife.bindView
@@ -53,7 +58,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     // created song list, collected song list
     private lateinit var mSongCategoryList: ArrayList<SongListCategoryObject>
 
-    private var mRclView: RecyclerView by bindView(R.id.rclv_mine)
+    private val mRclView: RecyclerView by bindView(R.id.rclv_mine)
+    private val mControllerView: MusicMediaPlayer by bindView(R.id.mmp_controller)
     // collection count
     private var mArtistCount = 0
     // song list / subscribe song list
@@ -62,6 +68,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
 
     private var mCreatedCategory = ArrayList<SongListItemObject>()
     private var mSubCategory = ArrayList<SongListItemObject>()
+    private var mServiceConn = PlayerConnection()
+    private var mMusicBinder: MusicService.MyBinder? = null
 
     override fun initLayout(): Int {
         return R.layout.mine_fragment
@@ -97,6 +105,32 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         songListBinder.setOnItemClick(SongListClickListener(this, mRcyItems))
 
         mRclView.adapter = mMultiAdapter
+
+        startService()
+    }
+
+    private fun startService() {
+        val intent = Intent(context, MusicService::class.java)
+        context?.startService(intent)
+        context?.bindService(intent, mServiceConn, Service.BIND_AUTO_CREATE)
+    }
+
+    private fun stopService() {
+        val intent = Intent(context, MusicService::class.java)
+        context?.stopService(intent)
+        context?.unbindService(mServiceConn)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(mMusicBinder != null) {
+            mControllerView.updateViewState()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopService()
     }
 
     override fun onSubcount(data: SongSubCunt?) {
@@ -226,7 +260,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     private fun getSongCategories(): ArrayList<SongListCategoryObject> {
         val list = ArrayList<SongListCategoryObject>()
         val category1 = SongListCategoryObject(ID_CATEGORY_CREATED_LIST, getString(R.string.mine_song_list_category_created), 0, true)
-        category1.state = State.COLLAPSE
+        category1.state = State.EXPAND
         list.add(category1)
 
         val category2 = SongListCategoryObject(ID_CATEGORY_FAVORITE_LIST, getString(R.string.mine_song_list_category_favorite), 0)
@@ -277,6 +311,19 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             val intent = Intent(frag.context, SongListActivity::class.java)
             intent.putExtra(SongListActivity.ARG_SONG_ID, item.songId)
             frag.startActivity(intent)
+        }
+    }
+
+    inner class PlayerConnection : ServiceConnection {
+        override fun onServiceDisconnected(name: ComponentName?) {
+            mMusicBinder = null
+        }
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            MusicLog.i(TAG, "service connected...")
+            val binder = service as MusicService.MyBinder
+            mMusicBinder = binder
+            mControllerView.setPlayer(binder)
         }
     }
 }

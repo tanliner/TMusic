@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rclv_mine"
-            android:layout_weight="1"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
+            android:layout_height="match_parent">
     </androidx.recyclerview.widget.RecyclerView>
-</LinearLayout>
+
+    <com.ltan.music.widget.MusicMediaPlayer
+            android:id="@+id/mmp_controller"
+            android:layout_gravity="start|bottom"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bottom_media_control_height">
+    </com.ltan.music.widget.MusicMediaPlayer>
+</FrameLayout>

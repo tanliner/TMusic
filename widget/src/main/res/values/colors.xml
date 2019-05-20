@@ -9,4 +9,6 @@
 
     <color name="color_list_item_title">#90000000</color>
     <color name="color_list_item_subtitle">#6f000000</color>
+
+    <color name="color_play_controller_bg">#F8FEFEFE</color>
 </resources>

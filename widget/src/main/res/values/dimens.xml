@@ -41,6 +41,7 @@
     <dimen name="list_item_menu_w">32dp</dimen>
     <dimen name="list_item_menu_h">48dp</dimen>
 
-    <dimen name="bottom_media_control_height">42dp</dimen>
+    <dimen name="bottom_media_control_height">48dp</dimen>
+    <dimen name="bottom_media_control_play_height">32dp</dimen>
 
 </resources>

@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
-
-    <Button
-            android:id="@+id/btn_mine_song_list_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/mine_song_list_back"
-            tools:text="返回" />
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rcy_mine_song_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-</LinearLayout>
+    <com.ltan.music.widget.MusicMediaPlayer
+            android:id="@+id/mmp_controller"
+            android:layout_gravity="start|bottom"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bottom_media_control_height">
+    </com.ltan.music.widget.MusicMediaPlayer>
+
+</FrameLayout>

@@ -7,7 +7,6 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
-import android.widget.Button
 import androidx.collection.LongSparseArray
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +15,7 @@ import com.ltan.music.common.MusicLog
 import com.ltan.music.common.ToastUtil
 import com.ltan.music.mine.adapter.PlaceItemBinder
 import com.ltan.music.mine.adapter.SongItemBinder
+import com.ltan.music.mine.adapter.SongListHeaderBinder
 import com.ltan.music.mine.beans.PlayListDetailRsp
 import com.ltan.music.mine.beans.SongUrl
 import com.ltan.music.mine.beans.Tracks
@@ -24,6 +24,7 @@ import com.ltan.music.mine.presenter.SongListPresenter
 import com.ltan.music.service.MusicService
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
+import com.ltan.music.widget.MusicMediaPlayer
 import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
 import kotlin.math.min
@@ -51,13 +52,13 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         mPresenter.attachView(this)
     }
 
-    private var currentSong = SongItemObject()
-    private var serviceConn = PlayerConnection()
-    private var musicBinder: MusicService.MyBinder? = null
+    private var mCurrentSong = SongItemObject()
+    private var mServiceConn = PlayerConnection()
+    private var mMusicBinder: MusicService.MyBinder? = null
 
     private var mSongListId: Long = 0L
     private val mSongsRcyView: RecyclerView by bindView(R.id.rcy_mine_song_list)
-    private val mBackBtn: Button by bindView(R.id.btn_mine_song_list_back)
+    private val mControllerView: MusicMediaPlayer by bindView(R.id.mmp_controller)
     private val mRcyAdapter = MultiTypeAdapter()
 
     // used to find the SongItem by SongUrls
@@ -80,11 +81,14 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     }
 
     private fun initView() {
-        mBackBtn.setOnClickListener {
-            finish()
-        }
-
         val songItemBinder = SongItemBinder()
+        val headerBinder = SongListHeaderBinder()
+        headerBinder.setBackListener(object: SongListHeaderBinder.BackListener {
+            override fun onBack() {
+                finish()
+            }
+        })
+        mRcyAdapter.register(String::class.java, headerBinder)
         mRcyAdapter.register(SongItemObject::class.java, songItemBinder)
         mRcyAdapter.register(PlaceItem::class.java, PlaceItemBinder())
         mRcyAdapter.items = mRcyItems
@@ -141,10 +145,10 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         }
         for (i in 0 until songs.size) {
             indexMap.get(songs[i].id)?.songUrl = songs[i].url
-            MusicLog.v(TAG, "url returned: ${currentSong.songId} vs ${songs[i].id} ${songs[i].url}")
-            if(currentSong.songId == songs[i].id) {
-                currentSong.songUrl = songs[i].url
-                currentSong.songUrl?.let { musicBinder?.play(it) }
+            MusicLog.v(TAG, "url returned: ${mCurrentSong.songId} vs ${songs[i].id} ${songs[i].url}")
+            if(mCurrentSong.songId == songs[i].id) {
+                mCurrentSong.songUrl = songs[i].url
+                mCurrentSong.songUrl?.let { mMusicBinder?.play(it) }
             }
         }
     }
@@ -168,7 +172,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         // startService(Intent(this@SongListActivity.baseContext, MusicService::class.java))
         val intent = Intent(baseContext, MusicService::class.java)
         intent.putExtra("songUrl", songUrl)
-        bindService(intent, serviceConn, Service.BIND_AUTO_CREATE)
+        bindService(intent, mServiceConn, Service.BIND_AUTO_CREATE)
     }
 
     inner class SongItemClick : ListItemClickListener {
@@ -176,7 +180,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
 
         override fun onItemClick(position: Int, v: View, type: ClickType) {
             MusicLog.d(TAG, "item click $position $v $type")
-            if(musicBinder == null) {
+            if(mMusicBinder == null) {
                 MusicLog.w(TAG, "service bind error")
                 return
             }
@@ -184,12 +188,13 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             val itemObject = mRcyItems[position] as SongItemObject
             val url = itemObject.songUrl
             if(url.isNullOrEmpty()) {
-                currentSong.songId = itemObject.songId
-                mPresenter.getSongUrl(buildArgs(currentSong.songId))
+                mCurrentSong.songId = itemObject.songId
+                mPresenter.getSongUrl(buildArgs(mCurrentSong.songId))
             } else {
-                currentSong.songId = -1
-                musicBinder?.play(url)
+                mCurrentSong.songId = -1
+                mMusicBinder?.play(url)
             }
+            mControllerView.setState(true)
             ToastUtil.showToastShort("${itemObject.title} coming soon")
         }
 
@@ -200,18 +205,19 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
 
     inner class PlayerConnection : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
-            musicBinder = null
+            mMusicBinder = null
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             MusicLog.i(TAG, "service connected...")
             val binder = service as MusicService.MyBinder
-            musicBinder = binder
+            mMusicBinder = binder
+            mControllerView.setPlayer(binder)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        unbindService(serviceConn)
+        unbindService(mServiceConn)
     }
 }

@@ -35,4 +35,10 @@
         <item name="android:layout_centerVertical">true</item>
     </style>
 
+    <style name="MediaPlayerControllerIcon">
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_width">@dimen/bottom_media_control_height</item>
+        <item name="android:layout_height">@dimen/bottom_media_control_height</item>
+    </style>
+
 </resources>

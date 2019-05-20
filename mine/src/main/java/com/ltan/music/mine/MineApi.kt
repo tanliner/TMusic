@@ -32,6 +32,9 @@ interface MineApi {
         @Field("offset") offset: Int = 0
     ): Flowable<PlayListRsp>
 
+    /**
+     * weapi/dj/program/{uid}, uid will be sent by {@code @Path}
+     */
     @FormUrlEncoded
     @POST(ApiConstants.USER_DJ_RADIO)
     fun getDjRadio(
@@ -56,6 +59,10 @@ interface MineApi {
         @Field("s") lastCollector: Int = 8
     ): Flowable<PlayListDetailRsp>
 
+    /**
+     * http params:
+     * { ids: [21212, 3212, 9926571], br: 999000 }
+     */
     @FormUrlEncoded
     @POST(ApiConstants.SONG_URL)
     fun getSongUrl(

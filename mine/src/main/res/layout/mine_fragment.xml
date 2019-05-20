@@ -10,10 +10,10 @@
             android:layout_height="match_parent">
     </androidx.recyclerview.widget.RecyclerView>
 
-    <com.ltan.music.widget.MusicMediaPlayer
+    <com.ltan.music.widget.MusicPlayerController
             android:id="@+id/mmp_controller"
             android:layout_gravity="start|bottom"
             android:layout_width="match_parent"
             android:layout_height="@dimen/bottom_media_control_height">
-    </com.ltan.music.widget.MusicMediaPlayer>
+    </com.ltan.music.widget.MusicPlayerController>
 </FrameLayout>

@@ -22,6 +22,17 @@ class MusicService : Service() {
         const val TAG = "playService"
     }
 
+    /**
+     * callback for view state update
+     * eg: update the imageview from play to pause
+     */
+    interface IPlayerCallback {
+        fun onStart()
+        fun onPause()
+        fun onCompleted()
+        fun onBufferUpdated(per: Int)
+    }
+
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var mediaPlayerControl: MediaController.MediaPlayerControl
 
@@ -54,11 +65,13 @@ class MusicService : Service() {
         private lateinit var player: MediaPlayer
 
         private var bufferPercent = 0
+        private var callback: IPlayerCallback? = null
 
         fun init(player: MediaPlayer) {
             this.player = player
             player.setOnBufferingUpdateListener { mp, percent ->
                 bufferPercent = percent
+                callback?.onBufferUpdated(percent)
                 MusicLog.d(TAG, "buffer percent.... $bufferPercent")
             }
             player.setOnPreparedListener {
@@ -66,6 +79,7 @@ class MusicService : Service() {
             }
             player.setOnCompletionListener {
                 MusicLog.d(TAG, "play completed")
+                callback?.onCompleted()
             }
         }
 
@@ -75,6 +89,10 @@ class MusicService : Service() {
 
         fun play(songId: Long) {
             // start()
+        }
+
+        fun setCallback(cb: IPlayerCallback) {
+            callback = cb
         }
 
         fun play(songUrl: String) {
@@ -98,6 +116,7 @@ class MusicService : Service() {
 
         override fun pause() {
             player.pause()
+            callback?.onPause()
         }
 
         override fun getBufferPercentage(): Int {
@@ -118,6 +137,7 @@ class MusicService : Service() {
 
         override fun start() {
             player.start()
+            callback?.onStart()
         }
 
         override fun getAudioSessionId(): Int {

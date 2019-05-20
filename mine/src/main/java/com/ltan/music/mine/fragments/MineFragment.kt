@@ -23,7 +23,7 @@ import com.ltan.music.mine.presenter.MinePresenter
 import com.ltan.music.service.MusicService
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
-import com.ltan.music.widget.MusicMediaPlayer
+import com.ltan.music.widget.MusicPlayerController
 import com.ltan.music.widget.SongListCategoryItem
 import com.ltan.music.widget.constants.State
 import kotterknife.bindView
@@ -59,7 +59,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     private lateinit var mSongCategoryList: ArrayList<SongListCategoryObject>
 
     private val mRclView: RecyclerView by bindView(R.id.rclv_mine)
-    private val mControllerView: MusicMediaPlayer by bindView(R.id.mmp_controller)
+    private val mControllerView: MusicPlayerController by bindView(R.id.mmp_controller)
     // collection count
     private var mArtistCount = 0
     // song list / subscribe song list
@@ -323,6 +323,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             MusicLog.i(TAG, "service connected...")
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
+            mMusicBinder?.setCallback(PlayerCallbackImpl(mControllerView))
             mControllerView.setPlayer(binder)
         }
     }

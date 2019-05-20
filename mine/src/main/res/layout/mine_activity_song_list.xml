@@ -9,11 +9,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-    <com.ltan.music.widget.MusicMediaPlayer
+    <com.ltan.music.widget.MusicPlayerController
             android:id="@+id/mmp_controller"
             android:layout_gravity="start|bottom"
             android:layout_width="match_parent"
             android:layout_height="@dimen/bottom_media_control_height">
-    </com.ltan.music.widget.MusicMediaPlayer>
+    </com.ltan.music.widget.MusicPlayerController>
 
 </FrameLayout>

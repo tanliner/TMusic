@@ -11,18 +11,17 @@ import android.widget.RelativeLayout
 /**
  * TMusic.com.ltan.music.widget
  *
- * @ClassName: MusicMediaPlayer
+ * @ClassName: MusicPlayerController
  * @Description:
  * @Author: tanlin
  * @Date:   2019-05-20
  * @Version: 1.0
  */
-class MusicMediaPlayer @JvmOverloads constructor(
+class MusicPlayerController @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
 ) : RelativeLayout(context, attrs, defStyle), View.OnClickListener {
 
     private var mPlayer: MediaController.MediaPlayerControl? = null
-    private var mContext = context
 
     private val mPreviewIv: ImageView
     private val mPlayIv: ImageView
@@ -71,6 +70,10 @@ class MusicMediaPlayer @JvmOverloads constructor(
         setState(mPlayer!!.isPlaying)
     }
 
+    /**
+     * Simply to switch the play/pause image
+     * [isPlaying] indicate whether media-player is playing or not
+     */
     fun setState(isPlaying: Boolean) {
         if (isPlaying) {
             mPlayIv.setImageResource(R.drawable.note_btn_pause_white)

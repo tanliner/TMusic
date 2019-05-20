@@ -24,7 +24,7 @@ import com.ltan.music.mine.presenter.SongListPresenter
 import com.ltan.music.service.MusicService
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
-import com.ltan.music.widget.MusicMediaPlayer
+import com.ltan.music.widget.MusicPlayerController
 import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
 import kotlin.math.min
@@ -58,7 +58,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
 
     private var mSongListId: Long = 0L
     private val mSongsRcyView: RecyclerView by bindView(R.id.rcy_mine_song_list)
-    private val mControllerView: MusicMediaPlayer by bindView(R.id.mmp_controller)
+    private val mControllerView: MusicPlayerController by bindView(R.id.mmp_controller)
     private val mRcyAdapter = MultiTypeAdapter()
 
     // used to find the SongItem by SongUrls
@@ -77,7 +77,8 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     private fun processArgs() {
         mSongListId = intent.getLongExtra(ARG_SONG_ID, 0L)
         mRcyItems = ArrayList()
-        mRcyItems.add(PlaceItem())
+        mRcyItems.add("header") // header button
+        mRcyItems.add(PlaceItem()) // footer space
     }
 
     private fun initView() {
@@ -106,7 +107,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         if (mRcyItems.size > 1) {
             val idsBuilder = StringBuilder()
             idsBuilder.append('[')
-            for (i in 0 until min(mRcyItems.size - 1, 10)) {
+            for (i in 0 until min(mRcyItems.size - 1, 5)) {
                 val songItemObject = mRcyItems[i] as SongItemObject
                 idsBuilder.append(songItemObject.songId).append(',')
             }
@@ -194,7 +195,6 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
                 mCurrentSong.songId = -1
                 mMusicBinder?.play(url)
             }
-            mControllerView.setState(true)
             ToastUtil.showToastShort("${itemObject.title} coming soon")
         }
 
@@ -212,6 +212,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             MusicLog.i(TAG, "service connected...")
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
+            mMusicBinder?.setCallback(PlayerCallbackImpl(mControllerView))
             mControllerView.setPlayer(binder)
         }
     }

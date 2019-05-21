@@ -125,6 +125,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         super.onResume()
         if(mMusicBinder != null) {
             mControllerView.updateViewState()
+            val curSong = mMusicBinder!!.getCurrentSong()
+            mControllerView.updateDisplay(curSong.title, curSong.subtitle)
         }
     }
 

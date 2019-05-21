@@ -66,6 +66,7 @@ class MusicService : Service() {
 
         private var bufferPercent = 0
         private var callback: IPlayerCallback? = null
+        private lateinit var mCurrentSong: SongPlaying
 
         fun init(player: MediaPlayer) {
             this.player = player
@@ -95,7 +96,16 @@ class MusicService : Service() {
             callback = cb
         }
 
-        fun play(songUrl: String) {
+        fun getCurrentSong(): SongPlaying {
+            return mCurrentSong
+        }
+
+        fun play(song: SongPlaying) {
+            mCurrentSong = song
+            play(song.url)
+        }
+
+        private fun play(songUrl: String) {
             player.reset()
             player.setDataSource(songUrl)
             player.prepare()

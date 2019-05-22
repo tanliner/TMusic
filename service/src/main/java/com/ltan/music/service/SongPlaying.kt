@@ -12,7 +12,7 @@ package com.ltan.music.service
  * @Version: 1.0
  */
 data class SongPlaying(
-    var id: Int = 0,
+    var id: Long = 0,
     var url: String,
     var title: String? = null,
     var subtitle: String? = null

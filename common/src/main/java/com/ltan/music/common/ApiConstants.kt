@@ -28,6 +28,8 @@ object ApiConstants {
     /* song */
     // param: {ids:[id2, id3, ...], br: int || 999000}
     const val SONG_URL = "weapi/song/enhance/player/url"
+    // can nor use @Path
+    const val SONG_LYRICS = "weapi/song/lyric?lv=-1&kv=-1&tv=-1"
     // param: {c: [{id1}, {id2}]} or {ids: [id1, ...]}
     const val SONG_DETAIL = "weapi/v3/song/detail"
     /* play list category: app->discovery->song_list->all */

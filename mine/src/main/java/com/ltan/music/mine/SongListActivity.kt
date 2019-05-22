@@ -157,8 +157,9 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             if(mCurrentSong.songId == songs[i].id) {
                 songItem?.let { setCurrentSong(it) }
                 mCurrentSong.songUrl = songs[i].url
-                mCurrentSong.songUrl?.let {
-                    val song = SongPlaying(url = it)
+                mCurrentSong.songUrl?.let { url ->
+                    val song = SongPlaying(url = url)
+                    songItem?.let { song.id = it.songId }
                     song.title = getCurTitle()
                     song.subtitle = getCurSubtitle()
                     mMusicBinder?.play(song)
@@ -222,6 +223,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             } else {
                 mCurrentSong.songId = -1
                 val song = SongPlaying(url = url)
+                song.id = itemObject.songId
                 song.title = getCurTitle()
                 song.subtitle = getCurSubtitle()
                 mMusicBinder?.play(song)

@@ -6,7 +6,17 @@ import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
 import android.widget.MediaController
+import com.ltan.music.business.api.ApiProxy
+import com.ltan.music.business.api.NormalSubscriber
+import com.ltan.music.common.ApiConstants
+import com.ltan.music.common.LyricsRsp
 import com.ltan.music.common.MusicLog
+import io.reactivex.Flowable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.POST
 
 /**
  * TMusic.com.ltan.music.service
@@ -31,6 +41,14 @@ class MusicService : Service() {
         fun onPause()
         fun onCompleted()
         fun onBufferUpdated(per: Int)
+    }
+
+    interface ILyricsApi {
+        @FormUrlEncoded
+        @POST(ApiConstants.SONG_LYRICS)
+        fun getLyrics(
+            @Field("id") id: Long
+            ): Flowable<LyricsRsp>
     }
 
     private lateinit var mediaPlayer: MediaPlayer
@@ -104,6 +122,15 @@ class MusicService : Service() {
         fun play(song: SongPlaying) {
             mCurrentSong = song
             play(song.url)
+            ApiProxy.instance.getApi(ILyricsApi::class.java).getLyrics(song.id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .safeSubscribe(object : NormalSubscriber<LyricsRsp>() {
+                    override fun onNext(t: LyricsRsp?) {
+                        MusicLog.d(TAG, "t === $t")
+                    }
+                })
+
         }
 
         private fun play(songUrl: String) {

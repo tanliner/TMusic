@@ -82,6 +82,7 @@ class MusicService : Service() {
                 MusicLog.d(TAG, "play completed")
                 callback?.onCompleted()
             }
+            mCurrentSong = SongPlaying(url = "")
         }
 
         fun getService(): MusicService {

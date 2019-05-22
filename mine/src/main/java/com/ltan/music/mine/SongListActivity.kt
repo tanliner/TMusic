@@ -66,6 +66,8 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     private val indexMap = LongSparseArray<SongItemObject>()
 
     private lateinit var mRcyItems: MutableList<Any>
+    private var mHeaderSize: Int = 0
+    private var mFootererSize: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +82,8 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         mRcyItems = ArrayList()
         mRcyItems.add("header") // header button
         mRcyItems.add(PlaceItem()) // footer space
+        mHeaderSize = 1
+        mFootererSize = 1
     }
 
     private fun initView() {
@@ -105,10 +109,10 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     }
 
     private fun querySongUrls() {
-        if (mRcyItems.size > 1) {
+        if (mRcyItems.size > mHeaderSize) {
             val idsBuilder = StringBuilder()
             idsBuilder.append('[')
-            for (i in 0 until min(mRcyItems.size - 1, 5)) {
+            for (i in mHeaderSize until min(mRcyItems.size - mFootererSize, 5)) {
                 val songItemObject = mRcyItems[i] as SongItemObject
                 idsBuilder.append(songItemObject.songId).append(',')
             }

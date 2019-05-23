@@ -3,7 +3,7 @@ package com.ltan.music.common
 /**
  * TMusic.com.ltan.music.common
  *
- * @ClassName: LyricsObj
+ * @ClassName: LyricsRsp
  * @Description:
  * @Author: tanlin
  * @Date:   2019-05-23
@@ -45,4 +45,18 @@ data class Lrc(
     val version: Int = 0,
 
     val lyric: String? = null
+)
+
+data class LyricsObj (
+    var title: String? = null,
+    var artist: String? = null,
+    var album: String? = null,
+    var uploader: String? = null,
+    var offset: Long = 0,
+    var songTexts: MutableList<LyricsLine>? = null
+)
+
+data class LyricsLine(
+    var start: Long = 0,
+    var txt: String? = null
 )

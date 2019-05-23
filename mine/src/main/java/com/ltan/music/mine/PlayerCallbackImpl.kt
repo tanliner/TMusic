@@ -34,4 +34,14 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
     override fun onBufferUpdated(per: Int) {
         MusicLog.v(TAG, "music source buffered $per")
     }
+
+    /**
+     * call on sub thread
+     */
+    override fun updateLyric(txt: String?) {
+        if(txt.isNullOrEmpty()) {
+            return
+        }
+        controller.post { controller.updateSummary(txt) }
+    }
 }

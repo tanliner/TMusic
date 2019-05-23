@@ -80,6 +80,10 @@ class MusicPlayerController @JvmOverloads constructor(
         mSummaryTv.text = summary
     }
 
+    fun updateSummary(summary: String?) {
+        mSummaryTv.text = summary
+    }
+
     /**
      * Simply to switch the play/pause image
      * [isPlaying] indicate whether media-player is playing or not

@@ -10,6 +10,11 @@ package com.ltan.music.common
  * @Version: 1.0
  */
 object ApiConstants {
+    const val CRYPTO_WEAPI = "weapi"
+    const val CRYPTO_LINUX_API = "linuxapi"
+    const val CRYPTO_EAPI = "eapi"
+    const val CRYPTO_KEY = "crypto"
+
     // user
     const val USER_LOGIN = "weapi/login"
     const val USER_LOGOUT = "weapi/logout"
@@ -28,7 +33,7 @@ object ApiConstants {
     /* song */
     // param: {ids:[id2, id3, ...], br: int || 999000}
     const val SONG_URL = "weapi/song/enhance/player/url"
-    // can nor use @Path
+    // Note: linuxapi
     const val SONG_LYRICS = "weapi/song/lyric?lv=-1&kv=-1&tv=-1"
     // param: {c: [{id1}, {id2}]} or {ids: [id1, ...]}
     const val SONG_DETAIL = "weapi/v3/song/detail"

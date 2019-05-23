@@ -8,10 +8,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.ltan.music.business.common.NullOnEmptyConverterFactory
 import com.ltan.music.business.common.ReqAgents
-import com.ltan.music.common.BaseApplication
-import com.ltan.music.common.Constants
-import com.ltan.music.common.Encryptor
-import com.ltan.music.common.MusicLog
+import com.ltan.music.common.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -41,6 +38,7 @@ class ApiProxy private constructor() {
         private val TYPE = arrayOf(ReqAgents.UA_TYPE_PC, ReqAgents.UA_TYPE_MOBILE)
 
         const val BASE_URL = "https://music.163.com/"
+        const val LINUX_API_REQ_URL = "https://music.163.com/api/linux/forward" // http request params will be put in while request LinuxAPi
         const val HEADER_INIT = "_ga=GA1.1.1970532667.1556805403; os=pc"
         const val HEADER_COOKIE = "Cookie"
         const val HEADER_SET_COOKIE = "Set-Cookie"
@@ -49,6 +47,7 @@ class ApiProxy private constructor() {
 
         const val REQ_PARAMS = "params" // http request params will be put in
         const val REQ_AES_SEC_KEY = "encSecKey" // the aes sec key, random generated, length is 16
+        const val LINUX_API_REQ_PARAMS = "eparams" // http request params will be put in while request LinuxAPi
     }
 
     private var sRetrofit: Retrofit
@@ -273,21 +272,59 @@ class ApiProxy private constructor() {
         }
 
         private fun encryptParam(request: Request, json: JsonObject): Request {
+
+            var crypto = ApiConstants.CRYPTO_WEAPI
+            if (json.has(ApiConstants.CRYPTO_KEY)) {
+                crypto = json.get(ApiConstants.CRYPTO_KEY).asString
+            }
+            return when (crypto) {
+                ApiConstants.CRYPTO_LINUX_API -> encryptParamLinuxAPi(request, json)
+                ApiConstants.CRYPTO_WEAPI -> encryptParamWEAPi(request, json)
+                else -> request
+            }
+        }
+
+        private fun encryptParamWEAPi(request: Request, json: JsonObject): Request {
+            json.remove(ApiConstants.CRYPTO_KEY)
             // random key, len = 16, used to encrypt the request body
             val secretKey = Encryptor.randomBytes(16)
 
-            // encrypt twice
+            // encrypt twice when `weapi`
             // 1. encrypt netease key
             // 2. the last step encrypt txt, AES encrypt again via client random key
             val encTextPre = Encryptor.encrypt(json.toString(), Encryptor.KEY)
             val paramsTxt = Encryptor.encrypt(encTextPre, secretKey)
             secretKey.reverse()
             val encSecKey = Encryptor.rsaEncrypt(secretKey, Encryptor.PUBLIC_KEY, Encryptor.ENCRYPT_TYPE_HEX)
-
             val builder = FormBody.Builder()
             builder.add(REQ_PARAMS, paramsTxt)
             builder.add(REQ_AES_SEC_KEY, encSecKey)
+
             return request.newBuilder()
+                .post(builder.build())
+                .build()
+        }
+
+        private fun encryptParamLinuxAPi(request: Request, json: JsonObject): Request {
+            var url = request.url().toString()
+            url = url.replace(Regex("\\w*api"), "api")
+            request.newBuilder().header("User-Agent", ReqAgents.LINUX_API_USER_AGENT)
+
+            // remove the crypto indicator
+            json.remove(ApiConstants.CRYPTO_KEY)
+            json.remove(BODY_QUERY_CSRF)
+            val encryptJson = JsonObject()
+            encryptJson.addProperty("method", request.method())
+            encryptJson.addProperty("url", url)
+            encryptJson.add("params", json) // just add Json Element, do not use the method toString
+            MusicLog.v(TAG, "encryptParamLinuxAPi orjson: $json enJson: $encryptJson")
+            val paramsTxt = Encryptor.encryptLinuxApi(encryptJson.toString(), Encryptor.LINUX_API_KEY)
+
+            val builder = FormBody.Builder()
+            builder.add(LINUX_API_REQ_PARAMS, paramsTxt)
+            // url = 'https://music.163.com/api/linux/forward'
+            return request.newBuilder()
+                .url(HttpUrl.get(LINUX_API_REQ_URL))
                 .post(builder.build())
                 .build()
         }

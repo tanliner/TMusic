@@ -2,6 +2,7 @@ package com.ltan.music.mine
 
 import com.ltan.music.common.MusicLog
 import com.ltan.music.service.MusicService
+import com.ltan.music.service.SongPlaying
 import com.ltan.music.widget.MusicPlayerController
 
 /**
@@ -27,8 +28,9 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
         controller.setState(false)
     }
 
-    override fun onCompleted() {
+    override fun onCompleted(song: SongPlaying) {
         controller.setState(false)
+        controller.updateDisplay(song.title, song.subtitle)
     }
 
     override fun onBufferUpdated(per: Int) {

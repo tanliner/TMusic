@@ -42,7 +42,7 @@ class MusicService : Service() {
     interface IPlayerCallback {
         fun onStart()
         fun onPause()
-        fun onCompleted()
+        fun onCompleted(song: SongPlaying)
         fun onBufferUpdated(per: Int)
         fun updateLyric(txt: String?)
     }
@@ -101,6 +101,7 @@ class MusicService : Service() {
 
         fun init(player: MediaPlayer) {
             this.mPlayer = player
+            mCurrentSong = SongPlaying(url = "")
             player.setOnBufferingUpdateListener { mp, percent ->
                 mBufferPercent = percent
                 mUICallback?.onBufferUpdated(percent)
@@ -111,18 +112,24 @@ class MusicService : Service() {
             }
             player.setOnCompletionListener {
                 MusicLog.d(TAG, "play completed")
-                mUICallback?.onCompleted()
+                mUICallback?.onCompleted(mCurrentSong)
                 mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
             }
-            mCurrentSong = SongPlaying(url = "")
             mLyricsUpdater = Handler(mUpdateThread.looper, Handler.Callback { msg ->
                 when(msg?.what) {
                     MSG_UPDATE_LYRIC -> {
                         val curPos = currentPosition
                         mLyrics?.let {
-                            mUICallback?.updateLyric(LyricsUtil.getCurrentSongLine(it, curPos))
+                            val lyricPosition = LyricsUtil.getCurrentSongLine(it, curPos)
+                            if(lyricPosition.nextDur == 0L && curPos > MSG_UPDATE_GAP) {
+                                return@let
+                            }
+                            val msgDelay: Long = if (lyricPosition.nextDur > MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
+                            MusicLog.i(TAG, "$lyricPosition, currentPos: $curPos, next time is: $msgDelay, callback is: $mUICallback")
+                            mUICallback?.updateLyric(lyricPosition.txt)
+
                             val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
-                            mLyricsUpdater.sendMessageDelayed(uMsg, MSG_UPDATE_GAP)
+                            mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
                         }
                         true
                     }
@@ -164,7 +171,8 @@ class MusicService : Service() {
                     override fun onNext(t: LyricsObj?) {
                         MusicLog.d(TAG, " object song t: \t$t")
                         mLyrics = t
-                        mLyricsUpdater.sendMessageDelayed(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC), MSG_UPDATE_GAP)
+                        mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
+                        mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
                     }
                 })
 
@@ -220,6 +228,7 @@ class MusicService : Service() {
         override fun start() {
             mPlayer.start()
             mUICallback?.onStart()
+            mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
             mLyricsUpdater.sendEmptyMessage(MSG_UPDATE_LYRIC)
         }
 

@@ -2,6 +2,7 @@ package com.ltan.music.common
 
 import java.io.BufferedReader
 import java.io.ByteArrayInputStream
+import java.util.regex.Pattern
 
 /**
  * TMusic.com.ltan.music.common
@@ -20,21 +21,25 @@ object LyricsUtil {
     private const val S_UPLOADER = "[by:"
     private const val S_OFFSET = "[offset:"
 
-    fun getCurrentSongLine(obj: LyricsObj, pos: Int): String? {
-        if(obj.songTexts.isNullOrEmpty() || obj.songTexts!![0].start > pos) {
-            return null
+    fun getCurrentSongLine(obj: LyricsObj, pos: Int): LyricPosition {
+        if(obj.songTexts.isNullOrEmpty()) {
+            return LyricPosition()
         }
-        for (i in 0 until obj.songTexts!!.size) {
+        var j = 0
+        val positionObj = LyricPosition()
+        val size = obj.songTexts!!.size
+        for (i in (size - 1) downTo 0) {
             val it = obj.songTexts!![i]
-            var itNext = it
-            if(i < obj.songTexts!!.size - 1) {
-                itNext = obj.songTexts!![i + 1]
-            }
-            if(it.start <= pos && itNext.start > pos) {
-                return it.txt
+            if(pos >= it.start) {
+                positionObj.txt = it.txt.toString()
+                j = i
+                break
             }
         }
-        return null
+        if(j < size - 1) {
+            positionObj.nextDur = obj.songTexts!![j + 1].start - pos
+        }
+        return positionObj
     }
 
     @JvmStatic
@@ -55,24 +60,24 @@ object LyricsUtil {
 
     @JvmStatic
     fun putLineToLyric(lyricObj: LyricsObj, line: String) {
-        // val lyricObj = LyricsObj()
         val lastQuote = line.lastIndexOf(']')
         when {
-            line.startsWith(S_TITLE, true) -> lyricObj.title = line.substring(4, lastQuote)
-            line.startsWith(S_ARTIST, true) -> lyricObj.artist = line.substring(4, lastQuote)
-            line.startsWith(S_ALBUM, true) -> lyricObj.album = line.substring(4, lastQuote)
+            line.startsWith(S_TITLE, true) -> lyricObj.title = line.substring(S_TITLE.length, lastQuote)
+            line.startsWith(S_ARTIST, true) -> lyricObj.artist = line.substring(S_ARTIST.length, lastQuote)
+            line.startsWith(S_ALBUM, true) -> lyricObj.album = line.substring(S_ALBUM.length, lastQuote)
             line.startsWith(S_UPLOADER, true) -> {
                 if(lyricObj.uploader != null) {
-                    lyricObj.uploader = "${lyricObj.uploader} / ${line.substring(4, lastQuote)}"
+                    lyricObj.uploader = "${lyricObj.uploader} / ${line.substring(S_UPLOADER.length, lastQuote)}"
                 } else {
                     lyricObj.uploader = line.substring(4, lastQuote)
                 }
             }
-            line.startsWith(S_OFFSET, true) -> lyricObj.offset = line.substring(4, lastQuote).toLong()
+            line.startsWith(S_OFFSET, true) -> lyricObj.offset = line.substring(S_OFFSET.length, lastQuote).toLong()
             else -> {
-                if (lastQuote >= 9 && line[lastQuote - 6] == ':') {
+                val start = calStartTimeMillis(lastQuote, line)
+                if(start >= 0) {
                     val txtInfo = LyricsLine()
-                    txtInfo.start = calStartTimeMillis(line, lastQuote)
+                    txtInfo.start = start
                     txtInfo.txt = line.substring(lastQuote + 1, line.length)
                     lyricObj.songTexts?.add(txtInfo)
                 }
@@ -81,14 +86,31 @@ object LyricsUtil {
     }
 
     /**
-     * [str] song text line
+     * [mm:ss:mmm] or [mm:ss:mm]
      * [index] the last index of ']', just incase the [100:58:45]somg text at this line
+     * [line] song text line
      */
     @JvmStatic
-    private fun calStartTimeMillis(str: String, index: Int): Long {
-        val minute = str.substring(1, index - 6).toInt()
-        val second =  str.substring(index - 5, index - 3).toInt()
-        val millisecond = str.substring(index - 2, index).toLong()
-        return millisecond + second * 1000 + minute * 60 * 1000
+    private fun calStartTimeMillis(index: Int, line: String): Long {
+        if (index < 9) {
+            return -1
+        }
+
+        // TODO fix the error line.
+        // var fixLineStr = line, [0-1:59:20]/[00:56:99]/[01:32.000]
+        val matcher = Pattern.compile("\\[(\\d{2,}:\\d{2}\\.\\d{2,3})\\]").matcher(line)
+        if(!matcher.find()) {
+            MusicLog.e("LyricUtil/calStartTimeMillis", "error line: $line")
+            // fixLineStr = fixLine(index, line)
+            return -1
+        }
+
+        val timeString = line.substring(1, index)
+        val lastPoint = timeString.lastIndexOf('.')
+        val lastColon = timeString.lastIndexOf(':')
+        val millisec = timeString.substring(lastPoint + 1, index - 1).toLong()
+        val sec = timeString.substring(lastColon + 1, lastPoint).toInt()
+        val minute = timeString.substring(0, lastColon).toInt()
+        return (minute * 60 + sec) * 1000 + millisec
     }
 }

@@ -246,6 +246,12 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             mMusicBinder = binder
             mMusicBinder?.setCallback(PlayerCallbackImpl(mControllerView))
             mControllerView.setPlayer(binder)
+
+            if(binder.isPlaying) {
+                val curSong = binder.getCurrentSong()
+                mControllerView.updateTitle(curSong.title)
+                mControllerView.setState(true)
+            }
         }
     }
 

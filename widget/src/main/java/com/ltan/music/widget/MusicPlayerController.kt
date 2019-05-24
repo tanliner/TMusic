@@ -80,6 +80,10 @@ class MusicPlayerController @JvmOverloads constructor(
         mSummaryTv.text = summary
     }
 
+    fun updateTitle(title: String?) {
+        mTitleTv.text = title
+    }
+
     fun updateSummary(summary: String?) {
         mSummaryTv.text = summary
     }

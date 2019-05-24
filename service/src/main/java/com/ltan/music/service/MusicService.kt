@@ -148,6 +148,10 @@ class MusicService : Service() {
 
         fun setCallback(cb: IPlayerCallback) {
             mUICallback = cb
+            if (isPlaying) {
+                mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
+                mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
+            }
         }
 
         fun getCurrentSong(): SongPlaying {

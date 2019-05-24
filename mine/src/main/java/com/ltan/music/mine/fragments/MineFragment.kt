@@ -71,6 +71,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     private var mServiceConn = PlayerConnection()
     private var mMusicBinder: MusicService.MyBinder? = null
 
+    private var mPlayerCallback: PlayerCallbackImpl? = null
+
     override fun initLayout(): Int {
         return R.layout.mine_fragment
     }
@@ -124,9 +126,15 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     override fun onResume() {
         super.onResume()
         if(mMusicBinder != null) {
-            mControllerView.updateViewState()
             val curSong = mMusicBinder!!.getCurrentSong()
-            mControllerView.updateDisplay(curSong.title, curSong.subtitle)
+            if(mMusicBinder!!.isPlaying) {
+                mControllerView.updateTitle(curSong.title)
+                mPlayerCallback?.let { mMusicBinder!!.setCallback(it) }
+                mControllerView.setState(true)
+            } else {
+                mControllerView.setState(false)
+                mControllerView.updateDisplay(curSong.title, curSong.subtitle)
+            }
         }
     }
 
@@ -325,7 +333,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             MusicLog.i(TAG, "service connected...")
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
-            mMusicBinder?.setCallback(PlayerCallbackImpl(mControllerView))
+            mPlayerCallback = PlayerCallbackImpl(mControllerView)
+            mMusicBinder?.setCallback(mPlayerCallback!!)
             mControllerView.setPlayer(binder)
         }
     }

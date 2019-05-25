@@ -154,7 +154,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             ToastUtil.showToastShort(getString(R.string.mine_song_list_failed))
             return
         }
-        MusicLog.w(TAG, "data is: $data")
+        MusicLog.d(TAG, "data is: $data")
         mArtistCount = data.artistCount
         mCreatedSongListCount = data.createdPlaylistCount
         mSubSongListCount = data.subPlaylistCount

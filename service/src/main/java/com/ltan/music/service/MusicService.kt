@@ -10,13 +10,11 @@ import android.os.IBinder
 import android.widget.MediaController
 import com.ltan.music.business.api.ApiProxy
 import com.ltan.music.business.api.NormalSubscriber
-import com.ltan.music.common.*
-import io.reactivex.Flowable
+import com.ltan.music.common.LyricsObj
+import com.ltan.music.common.LyricsUtil
+import com.ltan.music.common.MusicLog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
 
 /**
  * TMusic.com.ltan.music.service
@@ -43,16 +41,8 @@ class MusicService : Service() {
         fun onPause()
         fun onCompleted(song: SongPlaying)
         fun onBufferUpdated(per: Int)
-        fun updateLyric(txt: String?)
-    }
-
-    interface ILyricsApi {
-        @FormUrlEncoded
-        @POST(ApiConstants.SONG_LYRICS)
-        fun getLyrics(
-            @Field("id") id: String,
-            @Field(ApiConstants.CRYPTO_KEY) api: String = ApiConstants.CRYPTO_LINUX_API
-            ): Flowable<LyricsRsp>
+        fun updateLyric(title: String?, txt: String?)
+        fun onPicUrl(url: String?)
     }
 
     private lateinit var mediaPlayer: MediaPlayer
@@ -86,7 +76,8 @@ class MusicService : Service() {
         private lateinit var mPlayer: MediaPlayer
 
         private var mBufferPercent = 0
-        private lateinit var mCurrentSong: SongPlaying
+        // keep the one item
+        private val mCurrentSong: SongPlaying
         private lateinit var mLyricsUpdater: Handler
         private var mUpdateThread: HandlerThread = HandlerThread("MusicService/MyBinder")
         private var mLyrics: LyricsObj? = null
@@ -96,11 +87,11 @@ class MusicService : Service() {
         init {
             mUpdateThread.start()
             mCallbacks = ArrayList()
+            mCurrentSong = SongPlaying(url = "")
         }
 
         fun init(player: MediaPlayer) {
             this.mPlayer = player
-            mCurrentSong = SongPlaying(url = "")
             player.setOnBufferingUpdateListener { mp, percent ->
                 mBufferPercent = percent
                 onCallBackBuffer(percent)
@@ -114,9 +105,13 @@ class MusicService : Service() {
                 mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
             }
             mLyricsUpdater = Handler(mUpdateThread.looper, Handler.Callback { msg ->
-                when(msg?.what) {
-                    MSG_UPDATE_LYRIC -> { updateCallbackLyric(mLyrics) }
-                    else -> { false }
+                when (msg?.what) {
+                    MSG_UPDATE_LYRIC -> {
+                        updateCallbackLyric(mLyrics)
+                    }
+                    else -> {
+                        false
+                    }
                 }
             })
         }
@@ -135,6 +130,7 @@ class MusicService : Service() {
                 mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
                 mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
             }
+            cb.onPicUrl(mCurrentSong.picUrl)
         }
 
         fun removeCallback(cb: IPlayerCallback) {
@@ -146,7 +142,6 @@ class MusicService : Service() {
         }
 
         fun play(song: SongPlaying) {
-            mCurrentSong = song
             play(song.url)
             queryLyric(song)
         }
@@ -166,7 +161,7 @@ class MusicService : Service() {
         }
 
         private fun queryLyric(song: SongPlaying) {
-            ApiProxy.instance.getApi(ILyricsApi::class.java).getLyrics(song.id.toString())
+            ApiProxy.instance.getApi(IMusicServiceApi::class.java).getLyrics(song.id.toString())
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .map { rsp ->
@@ -191,17 +186,17 @@ class MusicService : Service() {
          * {@link queryLyric(int)}
          */
         private fun updateCallbackLyric(lyricsObj: LyricsObj?): Boolean {
-            if(lyricsObj == null || lyricsObj.songTexts.isNullOrEmpty()) {
+            if (lyricsObj == null || lyricsObj.songTexts.isNullOrEmpty()) {
                 return false
             }
             val curPos = currentPosition
             val lyricPosition = LyricsUtil.getCurrentSongLine(lyricsObj, curPos)
-            if(lyricPosition.nextDur == 0L && curPos > MSG_UPDATE_GAP) {
+            if (lyricPosition.nextDur == 0L && curPos > MSG_UPDATE_GAP) {
                 return false
             }
-            val msgDelay: Long = if (lyricPosition.nextDur > MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
-            MusicLog.i(TAG, "$lyricPosition, callback size is: ${mCallbacks.size}")
-            onCallBackUpdateLyric(lyricPosition.txt)
+            val msgDelay: Long =
+                if (lyricPosition.nextDur >= MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
+            onCallBackUpdateLyric(mCurrentSong.title, lyricPosition.txt)
 
             val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
             mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
@@ -214,9 +209,9 @@ class MusicService : Service() {
             }
         }
 
-        private fun onCallBackUpdateLyric(lyricTxt: String?) {
+        private fun onCallBackUpdateLyric(title: String?, lyricTxt: String?) {
             mCallbacks.forEach {
-                it.updateLyric(lyricTxt)
+                it.updateLyric(title, lyricTxt)
             }
         }
 
@@ -225,6 +220,7 @@ class MusicService : Service() {
                 it.onCompleted(mCurrentSong)
             }
         }
+
         private fun onCallBackStart() {
             mCallbacks.forEach {
                 it.onStart()

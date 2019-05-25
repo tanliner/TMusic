@@ -24,7 +24,6 @@ import com.ltan.music.mine.beans.Track
 import com.ltan.music.mine.contract.ISongListContract
 import com.ltan.music.mine.presenter.SongListPresenter
 import com.ltan.music.service.MusicService
-import com.ltan.music.service.SongPlaying
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.MusicPlayerController
@@ -175,11 +174,14 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
                 songItem?.let { setCurrentSong(it) }
                 mCurrentSong.songUrl = songs[i].url
                 mCurrentSong.songUrl?.let { url ->
-                    val song = SongPlaying(url = url)
-                    songItem?.let { song.id = it.songId }
-                    song.title = getCurTitle()
-                    song.subtitle = getCurSubtitle()
-                    mMusicBinder?.play(song)
+                    if(mMusicBinder != null) {
+                        val song = mMusicBinder!!.getCurrentSong()
+                        songItem?.let { song.id = it.songId }
+                        song.title = getCurTitle()
+                        song.url = url
+                        song.subtitle = getCurSubtitle()
+                        mMusicBinder?.play(song)
+                    }
                 }
             }
         }
@@ -239,9 +241,10 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         if(song.al == null) {
             return
         }
+        mMusicBinder?.let { it.getCurrentSong().picUrl = song.al.picUrl }
         Glide.with(this)
             .load(song.al.picUrl)
-            .error(PlayListItemPreview.ALBUM_EMG)
+            .error(PlayListItemPreview.ERROR_IMG)
             .placeholder(PlayListItemPreview.PLACEHOLDER_IMG)
             .into(mControllerView.mPreviewIv)
     }
@@ -288,9 +291,14 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
                 return
             }
             val ids: LongArray = arrayOf(itemObject.songId).toLongArray()
-            querySongDetail(buildArgs(ids), buildCollectors(ids))
-            if(mCurrentSongDetail != null) {
-                updateControlPreview(mCurrentSongDetail!!)
+
+            mCurrentSongDetail?.id.let {
+                if(it != itemObject.songId) {
+                    querySongDetail(buildArgs(ids), buildCollectors(ids))
+                } else {
+                    // click the same item
+                    updateControlPreview(mCurrentSongDetail!!)
+                }
             }
 
             val url = itemObject.songUrl
@@ -299,8 +307,9 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
                 querySongUrls(buildArgs(ids))
             } else {
                 mCurrentSong.songId = -1
-                val song = SongPlaying(url = url)
+                val song = mMusicBinder!!.getCurrentSong()
                 song.id = itemObject.songId
+                song.url = url
                 song.title = getCurTitle()
                 song.subtitle = getCurSubtitle()
                 mMusicBinder?.play(song)

@@ -68,6 +68,10 @@ class MusicPlayerController @JvmOverloads constructor(
         setState(mPlayer!!.isPlaying)
     }
 
+    fun getTitle(): String {
+        return mTitleTv.text.toString()
+    }
+
     fun updateViewState() {
         if(mPlayer == null) {
             return

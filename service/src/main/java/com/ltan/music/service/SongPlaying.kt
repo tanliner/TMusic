@@ -14,6 +14,8 @@ package com.ltan.music.service
 data class SongPlaying(
     var id: Long = 0,
     var url: String,
+    // ImageUrl for preview during playing, load image with `Glide`
+    var picUrl: String? = null,
     var title: String? = null,
     var subtitle: String? = null
 )

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:gravity="center_vertical"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/container_circle_bg"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:layout_marginEnd="10dp">
+
+        <ImageView
+                android:layout_width="@dimen/song_list_heart_mode_w"
+                android:layout_height="@dimen/song_list_heart_mode_h"
+                android:src="@drawable/heart_mode"
+                android:contentDescription="@string/app_name" />
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="心动模式" />
+    </LinearLayout>
+</LinearLayout>

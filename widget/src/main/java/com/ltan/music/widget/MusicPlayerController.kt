@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.MediaController
 import android.widget.RelativeLayout
+import android.widget.TextView
 
 /**
  * TMusic.com.ltan.music.widget
@@ -26,6 +27,8 @@ class MusicPlayerController @JvmOverloads constructor(
     private val mPreviewIv: ImageView
     private val mPlayIv: ImageView
     private val mFavoriteIv: ImageView
+    private val mTitleTv: TextView
+    private val mSummaryTv: TextView
 
     init {
         val inflater = LayoutInflater.from(context)
@@ -33,6 +36,8 @@ class MusicPlayerController @JvmOverloads constructor(
         mPreviewIv = findViewById(R.id.iv_player_controller_preview)
         mPlayIv = findViewById(R.id.iv_player_controller_play)
         mFavoriteIv = findViewById(R.id.iv_player_controller_favorite)
+        mTitleTv = findViewById(R.id.tv_player_title)
+        mSummaryTv = findViewById(R.id.tv_player_summary)
         setOnClickListener(this)
         mFavoriteIv.setOnClickListener(this)
         mPlayIv.setOnClickListener(this)
@@ -68,6 +73,19 @@ class MusicPlayerController @JvmOverloads constructor(
             return
         }
         setState(mPlayer!!.isPlaying)
+    }
+
+    fun updateDisplay(title: String?, summary: String?) {
+        mTitleTv.text = title
+        mSummaryTv.text = summary
+    }
+
+    fun updateTitle(title: String?) {
+        mTitleTv.text = title
+    }
+
+    fun updateSummary(summary: String?) {
+        mSummaryTv.text = summary
     }
 
     /**

@@ -4,9 +4,20 @@ import android.app.Service
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Binder
+import android.os.Handler
+import android.os.HandlerThread
 import android.os.IBinder
 import android.widget.MediaController
-import com.ltan.music.common.MusicLog
+import com.ltan.music.business.api.ApiProxy
+import com.ltan.music.business.api.NormalSubscriber
+import com.ltan.music.common.*
+import io.reactivex.Flowable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.POST
+
 
 /**
  * TMusic.com.ltan.music.service
@@ -20,6 +31,8 @@ import com.ltan.music.common.MusicLog
 class MusicService : Service() {
     companion object {
         const val TAG = "playService"
+        const val MSG_UPDATE_LYRIC = 0x1001
+        const val MSG_UPDATE_GAP = 1000L
     }
 
     /**
@@ -29,12 +42,23 @@ class MusicService : Service() {
     interface IPlayerCallback {
         fun onStart()
         fun onPause()
-        fun onCompleted()
+        fun onCompleted(song: SongPlaying)
         fun onBufferUpdated(per: Int)
+        fun updateLyric(txt: String?)
+    }
+
+    interface ILyricsApi {
+        @FormUrlEncoded
+        @POST(ApiConstants.SONG_LYRICS)
+        fun getLyrics(
+            @Field("id") id: String,
+            @Field(ApiConstants.CRYPTO_KEY) api: String = ApiConstants.CRYPTO_LINUX_API
+            ): Flowable<LyricsRsp>
     }
 
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var mediaPlayerControl: MediaController.MediaPlayerControl
+    private lateinit var mBinder: MyBinder
 
     override fun onCreate() {
         super.onCreate()
@@ -43,10 +67,10 @@ class MusicService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        val binder = MyBinder(this)
-        binder.init(mediaPlayer)
+        mBinder = MyBinder(this)
+        mBinder.init(mediaPlayer)
         // return MyBinder(this)
-        return binder
+        return mBinder
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -56,31 +80,62 @@ class MusicService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mBinder.stop()
         mediaPlayer.release()
     }
 
     class MyBinder(service: MusicService) : Binder(), MediaController.MediaPlayerControl {
 
         private var musicService: MusicService = service
-        private lateinit var player: MediaPlayer
+        private lateinit var mPlayer: MediaPlayer
 
-        private var bufferPercent = 0
-        private var callback: IPlayerCallback? = null
+        private var mBufferPercent = 0
+        private var mUICallback: IPlayerCallback? = null
+        private lateinit var mCurrentSong: SongPlaying
+        private lateinit var mLyricsUpdater: Handler
+        private var mUpdateThread: HandlerThread = HandlerThread("BinderHandlerThread")
+        private var mLyrics: LyricsObj? = null
+        init {
+            mUpdateThread.start()
+        }
 
         fun init(player: MediaPlayer) {
-            this.player = player
+            this.mPlayer = player
+            mCurrentSong = SongPlaying(url = "")
             player.setOnBufferingUpdateListener { mp, percent ->
-                bufferPercent = percent
-                callback?.onBufferUpdated(percent)
-                MusicLog.d(TAG, "buffer percent.... $bufferPercent")
+                mBufferPercent = percent
+                mUICallback?.onBufferUpdated(percent)
+                MusicLog.d(TAG, "buffer percent.... $mBufferPercent")
             }
             player.setOnPreparedListener {
                 start()
             }
             player.setOnCompletionListener {
                 MusicLog.d(TAG, "play completed")
-                callback?.onCompleted()
+                mUICallback?.onCompleted(mCurrentSong)
+                mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
             }
+            mLyricsUpdater = Handler(mUpdateThread.looper, Handler.Callback { msg ->
+                when(msg?.what) {
+                    MSG_UPDATE_LYRIC -> {
+                        val curPos = currentPosition
+                        mLyrics?.let {
+                            val lyricPosition = LyricsUtil.getCurrentSongLine(it, curPos)
+                            if(lyricPosition.nextDur == 0L && curPos > MSG_UPDATE_GAP) {
+                                return@let
+                            }
+                            val msgDelay: Long = if (lyricPosition.nextDur > MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
+                            MusicLog.i(TAG, "$lyricPosition, currentPos: $curPos, next time is: $msgDelay, callback is: $mUICallback")
+                            mUICallback?.updateLyric(lyricPosition.txt)
+
+                            val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
+                            mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
+                        }
+                        true
+                    }
+                    else -> { false }
+                }
+            })
         }
 
         fun getService(): MusicService {
@@ -92,18 +147,56 @@ class MusicService : Service() {
         }
 
         fun setCallback(cb: IPlayerCallback) {
-            callback = cb
+            mUICallback = cb
+            if (isPlaying) {
+                mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
+                mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
+            }
         }
 
-        fun play(songUrl: String) {
-            player.reset()
-            player.setDataSource(songUrl)
-            player.prepare()
+        fun getCurrentSong(): SongPlaying {
+            return mCurrentSong
+        }
+
+        fun play(song: SongPlaying) {
+            mCurrentSong = song
+            play(song.url)
+            ApiProxy.instance.getApi(ILyricsApi::class.java).getLyrics(song.id.toString())
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .map { rsp ->
+                    if (rsp.lrc == null) {
+                        LyricsObj()
+                    }
+                    LyricsUtil.parseLyricsInfo(rsp.lrc?.lyric)
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .safeSubscribe(object : NormalSubscriber<LyricsObj>() {
+                    override fun onNext(t: LyricsObj?) {
+                        MusicLog.d(TAG, " object song t: \t$t")
+                        mLyrics = t
+                        mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
+                        mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
+                    }
+                })
+
+        }
+
+        private fun play(songUrl: String) {
+            mPlayer.reset()
+            mPlayer.setDataSource(songUrl)
+            mPlayer.prepare()
             // start()
         }
 
+        fun stop() {
+            mPlayer.stop()
+            mPlayer.reset()
+            mUpdateThread.quitSafely()
+        }
+
         override fun isPlaying(): Boolean {
-            return player.isPlaying
+            return mPlayer.isPlaying
         }
 
         override fun canSeekForward(): Boolean {
@@ -111,24 +204,25 @@ class MusicService : Service() {
         }
 
         override fun getDuration(): Int {
-            return player.duration
+            return mPlayer.duration
         }
 
         override fun pause() {
-            player.pause()
-            callback?.onPause()
+            mPlayer.pause()
+            mUICallback?.onPause()
+            mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
         }
 
         override fun getBufferPercentage(): Int {
-            return bufferPercent
+            return mBufferPercent
         }
 
         override fun seekTo(pos: Int) {
-            player.seekTo(pos)
+            mPlayer.seekTo(pos)
         }
 
         override fun getCurrentPosition(): Int {
-            return player.currentPosition
+            return mPlayer.currentPosition
         }
 
         override fun canSeekBackward(): Boolean {
@@ -136,12 +230,14 @@ class MusicService : Service() {
         }
 
         override fun start() {
-            player.start()
-            callback?.onStart()
+            mPlayer.start()
+            mUICallback?.onStart()
+            mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
+            mLyricsUpdater.sendEmptyMessage(MSG_UPDATE_LYRIC)
         }
 
         override fun getAudioSessionId(): Int {
-            return player.audioSessionId
+            return mPlayer.audioSessionId
         }
 
         override fun canPause(): Boolean {

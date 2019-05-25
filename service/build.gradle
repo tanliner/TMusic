@@ -4,6 +4,7 @@ dependencies {
     implementation deps.support.app_compat
 
     implementation project(path: ':common')
+    implementation project(path: ':business')
 
     testImplementation deps.junit
     androidTestImplementation deps.test.runner

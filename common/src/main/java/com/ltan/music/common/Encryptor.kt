@@ -1,5 +1,6 @@
 package com.ltan.music.common
 
+import android.annotation.SuppressLint
 import android.util.Base64
 import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
@@ -34,8 +35,10 @@ object Encryptor {
     const val ENCRYPT_TYPE_DEF = ENCRYPT_TYPE_BASE64
 
     val KEY = "0CoJUm6Qyw8W8jud".toByteArray()
+    val LINUX_API_KEY = "rFgB&h#%2?^eDg:Q".toByteArray()
     private val ivx = "0102030405060708".toByteArray()
     private const val TRANSFORMATION = "AES/CBC/PKCS5Padding"
+    private const val TRANSFORMATION_ECB = "AES/ECB/PKCS5Padding" // equipment PKCS1
     // encrypt/algorithm/padding [ref-jianshu](https://juejin.im/post/5be103685188255e9b617dd7)
     // "RSA/ECB/PKCS1Padding" // or padding 0 by yourself
     private const val RSA_TRANSFORMATION = "RSA/None/NoPadding"      // system inject 0 default
@@ -73,6 +76,22 @@ object Encryptor {
         val dstBuff = cipher.doFinal(msgByteArray)
 
         return Base64.encodeToString(dstBuff, Base64.NO_WRAP)
+    }
+
+    @JvmStatic
+    fun encryptLinuxApi(msg: String, seckey: ByteArray): String {
+        return encryptLinuxApi(msg.toByteArray(), seckey)
+    }
+    @SuppressLint("GetInstance")
+    @JvmStatic
+    fun encryptLinuxApi(msgByteArray: ByteArray, secKey: ByteArray): String {
+        val skeySpec = SecretKeySpec(secKey, "AES")
+        val cipher = Cipher.getInstance(TRANSFORMATION_ECB)
+
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec)
+        val dstBuff = cipher.doFinal(msgByteArray)
+
+        return byteArrayToHexString(dstBuff, true)
     }
 
     @Throws(
@@ -170,10 +189,11 @@ object Encryptor {
     }
 
     @JvmStatic
-    fun byteArrayToHexString(bytes: ByteArray): String {
+    fun byteArrayToHexString(bytes: ByteArray, upperCase: Boolean = false): String {
         val hexStr = StringBuilder(bytes.size * 2)
+        val pattern = if (upperCase) "%02X" else "%02x"
         for (b in bytes) {
-            hexStr.append(String.format("%02x", b))
+            hexStr.append(String.format(pattern, b))
         }
         return hexStr.toString()
     }

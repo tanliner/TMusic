@@ -71,6 +71,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     private var mServiceConn = PlayerConnection()
     private var mMusicBinder: MusicService.MyBinder? = null
 
+    private var mPlayerCallback: PlayerCallbackImpl? = null
+
     override fun initLayout(): Int {
         return R.layout.mine_fragment
     }
@@ -124,7 +126,15 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     override fun onResume() {
         super.onResume()
         if(mMusicBinder != null) {
-            mControllerView.updateViewState()
+            val curSong = mMusicBinder!!.getCurrentSong()
+            if(mMusicBinder!!.isPlaying) {
+                mControllerView.updateTitle(curSong.title)
+                mPlayerCallback?.let { mMusicBinder!!.setCallback(it) }
+                mControllerView.setState(true)
+            } else {
+                mControllerView.setState(false)
+                mControllerView.updateDisplay(curSong.title, curSong.subtitle)
+            }
         }
     }
 
@@ -164,7 +174,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             mCreatedCategory.add(item)
         }
         if(mCreatedSongListCount > 0) {
-            mCreatedCategory[0].isHeartMode = true;
+            mCreatedCategory[0].isHeartMode = true
         }
         // category subscribed
         for (i in mCreatedSongListCount until data.size) {
@@ -306,6 +316,13 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         private val items: MutableList<Any>
     ) : ListItemClickListener {
         override fun onItemClick(position: Int, v: View, type: ClickType) {
+            if (type == ClickType.ITEM) {
+                itemClick(position, v)
+            } else {
+                ToastUtil.showToastShort("$type")
+            }
+        }
+        private fun itemClick(position: Int, view: View) {
             val item = items[position] as SongListItemObject
             MusicLog.d(TAG, "SongListClickListener/ item=$item")
             val intent = Intent(frag.context, SongListActivity::class.java)
@@ -323,7 +340,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             MusicLog.i(TAG, "service connected...")
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
-            mMusicBinder?.setCallback(PlayerCallbackImpl(mControllerView))
+            mPlayerCallback = PlayerCallbackImpl(mControllerView)
+            mMusicBinder?.setCallback(mPlayerCallback!!)
             mControllerView.setPlayer(binder)
         }
     }

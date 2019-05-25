@@ -5,11 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.ltan.music.mine.SongListItemObject
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.ListItemViewClickListener
 import com.ltan.music.widget.SongListItem
+import com.ltan.music.widget.constants.PlayListItemPreview
 import me.drakeet.multitype.ItemViewBinder
 
 /**
@@ -28,11 +30,19 @@ class SongListItemBinder(context: Context) : ItemViewBinder<SongListItemObject, 
 
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {
         // viewClick = ItemClick(itemClick, null)
-        return ViewHolder(SongListItem(ctx))
+        return ViewHolder(SongListItem(inflater.context))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, item: SongListItemObject) {
-        holder.item.setPreview(ctx.getDrawable(item.imgId))
+        if(item.imgId > 0) {
+            holder.item.setPreview(ctx.getDrawable(item.imgId))
+        } else {
+            Glide.with(ctx)
+                .load(item.imgUrl)
+                .error(PlayListItemPreview.ERROR_IMG)
+                .placeholder(PlayListItemPreview.PLACEHOLDER_IMG)
+                .into(holder.item.mPrevImgIv)
+        }
         holder.item.setName(item.title)
         holder.item.setCount(item.count)
         holder.item.setHeartMode(item.isHeartMode)

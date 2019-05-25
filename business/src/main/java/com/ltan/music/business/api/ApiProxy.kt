@@ -37,8 +37,8 @@ class ApiProxy private constructor() {
         private val TAG = ApiProxy::class.java.simpleName
         private val TYPE = arrayOf(ReqAgents.UA_TYPE_PC, ReqAgents.UA_TYPE_MOBILE)
 
-        const val BASE_URL = "https://music.163.com/"
-        const val LINUX_API_REQ_URL = "https://music.163.com/api/linux/forward" // http request params will be put in while request LinuxAPi
+        const val BASE_URL = ApiConstants.BASE_URL
+        const val LINUX_API_REQ_URL = ApiConstants.LINUX_API_BASE_URL // http request params will be put in while request LinuxAPi
         const val HEADER_INIT = "_ga=GA1.1.1970532667.1556805403; os=pc"
         const val HEADER_COOKIE = "Cookie"
         const val HEADER_SET_COOKIE = "Set-Cookie"
@@ -268,7 +268,6 @@ class ApiProxy private constructor() {
                 MusicLog.v(TAG, "params json string: $json")
             }
             return encryptParam(request, json)
-
         }
 
         private fun encryptParam(request: Request, json: JsonObject): Request {
@@ -317,7 +316,7 @@ class ApiProxy private constructor() {
             encryptJson.addProperty("method", request.method())
             encryptJson.addProperty("url", url)
             encryptJson.add("params", json) // just add Json Element, do not use the method toString
-            MusicLog.v(TAG, "encryptParamLinuxAPi orjson: $json enJson: $encryptJson")
+            MusicLog.v(TAG, "encryptJson: $encryptJson")
             val paramsTxt = Encryptor.encryptLinuxApi(encryptJson.toString(), Encryptor.LINUX_API_KEY)
 
             val builder = FormBody.Builder()

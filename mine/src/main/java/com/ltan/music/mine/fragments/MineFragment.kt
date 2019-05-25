@@ -84,7 +84,6 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mPresenter.subcount()
-        AccountUtil.getAccountInfo()?.let { mPresenter.getPlayList(it.id) }
         init()
     }
 
@@ -127,14 +126,21 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         super.onResume()
         if(mMusicBinder != null) {
             val curSong = mMusicBinder!!.getCurrentSong()
+            mPlayerCallback?.let { mMusicBinder!!.addCallback(it) }
             if(mMusicBinder!!.isPlaying) {
                 mControllerView.updateTitle(curSong.title)
-                mPlayerCallback?.let { mMusicBinder!!.setCallback(it) }
                 mControllerView.setState(true)
             } else {
                 mControllerView.setState(false)
                 mControllerView.updateDisplay(curSong.title, curSong.subtitle)
             }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if(mMusicBinder != null) {
+            mPlayerCallback?.let { mMusicBinder!!.removeCallback(it) }
         }
     }
 
@@ -158,6 +164,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mSongCategoryList[1].count = data.subPlaylistCount
         mMultiAdapter.notifyDataSetChanged()
         // mMultiAdapter.notifyItemRangeChanged(5, 4)
+        AccountUtil.getAccountInfo()?.let { mPresenter.getPlayList(it.id) }
     }
 
     override fun onPlayList(data: List<PlayList>?) {
@@ -170,7 +177,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
 
         // category created
         for (i in 0 until min(mCreatedSongListCount, data.size)) {
-            val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
+            val playItem = data[i]
+            val item = SongListItemObject(playItem.id, 0, playItem.coverImgUrl, playItem.name, playItem.trackCount)
             mCreatedCategory.add(item)
         }
         if(mCreatedSongListCount > 0) {
@@ -178,7 +186,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         }
         // category subscribed
         for (i in mCreatedSongListCount until data.size) {
-            val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
+            val playItem = data[i]
+            val item = SongListItemObject(playItem.id, 0, playItem.coverImgUrl, playItem.name, playItem.trackCount)
             mSubCategory.add(item)
         }
         var favoriteOffset = CATEGORY_LIST_INDEX + 1
@@ -341,7 +350,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
             mPlayerCallback = PlayerCallbackImpl(mControllerView)
-            mMusicBinder?.setCallback(mPlayerCallback!!)
+            mMusicBinder?.addCallback(mPlayerCallback!!)
             mControllerView.setPlayer(binder)
         }
     }

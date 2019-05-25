@@ -1,5 +1,6 @@
 package com.ltan.music.mine
 
+import com.bumptech.glide.Glide
 import com.ltan.music.common.MusicLog
 import com.ltan.music.service.MusicService
 import com.ltan.music.service.SongPlaying
@@ -40,10 +41,19 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
     /**
      * call on sub thread
      */
-    override fun updateLyric(txt: String?) {
+    override fun updateLyric(title: String?, txt: String?) {
         if(txt.isNullOrEmpty()) {
             return
         }
+        if(title != controller.getTitle()) {
+            controller.post { controller.updateTitle(title) }
+        }
         controller.post { controller.updateSummary(txt) }
+    }
+
+    override fun onPicUrl(url: String?) {
+        Glide.with(controller.context)
+            .load(url)
+            .into(controller.mPreviewIv)
     }
 }

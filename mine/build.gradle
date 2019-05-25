@@ -5,6 +5,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation deps.support.app_compat
+    implementation deps.glide.runtime
+    annotationProcessor deps.glide.compiler
 
     implementation project(path: ':business')
     implementation project(path: ':service')

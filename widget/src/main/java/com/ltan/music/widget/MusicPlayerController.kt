@@ -24,7 +24,7 @@ class MusicPlayerController @JvmOverloads constructor(
 
     private var mPlayer: MediaController.MediaPlayerControl? = null
 
-    private val mPreviewIv: ImageView
+    val mPreviewIv: ImageView
     private val mPlayIv: ImageView
     private val mFavoriteIv: ImageView
     private val mTitleTv: TextView
@@ -66,6 +66,10 @@ class MusicPlayerController @JvmOverloads constructor(
             onPlay()
         }
         setState(mPlayer!!.isPlaying)
+    }
+
+    fun getTitle(): String {
+        return mTitleTv.text.toString()
     }
 
     fun updateViewState() {

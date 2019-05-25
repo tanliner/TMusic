@@ -108,18 +108,29 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         mPresenter.getPlayListDetail(mSongListId)
     }
 
-    private fun querySongUrls() {
+    /**
+     * to query the song url when song list is updated
+     * [count] how many mp3 you want to load
+     */
+    private fun querySongUrls(count: Int) {
         if (mRcyItems.size > mHeaderSize) {
             val idsBuilder = StringBuilder()
             idsBuilder.append('[')
-            for (i in mHeaderSize until min(mRcyItems.size - mFootererSize, 5)) {
+            for (i in mHeaderSize until min(mRcyItems.size - mFootererSize, count)) {
                 val songItemObject = mRcyItems[i] as SongItemObject
                 idsBuilder.append(songItemObject.songId).append(',')
             }
             idsBuilder.deleteCharAt(idsBuilder.length - 1)
             idsBuilder.append(']')
-            mPresenter.getSongUrl(idsBuilder.toString())
+            querySongUrls(idsBuilder.toString())
         }
+    }
+
+    /**
+     * query all song urls, [ids] should me [10023, 200123, 302393, ...]
+     */
+    private fun querySongUrls(ids: String) {
+        mPresenter.getSongUrl(ids)
     }
 
     override fun onPlayListDetail(data: PlayListDetailRsp?) {
@@ -142,7 +153,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             }
         }
         mRcyAdapter.notifyDataSetChanged()
-        querySongUrls()
+        // querySongUrls(5)
     }
 
     override fun onSongUrl(songs: List<SongUrl>?) {
@@ -166,6 +177,16 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mMusicBinder?.addCallback(mServiceConn.callback)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mMusicBinder?.removeCallback(mServiceConn.callback)
     }
 
     private fun buildSubtitle(tracks: Tracks): String {
@@ -204,7 +225,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     }
 
     inner class SongItemClick : ListItemClickListener {
-        val TAG = "SongItemClick"
+        private val TAG = "SongListAci/SongItemClick"
 
         override fun onItemClick(position: Int, v: View, type: ClickType) {
             MusicLog.d(TAG, "item click $position $v $type")
@@ -212,14 +233,14 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             setCurrentSong(itemObject)
             mControllerView.updateDisplay(itemObject.title, itemObject.subTitle)
             if(mMusicBinder == null) {
-                MusicLog.w(TAG, "service bind error")
+                MusicLog.e(TAG, "service bind error")
                 return
             }
 
             val url = itemObject.songUrl
             if(url.isNullOrEmpty()) {
                 mCurrentSong.songId = itemObject.songId
-                mPresenter.getSongUrl(buildArgs(mCurrentSong.songId))
+                querySongUrls(buildArgs(mCurrentSong.songId))
             } else {
                 mCurrentSong.songId = -1
                 val song = SongPlaying(url = url)
@@ -236,6 +257,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     }
 
     inner class PlayerConnection : ServiceConnection {
+        lateinit var callback: PlayerCallbackImpl
         override fun onServiceDisconnected(name: ComponentName?) {
             mMusicBinder = null
         }
@@ -244,7 +266,8 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             MusicLog.i(TAG, "service connected...")
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
-            mMusicBinder?.setCallback(PlayerCallbackImpl(mControllerView))
+            callback = PlayerCallbackImpl(mControllerView)
+            mMusicBinder?.addCallback(callback)
             mControllerView.setPlayer(binder)
 
             val curSong = binder.getCurrentSong()

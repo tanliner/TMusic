@@ -18,7 +18,6 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-
 /**
  * TMusic.com.ltan.music.service
  *
@@ -30,7 +29,7 @@ import retrofit2.http.POST
  */
 class MusicService : Service() {
     companion object {
-        const val TAG = "playService"
+        const val TAG = "MusicService"
         const val MSG_UPDATE_LYRIC = 0x1001
         const val MSG_UPDATE_GAP = 1000L
     }
@@ -57,24 +56,21 @@ class MusicService : Service() {
     }
 
     private lateinit var mediaPlayer: MediaPlayer
-    private lateinit var mediaPlayerControl: MediaController.MediaPlayerControl
     private lateinit var mBinder: MyBinder
 
     override fun onCreate() {
         super.onCreate()
         mediaPlayer = MediaPlayer()
-        // mediaPlayerControl = MediaController()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         mBinder = MyBinder(this)
         mBinder.init(mediaPlayer)
-        // return MyBinder(this)
         return mBinder
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        MusicLog.d(TAG, "onStartCommand--- $intent")
+        MusicLog.d(TAG, "onStartCommand intent: $intent")
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -90,13 +86,16 @@ class MusicService : Service() {
         private lateinit var mPlayer: MediaPlayer
 
         private var mBufferPercent = 0
-        private var mUICallback: IPlayerCallback? = null
         private lateinit var mCurrentSong: SongPlaying
         private lateinit var mLyricsUpdater: Handler
-        private var mUpdateThread: HandlerThread = HandlerThread("BinderHandlerThread")
+        private var mUpdateThread: HandlerThread = HandlerThread("MusicService/MyBinder")
         private var mLyrics: LyricsObj? = null
+
+        private val mCallbacks: ArrayList<IPlayerCallback>
+
         init {
             mUpdateThread.start()
+            mCallbacks = ArrayList()
         }
 
         fun init(player: MediaPlayer) {
@@ -104,35 +103,19 @@ class MusicService : Service() {
             mCurrentSong = SongPlaying(url = "")
             player.setOnBufferingUpdateListener { mp, percent ->
                 mBufferPercent = percent
-                mUICallback?.onBufferUpdated(percent)
+                onCallBackBuffer(percent)
                 MusicLog.d(TAG, "buffer percent.... $mBufferPercent")
             }
             player.setOnPreparedListener {
                 start()
             }
             player.setOnCompletionListener {
-                MusicLog.d(TAG, "play completed")
-                mUICallback?.onCompleted(mCurrentSong)
+                onCallBackComplete(mCurrentSong)
                 mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
             }
             mLyricsUpdater = Handler(mUpdateThread.looper, Handler.Callback { msg ->
                 when(msg?.what) {
-                    MSG_UPDATE_LYRIC -> {
-                        val curPos = currentPosition
-                        mLyrics?.let {
-                            val lyricPosition = LyricsUtil.getCurrentSongLine(it, curPos)
-                            if(lyricPosition.nextDur == 0L && curPos > MSG_UPDATE_GAP) {
-                                return@let
-                            }
-                            val msgDelay: Long = if (lyricPosition.nextDur > MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
-                            MusicLog.i(TAG, "$lyricPosition, currentPos: $curPos, next time is: $msgDelay, callback is: $mUICallback")
-                            mUICallback?.updateLyric(lyricPosition.txt)
-
-                            val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
-                            mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
-                        }
-                        true
-                    }
+                    MSG_UPDATE_LYRIC -> { updateCallbackLyric(mLyrics) }
                     else -> { false }
                 }
             })
@@ -146,12 +129,16 @@ class MusicService : Service() {
             // start()
         }
 
-        fun setCallback(cb: IPlayerCallback) {
-            mUICallback = cb
+        fun addCallback(cb: IPlayerCallback) {
+            mCallbacks.add(cb)
             if (isPlaying) {
                 mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
                 mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
             }
+        }
+
+        fun removeCallback(cb: IPlayerCallback) {
+            mCallbacks.remove(cb)
         }
 
         fun getCurrentSong(): SongPlaying {
@@ -161,25 +148,7 @@ class MusicService : Service() {
         fun play(song: SongPlaying) {
             mCurrentSong = song
             play(song.url)
-            ApiProxy.instance.getApi(ILyricsApi::class.java).getLyrics(song.id.toString())
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .map { rsp ->
-                    if (rsp.lrc == null) {
-                        LyricsObj()
-                    }
-                    LyricsUtil.parseLyricsInfo(rsp.lrc?.lyric)
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .safeSubscribe(object : NormalSubscriber<LyricsObj>() {
-                    override fun onNext(t: LyricsObj?) {
-                        MusicLog.d(TAG, " object song t: \t$t")
-                        mLyrics = t
-                        mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
-                        mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
-                    }
-                })
-
+            queryLyric(song)
         }
 
         private fun play(songUrl: String) {
@@ -193,6 +162,79 @@ class MusicService : Service() {
             mPlayer.stop()
             mPlayer.reset()
             mUpdateThread.quitSafely()
+            mCallbacks.clear()
+        }
+
+        private fun queryLyric(song: SongPlaying) {
+            ApiProxy.instance.getApi(ILyricsApi::class.java).getLyrics(song.id.toString())
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .map { rsp ->
+                    if (rsp.lrc == null) {
+                        LyricsObj()
+                    }
+                    LyricsUtil.parseLyricsInfo(rsp.lrc?.lyric)
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .safeSubscribe(object : NormalSubscriber<LyricsObj>() {
+                    override fun onNext(t: LyricsObj?) {
+                        MusicLog.d(MusicService.TAG, "lyric of ${song.title}: $t")
+                        mLyrics = t
+                        mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
+                        mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
+                    }
+                })
+        }
+
+        /**
+         * will send a delay msg {@link MusicService#MSG_UPDATE_LYRIC} like a loop, until next duration is 0
+         * {@link queryLyric(int)}
+         */
+        private fun updateCallbackLyric(lyricsObj: LyricsObj?): Boolean {
+            if(lyricsObj == null || lyricsObj.songTexts.isNullOrEmpty()) {
+                return false
+            }
+            val curPos = currentPosition
+            val lyricPosition = LyricsUtil.getCurrentSongLine(lyricsObj, curPos)
+            if(lyricPosition.nextDur == 0L && curPos > MSG_UPDATE_GAP) {
+                return false
+            }
+            val msgDelay: Long = if (lyricPosition.nextDur > MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
+            MusicLog.i(TAG, "$lyricPosition, callback size is: ${mCallbacks.size}")
+            onCallBackUpdateLyric(lyricPosition.txt)
+
+            val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
+            mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
+            return true
+        }
+
+        private fun onCallBackBuffer(per: Int) {
+            mCallbacks.forEach {
+                it.onBufferUpdated(per)
+            }
+        }
+
+        private fun onCallBackUpdateLyric(lyricTxt: String?) {
+            mCallbacks.forEach {
+                it.updateLyric(lyricTxt)
+            }
+        }
+
+        private fun onCallBackComplete(curSong: SongPlaying) {
+            mCallbacks.forEach {
+                it.onCompleted(mCurrentSong)
+            }
+        }
+        private fun onCallBackStart() {
+            mCallbacks.forEach {
+                it.onStart()
+            }
+        }
+
+        private fun onCallBackPause() {
+            mCallbacks.forEach {
+                it.onPause()
+            }
         }
 
         override fun isPlaying(): Boolean {
@@ -209,7 +251,7 @@ class MusicService : Service() {
 
         override fun pause() {
             mPlayer.pause()
-            mUICallback?.onPause()
+            onCallBackPause()
             mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
         }
 
@@ -231,7 +273,7 @@ class MusicService : Service() {
 
         override fun start() {
             mPlayer.start()
-            mUICallback?.onStart()
+            onCallBackStart()
             mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
             mLyricsUpdater.sendEmptyMessage(MSG_UPDATE_LYRIC)
         }

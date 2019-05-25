@@ -84,7 +84,6 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mPresenter.subcount()
-        AccountUtil.getAccountInfo()?.let { mPresenter.getPlayList(it.id) }
         init()
     }
 
@@ -127,14 +126,21 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         super.onResume()
         if(mMusicBinder != null) {
             val curSong = mMusicBinder!!.getCurrentSong()
+            mPlayerCallback?.let { mMusicBinder!!.addCallback(it) }
             if(mMusicBinder!!.isPlaying) {
                 mControllerView.updateTitle(curSong.title)
-                mPlayerCallback?.let { mMusicBinder!!.setCallback(it) }
                 mControllerView.setState(true)
             } else {
                 mControllerView.setState(false)
                 mControllerView.updateDisplay(curSong.title, curSong.subtitle)
             }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if(mMusicBinder != null) {
+            mPlayerCallback?.let { mMusicBinder!!.removeCallback(it) }
         }
     }
 
@@ -148,7 +154,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             ToastUtil.showToastShort(getString(R.string.mine_song_list_failed))
             return
         }
-        MusicLog.d(TAG, "data is: $data")
+        MusicLog.w(TAG, "data is: $data")
         mArtistCount = data.artistCount
         mCreatedSongListCount = data.createdPlaylistCount
         mSubSongListCount = data.subPlaylistCount
@@ -158,6 +164,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mSongCategoryList[1].count = data.subPlaylistCount
         mMultiAdapter.notifyDataSetChanged()
         // mMultiAdapter.notifyItemRangeChanged(5, 4)
+        AccountUtil.getAccountInfo()?.let { mPresenter.getPlayList(it.id) }
     }
 
     override fun onPlayList(data: List<PlayList>?) {
@@ -341,7 +348,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
             mPlayerCallback = PlayerCallbackImpl(mControllerView)
-            mMusicBinder?.setCallback(mPlayerCallback!!)
+            mMusicBinder?.addCallback(mPlayerCallback!!)
             mControllerView.setPlayer(binder)
         }
     }

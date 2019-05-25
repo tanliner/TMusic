@@ -268,7 +268,6 @@ class ApiProxy private constructor() {
                 MusicLog.v(TAG, "params json string: $json")
             }
             return encryptParam(request, json)
-
         }
 
         private fun encryptParam(request: Request, json: JsonObject): Request {
@@ -317,7 +316,7 @@ class ApiProxy private constructor() {
             encryptJson.addProperty("method", request.method())
             encryptJson.addProperty("url", url)
             encryptJson.add("params", json) // just add Json Element, do not use the method toString
-            MusicLog.v(TAG, "encryptParamLinuxAPi orjson: $json enJson: $encryptJson")
+            MusicLog.v(TAG, "encryptJson: $encryptJson")
             val paramsTxt = Encryptor.encryptLinuxApi(encryptJson.toString(), Encryptor.LINUX_API_KEY)
 
             val builder = FormBody.Builder()

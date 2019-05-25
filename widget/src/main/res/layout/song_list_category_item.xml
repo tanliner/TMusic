@@ -38,7 +38,7 @@
             android:id="@+id/iv_song_list_category_menu"
             android:layout_width="@dimen/song_list_header_shortcut_w"
             android:layout_height="@dimen/song_list_header_shortcut_h"
-            android:src="@drawable/song_list_item_menu"
+            android:src="@drawable/song_category_item_menu"
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
             android:contentDescription="@string/app_name" />

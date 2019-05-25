@@ -174,7 +174,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             mCreatedCategory.add(item)
         }
         if(mCreatedSongListCount > 0) {
-            mCreatedCategory[0].isHeartMode = true;
+            mCreatedCategory[0].isHeartMode = true
         }
         // category subscribed
         for (i in mCreatedSongListCount until data.size) {
@@ -316,6 +316,13 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         private val items: MutableList<Any>
     ) : ListItemClickListener {
         override fun onItemClick(position: Int, v: View, type: ClickType) {
+            if (type == ClickType.ITEM) {
+                itemClick(position, v)
+            } else {
+                ToastUtil.showToastShort("$type")
+            }
+        }
+        private fun itemClick(position: Int, view: View) {
             val item = items[position] as SongListItemObject
             MusicLog.d(TAG, "SongListClickListener/ item=$item")
             val intent = Intent(frag.context, SongListActivity::class.java)

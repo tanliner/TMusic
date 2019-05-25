@@ -6,12 +6,12 @@
 
     <ImageView
             android:id="@+id/iv_player_controller_preview"
-            android:src="@drawable/def"
+            android:src="@drawable/big_icon_app_default"
             style="@style/MediaPlayerControllerIcon" />
 
     <ImageView
             android:id="@+id/iv_player_controller_favorite"
-            android:src="@drawable/def"
+            android:src="@drawable/song_list_button_black"
             style="@style/MediaPlayerControllerIcon"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true" />
@@ -20,6 +20,8 @@
             android:id="@+id/iv_player_controller_play"
             android:src="@drawable/note_btn_pause_white"
             style="@style/MediaPlayerControllerIcon"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
             android:layout_toStartOf="@id/iv_player_controller_favorite" />
 
     <LinearLayout
@@ -28,7 +30,7 @@
             android:orientation="vertical"
             android:layout_centerVertical="true"
             android:showDividers="middle"
-            android:divider="@drawable/test_controller"
+            android:divider="@drawable/controller_lyric_gap"
             android:layout_toEndOf="@id/iv_player_controller_preview"
             android:layout_toStartOf="@id/iv_player_controller_play">
 

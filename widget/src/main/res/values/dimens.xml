@@ -20,11 +20,19 @@
     <dimen name="song_list_header_name_left_margin">4dp</dimen>
     <dimen name="song_list_header_name_padding_v">8dp</dimen>
     <dimen name="song_list_header_shortcut_w">26dp</dimen>
-    <dimen name="song_list_header_shortcut_h">18dp</dimen>
+    <dimen name="song_list_header_shortcut_h">32dp</dimen>
     <dimen name="song_list_header_shortcut_txt_size">16dp</dimen>
+    <dimen name="song_list_title_txt_size">16dp</dimen>
+    <dimen name="song_list_subtitle_txt_size">12dp</dimen>
+    <dimen name="song_list_title_margin_s">10dp</dimen>
+    <dimen name="song_list_title_margin_t">10dp</dimen>
+    <dimen name="song_list_subtitle_margin_b">10dp</dimen>
+
+    <dimen name="song_list_heart_mode_w">20dp</dimen>
+    <dimen name="song_list_heart_mode_h">20dp</dimen>
 
     <dimen name="song_list_item_height">60dp</dimen>
-    <dimen name="song_list_item_img_size">50dp</dimen>
+    <dimen name="song_list_item_img_size">48dp</dimen>
     <dimen name="song_list_item_left_padding">16dp</dimen>
     <dimen name="song_list_item_right_padding">6dp</dimen>
     <dimen name="song_list_item_name_left_margin">4dp</dimen>
@@ -35,7 +43,7 @@
 
     <dimen name="song_item_subtitle_margin_t">6dp</dimen>
     <dimen name="song_item_number_size">14dp</dimen>
-    <dimen name="song_item_title_size">16dp</dimen>
+    <dimen name="song_item_title_size">14dp</dimen>
     <dimen name="song_item_subtitle_size">12dp</dimen>
 
     <dimen name="list_item_menu_w">32dp</dimen>

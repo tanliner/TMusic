@@ -76,7 +76,7 @@ data class PlayList(
 
     val trackUpdateTime: Long = 0,
 
-    val tracks: List<Tracks>? = null,
+    val tracks: List<Track>? = null,
 
     val updateTime: Long = 0,
 
@@ -147,7 +147,7 @@ data class TrackId(
     val v: Int
 )
 
-data class Tracks(
+data class Track(
     val a: String? = null,
 
     val al: Al? = null,
@@ -174,13 +174,13 @@ data class Tracks(
 
     val ftype: Int = 0,
 
-    val h: H? = null,
+    val h: RateInfo? = null,
 
     val id: Long = 0,
 
-    val l: L? = null,
+    val l: RateInfo? = null,
 
-    val m: M? = null,
+    val m: RateInfo? = null,
 
     val mst: Int = 0,
 
@@ -238,7 +238,7 @@ data class Ar (
     val tns: List<String>? = null
 )
 
-data class H (
+data class RateInfo (
     val br: Long = 0,
 
     val fid: Int = 0,
@@ -281,7 +281,7 @@ data class Privileges (
 
     val flag: Int = 0,
 
-    val id: Int = 0,
+    val id: Long = 0,
 
     val maxbr: Int = 0,
 

@@ -177,7 +177,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
 
         // category created
         for (i in 0 until min(mCreatedSongListCount, data.size)) {
-            val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
+            val playItem = data[i]
+            val item = SongListItemObject(playItem.id, 0, playItem.coverImgUrl, playItem.name, playItem.trackCount)
             mCreatedCategory.add(item)
         }
         if(mCreatedSongListCount > 0) {
@@ -185,7 +186,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         }
         // category subscribed
         for (i in mCreatedSongListCount until data.size) {
-            val item = SongListItemObject(data[i].id, imgId, data[i].name, data[i].trackCount)
+            val playItem = data[i]
+            val item = SongListItemObject(playItem.id, 0, playItem.coverImgUrl, playItem.name, playItem.trackCount)
             mSubCategory.add(item)
         }
         var favoriteOffset = CATEGORY_LIST_INDEX + 1

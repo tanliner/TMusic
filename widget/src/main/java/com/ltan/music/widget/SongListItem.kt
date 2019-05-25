@@ -25,7 +25,7 @@ class SongListItem @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr), View.OnClickListener {
 
-    private var mPrevImgIv: ImageView
+    val mPrevImgIv: ImageView
     private var mItemNameTv: TextView
     private var mCountTv: TextView
     private var mHeartModeLl: LinearLayout? = null
@@ -61,6 +61,10 @@ class SongListItem @JvmOverloads constructor(
 
     fun setPreview(preview: Drawable?) {
         mPrevImgIv.setImageDrawable(preview)
+    }
+
+    fun getPreview(): ImageView {
+        return mPrevImgIv
     }
 
     fun setName(name: String?) {

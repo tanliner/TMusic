@@ -1,6 +1,5 @@
 package com.ltan.music.discovery.fragments
 
-import android.os.Bundle
 import android.view.View
 import com.ltan.music.basemvp.MusicBaseFragment
 import com.ltan.music.basemvp.setValue
@@ -32,13 +31,8 @@ class DiscoveryFragment : MusicBaseFragment() {
         return R.layout.discovery_fragment
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        init(view)
-    }
-
-    fun init(view: View?) {
-        mHeader = view!!.findViewById(R.id.page_header)
+    override fun init(view: View) {
+        mHeader = view.findViewById(R.id.page_header)
         mHeader.setOnClickListener { v -> justTest(v); justTest(mHeader) }
     }
 

@@ -5,6 +5,8 @@
     <dimen name="menu_item_width">60dp</dimen>
     <dimen name="menu_item_height">48dp</dimen>
 
+    <dimen name="common_horizontal_edge">16dp</dimen>
+
     <dimen name="pager_header_item_padding_h">16dp</dimen>
     <dimen name="pager_header_item_margin_v">8dp</dimen>
     <dimen name="pager_header_item_title_size">12dp</dimen>
@@ -31,6 +33,8 @@
     <dimen name="song_list_heart_mode_w">20dp</dimen>
     <dimen name="song_list_heart_mode_h">20dp</dimen>
 
+    <dimen name="song_list_header_title_size">18dp</dimen>
+
     <dimen name="song_list_item_height">60dp</dimen>
     <dimen name="song_list_item_img_size">48dp</dimen>
     <dimen name="song_list_item_left_padding">16dp</dimen>
@@ -51,5 +55,13 @@
 
     <dimen name="bottom_media_control_height">48dp</dimen>
     <dimen name="bottom_media_control_play_height">32dp</dimen>
+
+    <!-- song list dimens -->
+    <dimen name="mine_song_list_toolbar_height">48dp</dimen>
+    <dimen name="mine_song_list_header_height">256dp</dimen>
+    <dimen name="mine_song_list_header_vip_height">48dp</dimen>
+    <dimen name="mine_song_list_header_padding_t">56dp</dimen>
+    <dimen name="mine_song_list_header_preview_size">120dp</dimen>
+    <dimen name="mine_song_list_header_title_margin_l">16dp</dimen>
 
 </resources>

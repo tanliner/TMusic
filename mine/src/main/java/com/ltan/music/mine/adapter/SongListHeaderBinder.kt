@@ -3,9 +3,13 @@ package com.ltan.music.mine.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.ltan.music.mine.R
+import com.ltan.music.mine.SongListHeaderObject
+import com.ltan.music.widget.constants.PlayListItemPreview
 import me.drakeet.multitype.ItemViewBinder
 
 /**
@@ -17,31 +21,34 @@ import me.drakeet.multitype.ItemViewBinder
  * @Date:   2019-05-21
  * @Version: 1.0
  */
-class SongListHeaderBinder : ItemViewBinder<String, SongListHeaderBinder.ViewHolder>() {
-
-    interface BackListener {
-        fun onBack()
-    }
-
-    private var mBackClick: BackListener? = null
+class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeaderBinder.ViewHolder>() {
 
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {
-        val context = inflater.context
-        val title = context.resources.getString(R.string.mine_song_list_back)
-        val button = Button(context)
-        button.text = title
-        return ViewHolder(button)
+        val view = inflater.inflate(R.layout.mine_song_list_header, parent, false)
+        return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, item: String) {
-        holder.item.setOnClickListener { mBackClick?.onBack() }
-    }
-
-    fun setBackListener(l: BackListener) {
-        mBackClick = l
+    override fun onBindViewHolder(holder: ViewHolder, item: SongListHeaderObject) {
+        val ctx = holder.itemView.context
+        Glide.with(holder.itemView.context)
+            .load(item.previewUrl)
+            .placeholder(PlayListItemPreview.SONG_LIST_PREVIEW)
+            .error(PlayListItemPreview.SONG_LIST_PREVIEW)
+            .into(holder.previewImg)
+        holder.songListTitle.text = item.title
+        holder.playAllTxt.text = ctx.resources.getString(R.string.mine_song_list_header_play_all)
+        holder.songListSize.text = ctx.resources.getString(R.string.mine_song_list_header_song_count, item.songSize)
+        holder.songListOwner.text = item.owner
+        holder.songListExtra.text = item.extra
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val item = itemView as Button
+        val previewImg: ImageView = itemView.findViewById(R.id.iv_song_list_header_preview)
+        val playAllImg: ImageView = itemView.findViewById(R.id.iv_song_list_play_all)
+        val songListTitle: TextView = itemView.findViewById(R.id.tv_song_list_header_title)
+        val songListOwner: TextView = itemView.findViewById(R.id.tv_song_list_owner)
+        val songListExtra: TextView = itemView.findViewById(R.id.tv_song_list_owner_extra_info)
+        val playAllTxt: TextView = itemView.findViewById(R.id.tv_song_list_play_all)
+        val songListSize: TextView = itemView.findViewById(R.id.tv_song_list_play_all_summary)
     }
 }

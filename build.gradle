@@ -53,6 +53,11 @@ subprojects {
             versionName build_versions.version_name
         }
 
+        // Parcelable
+        androidExtensions {
+            experimental = true
+        }
+
         compileOptions {
             sourceCompatibility build_versions.source_compatibility
             targetCompatibility build_versions.target_compatibility

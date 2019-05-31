@@ -4,12 +4,16 @@ import android.app.Service
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
+import android.util.DisplayMetrics
 import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.collection.LongSparseArray
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.ltan.music.basemvp.BaseMVPActivity
 import com.ltan.music.common.MusicLog
@@ -27,6 +31,7 @@ import com.ltan.music.service.MusicService
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.MusicPlayerController
+import com.ltan.music.widget.MusicRecycleView
 import com.ltan.music.widget.constants.PlayListItemPreview
 import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
@@ -44,7 +49,7 @@ import kotlin.math.min
 class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract.View {
 
     companion object {
-        const val ARG_SONG_ID = "song_list_id"
+        const val ARG_SONG = "song_list"
     }
 
     override fun initLayout(): Int {
@@ -61,9 +66,19 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     private var mCurrentSongDetail: Track? = null
 
     private var mSongListId: Long = 0L
-    private val mSongsRcyView: RecyclerView by bindView(R.id.rcy_mine_song_list)
+    private val mSongsRcyView: MusicRecycleView by bindView(R.id.rcy_mine_song_list)
+    private val mSongListToolbar: LinearLayout by bindView(R.id.ll_song_list_toolbar)
+    // floating item view
+    private val mFloatingHeader: LinearLayout by bindView(R.id.ll_song_list_floating_header)
+    private val mFloatingPlayAllImg: ImageView by bindView(R.id.iv_song_list_play_all)
+    private val mFloatingPlayAll: TextView by bindView(R.id.tv_song_list_play_all)
+    private val mFloatingPlayAllCount: TextView by bindView(R.id.tv_song_list_play_all_count)
+
     private val mControllerView: MusicPlayerController by bindView(R.id.mmp_controller)
     private val mRcyAdapter = MultiTypeAdapter()
+
+    // floating args
+    private lateinit var songPlayListItem: SongListItemObject
 
     // used to find the SongItem by SongUrls
     private val indexMap = LongSparseArray<SongItemObject>()
@@ -71,6 +86,8 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     private lateinit var mRcyItems: MutableList<Any>
     private var mHeaderSize: Int = 0
     private var mFootererSize: Int = 0
+
+    private lateinit var mDisplayMetrics: DisplayMetrics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,9 +98,18 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     }
 
     private fun processArgs() {
-        mSongListId = intent.getLongExtra(ARG_SONG_ID, 0L)
+        songPlayListItem = intent.getParcelableExtra(ARG_SONG)
+        mSongListId = songPlayListItem.songId
+
+        val header = SongListHeaderObject()
+        header.previewUrl = songPlayListItem.imgUrl
+        header.title = songPlayListItem.title
+        header.songSize = songPlayListItem.count
+        header.owner = songPlayListItem.owner
+        header.extra = resources.getString(R.string.mine_song_list_header_edit_extra)
+
         mRcyItems = ArrayList()
-        mRcyItems.add("header") // header button
+        mRcyItems.add(header) // header button
         mRcyItems.add(PlaceItem()) // footer space
         mHeaderSize = 1
         mFootererSize = 1
@@ -92,19 +118,37 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     private fun initView() {
         val songItemBinder = SongItemBinder()
         val headerBinder = SongListHeaderBinder()
-        headerBinder.setBackListener(object: SongListHeaderBinder.BackListener {
-            override fun onBack() {
-                finish()
-            }
-        })
-        mRcyAdapter.register(String::class.java, headerBinder)
+        mRcyAdapter.register(SongListHeaderObject::class.java, headerBinder)
         mRcyAdapter.register(SongItemObject::class.java, songItemBinder)
         mRcyAdapter.register(PlaceItem::class.java, PlaceItemBinder())
         mRcyAdapter.items = mRcyItems
 
         songItemBinder.setOnItemClickListener(SongItemClick())
+        mDisplayMetrics = resources.displayMetrics
+        mSongsRcyView.setChangeListener(object : MusicRecycleView.OnHeaderChangeListener {
+            override fun onVisibleChange(visible: Boolean) {
+                if (visible) {
+                    mFloatingHeader.visibility = View.VISIBLE
+                    mSongListToolbar.setBackgroundColor(Color.DKGRAY)// -0x1000000
+                    mFloatingHeader.setBackgroundColor(resources.getColor(R.color.color_song_list_floating_header))
+                } else {
+                    mFloatingHeader.visibility = View.GONE
+                    mSongListToolbar.setBackgroundColor(Color.TRANSPARENT)
+                }
+            }
+        })
+        // paddingTop + previewImgHeight + marginTop - toolbarHeight
+        val offset = (56 + 120 + 32 - 48) * mDisplayMetrics.density
+        mSongsRcyView.setFloatingOffset(offset.toInt())
+        initFloatingItem(songPlayListItem)
+
         mSongsRcyView.layoutManager = LinearLayoutManager(this)
         mSongsRcyView.adapter = mRcyAdapter
+    }
+
+    private fun initFloatingItem(item: SongListItemObject) {
+        mFloatingPlayAll.text = resources.getString(R.string.mine_song_list_header_play_all)
+        mFloatingPlayAllCount.text = resources.getString(R.string.mine_song_list_header_song_count, item.count)
     }
 
     private fun querySongList() {

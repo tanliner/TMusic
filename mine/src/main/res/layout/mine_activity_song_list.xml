@@ -1,19 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:orientation="vertical"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.ltan.music.widget.MusicRecycleView
             android:id="@+id/rcy_mine_song_list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    <LinearLayout
+            android:id="@+id/ll_song_list_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/mine_song_list_toolbar_height"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+        <ImageView
+                android:id="@+id/id_header_preview"
+                android:layout_width="wrap_content"
+                android:src="@drawable/right_arrow"
+                android:layout_marginStart="@dimen/common_horizontal_edge"
+                android:rotation="180"
+                android:layout_height="match_parent" />
+
+        <TextView
+                android:textSize="28sp"
+                android:textColor="@android:color/black"
+                android:id="@+id/tv_song_list_name"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+        <ImageView
+                android:id="@+id/iv_song_list_search"
+                android:layout_width="@dimen/mine_song_list_toolbar_height"
+                android:src="@drawable/search"
+                android:scaleType="centerInside"
+                android:layout_height="match_parent" />
+
+        <ImageView
+                android:id="@+id/iv_song_list_menu"
+                android:layout_width="@dimen/mine_song_list_toolbar_height"
+                android:src="@drawable/song_list_item_menu"
+                android:scaleType="centerInside"
+                android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/ll_song_list_floating_header"
+            android:layout_below="@id/ll_song_list_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/mine_song_list_header_vip_height"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:orientation="horizontal">
+
+        <ImageView
+                android:id="@+id/iv_song_list_play_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/common_horizontal_edge"
+                android:src="@drawable/note_btn_play_white"/>
+
+        <TextView
+                android:id="@+id/tv_song_list_play_all"
+                android:textSize="16sp"
+                android:textColor="@color/color_song_list_play_all"
+                android:layout_gravity="center"
+                tools:text="@string/mine_song_list_header_play_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        <TextView
+                android:id="@+id/tv_song_list_play_all_count"
+                android:textSize="12sp"
+                tools:text="@string/mine_song_list_header_song_count"
+                android:textColor="@color/color_list_item_subtitle"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <com.ltan.music.widget.MusicPlayerController
             android:id="@+id/mmp_controller"
-            android:layout_gravity="start|bottom"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
             android:layout_width="match_parent"
             android:layout_height="@dimen/bottom_media_control_height">
     </com.ltan.music.widget.MusicPlayerController>
 
-</FrameLayout>
+</RelativeLayout>

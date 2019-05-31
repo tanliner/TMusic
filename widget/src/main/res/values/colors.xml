@@ -11,4 +11,7 @@
     <color name="color_list_item_subtitle">#6f000000</color>
 
     <color name="color_play_controller_bg">#F8FEFEFE</color>
+
+    <color name="color_song_list_play_all">#FF000000</color>
+    <color name="color_song_list_floating_header">#F8FEFEFE</color>
 </resources>

@@ -1,6 +1,5 @@
 package com.ltan.music.basemvp
 
-import android.os.Bundle
 import android.view.View
 import com.ltan.music.common.MusicLog
 
@@ -25,9 +24,7 @@ abstract class BaseMVPFragment<P : IBaseContract.Presenter<*>> : MusicBaseFragme
      */
     abstract fun initPresenter()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        // mPresenter = PresenterUtil.getBasePresenter(this.javaClass)
+    override fun init(view: View) {
         val p: P? = PresenterUtil.getBasePresenter(this.javaClass)
         p?.let { mPresenter = it }
         if(p == null) {

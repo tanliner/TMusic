@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/mine_song_list_header_height"
+                android:paddingTop="@dimen/mine_song_list_header_padding_t">
+
+    <ImageView
+            android:id="@+id/iv_song_list_header_preview"
+            android:layout_width="@dimen/mine_song_list_header_preview_size"
+            android:layout_height="@dimen/mine_song_list_header_preview_size"
+            android:layout_marginStart="@dimen/common_horizontal_edge" />
+
+    <TextView
+            android:id="@+id/tv_song_list_header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/song_list_header_title_size"
+            android:textStyle="bold"
+            tools:text="Play List Name"
+            android:layout_toEndOf="@id/iv_song_list_header_preview"
+            android:layout_marginStart="@dimen/mine_song_list_header_title_margin_l"
+            android:layout_alignTop="@id/iv_song_list_header_preview"
+            />
+
+    <TextView
+            android:id="@+id/tv_song_list_owner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Owner"
+            android:layout_marginTop="6dp"
+            android:layout_below="@id/tv_song_list_header_title"
+            android:layout_alignStart="@id/tv_song_list_header_title"
+            />
+    <TextView
+            android:id="@+id/tv_song_list_owner_extra_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="@string/mine_song_list_header_edit_extra"
+            android:layout_alignBottom="@id/iv_song_list_header_preview"
+            android:layout_alignStart="@id/tv_song_list_header_title"
+            />
+
+    <LinearLayout
+            android:id="@+id/ll_song_list_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/mine_song_list_header_vip_height"
+            android:layout_below="@id/iv_song_list_header_preview"
+            android:background="@color/color_song_list_floating_header"
+            android:layout_marginTop="32dp"
+            android:orientation="horizontal">
+        <ImageView
+                android:id="@+id/iv_song_list_play_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/common_horizontal_edge"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/note_btn_play_white"/>
+
+        <TextView
+                android:id="@+id/tv_song_list_play_all"
+                android:textSize="16sp"
+                android:textColor="@color/color_song_list_play_all"
+                android:layout_gravity="center"
+                tools:text="@string/mine_song_list_header_play_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        <TextView
+                android:id="@+id/tv_song_list_play_all_summary"
+                android:textSize="12sp"
+                tools:text="@string/mine_song_list_header_song_count"
+                android:textColor="@color/color_list_item_subtitle"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</RelativeLayout>

@@ -2,11 +2,16 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/mine_song_list_header_height"
-                android:paddingTop="@dimen/mine_song_list_header_padding_t">
+                android:layout_height="@dimen/mine_song_list_header_height">
+    <ImageView
+            android:id="@+id/iv_header_transform_test"
+            android:scaleType="fitXY"
+            android:layout_width="match_parent"
+            android:layout_height="208dp" />
 
     <ImageView
             android:id="@+id/iv_song_list_header_preview"
+            android:layout_marginTop="@dimen/mine_song_list_header_padding_t"
             android:layout_width="@dimen/mine_song_list_header_preview_size"
             android:layout_height="@dimen/mine_song_list_header_preview_size"
             android:layout_marginStart="@dimen/common_horizontal_edge" />
@@ -15,6 +20,7 @@
             android:id="@+id/tv_song_list_header_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
             android:textSize="@dimen/song_list_header_title_size"
             android:textStyle="bold"
             tools:text="Play List Name"
@@ -27,6 +33,7 @@
             android:id="@+id/tv_song_list_owner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
             tools:text="Owner"
             android:layout_marginTop="6dp"
             android:layout_below="@id/tv_song_list_header_title"
@@ -36,6 +43,7 @@
             android:id="@+id/tv_song_list_owner_extra_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
             tools:text="@string/mine_song_list_header_edit_extra"
             android:layout_alignBottom="@id/iv_song_list_header_preview"
             android:layout_alignStart="@id/tv_song_list_header_title"

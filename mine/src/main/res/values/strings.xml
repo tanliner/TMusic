@@ -35,6 +35,7 @@
     <string name="mine_play_list_failed">获取音乐列表失败</string>
     <string name="mine_song_list_back">返回</string>
 
+    <string name="mine_song_list_title">歌单</string>
     <string name="mine_song_list_header_play_all">播放全部</string>
     <string name="mine_song_list_header_edit_extra">编辑信息</string>
     <string name="mine_song_list_header_song_count">(共%1$d首)</string>

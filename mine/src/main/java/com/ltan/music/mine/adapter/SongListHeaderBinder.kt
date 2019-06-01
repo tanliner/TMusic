@@ -10,6 +10,7 @@ import com.bumptech.glide.Glide
 import com.ltan.music.mine.R
 import com.ltan.music.mine.SongListHeaderObject
 import com.ltan.music.widget.constants.PlayListItemPreview
+import jp.wasabeef.glide.transformations.BlurTransformation
 import me.drakeet.multitype.ItemViewBinder
 
 /**
@@ -30,7 +31,7 @@ class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeader
 
     override fun onBindViewHolder(holder: ViewHolder, item: SongListHeaderObject) {
         val ctx = holder.itemView.context
-        Glide.with(holder.itemView.context)
+        Glide.with(ctx)
             .load(item.previewUrl)
             .placeholder(PlayListItemPreview.SONG_LIST_PREVIEW)
             .error(PlayListItemPreview.SONG_LIST_PREVIEW)
@@ -40,9 +41,15 @@ class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeader
         holder.songListSize.text = ctx.resources.getString(R.string.mine_song_list_header_song_count, item.songSize)
         holder.songListOwner.text = item.owner
         holder.songListExtra.text = item.extra
+
+        Glide.with(ctx)
+            .load(item.previewUrl)
+            .transform(BlurTransformation(28, 30))
+            .into(holder.bgImg)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val bgImg: ImageView = itemView.findViewById(R.id.iv_header_transform_test)
         val previewImg: ImageView = itemView.findViewById(R.id.iv_song_list_header_preview)
         val playAllImg: ImageView = itemView.findViewById(R.id.iv_song_list_play_all)
         val songListTitle: TextView = itemView.findViewById(R.id.tv_song_list_header_title)

@@ -66,6 +66,9 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     private var mCurrentSongDetail: Track? = null
 
     private var mSongListId: Long = 0L
+    private val mBackIcon: ImageView by bindView(R.id.iv_song_list_back)
+    private val mSongListName: TextView by bindView(R.id.tv_song_list_name)
+
     private val mSongsRcyView: MusicRecycleView by bindView(R.id.rcy_mine_song_list)
     private val mSongListToolbar: LinearLayout by bindView(R.id.ll_song_list_toolbar)
     // floating item view
@@ -116,6 +119,10 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     }
 
     private fun initView() {
+
+        mSongListName.text = songPlayListItem.title
+        mBackIcon.setOnClickListener { finish() }
+
         val songItemBinder = SongItemBinder()
         val headerBinder = SongListHeaderBinder()
         mRcyAdapter.register(SongListHeaderObject::class.java, headerBinder)
@@ -125,21 +132,28 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
 
         songItemBinder.setOnItemClickListener(SongItemClick())
         mDisplayMetrics = resources.displayMetrics
+        // paddingTop + previewImgHeight + marginTop - toolbarHeight
+        val offset = (56 + 120 + 32 - 48) * mDisplayMetrics.density
+        val titleOffset = (56 + 20) * mDisplayMetrics.density
         mSongsRcyView.setChangeListener(object : MusicRecycleView.OnHeaderChangeListener {
-            override fun onVisibleChange(visible: Boolean) {
-                if (visible) {
+            override fun onScrollChanged(scrollY: Int) {
+                if (scrollY >= titleOffset) {
+                    mSongListName.text = songPlayListItem.title
+                } else {
+                    mSongListName.text = resources.getString(R.string.mine_song_list_title)
+                }
+                if (scrollY >= offset) {
+                    mSongListToolbar.alpha = 1.0F
                     mFloatingHeader.visibility = View.VISIBLE
                     mSongListToolbar.setBackgroundColor(Color.DKGRAY)// -0x1000000
                     mFloatingHeader.setBackgroundColor(resources.getColor(R.color.color_song_list_floating_header))
                 } else {
                     mFloatingHeader.visibility = View.GONE
-                    mSongListToolbar.setBackgroundColor(Color.TRANSPARENT)
+                    val alpha = 1.0F * scrollY / offset * 255
+                    mSongListToolbar.setBackgroundColor(Color.argb(alpha.toInt(), 0x44, 0x44, 0x44))
                 }
             }
         })
-        // paddingTop + previewImgHeight + marginTop - toolbarHeight
-        val offset = (56 + 120 + 32 - 48) * mDisplayMetrics.density
-        mSongsRcyView.setFloatingOffset(offset.toInt())
         initFloatingItem(songPlayListItem)
 
         mSongsRcyView.layoutManager = LinearLayoutManager(this)

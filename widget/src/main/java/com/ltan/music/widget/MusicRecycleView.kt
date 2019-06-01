@@ -21,11 +21,10 @@ class MusicRecycleView @JvmOverloads constructor(
     }
 
     interface OnHeaderChangeListener {
-        fun onVisibleChange(visible: Boolean)
+        fun onScrollChanged(scrollY: Int)
     }
 
     private var mChangeListener: OnHeaderChangeListener? = null
-    private var mFloatingOffset = 0
 
     private var mScrollY = 0
 
@@ -34,16 +33,12 @@ class MusicRecycleView @JvmOverloads constructor(
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 mScrollY += dy
-                mChangeListener?.onVisibleChange(mScrollY >= mFloatingOffset)
+                mChangeListener?.onScrollChanged(mScrollY)
             }
         })
     }
 
     fun setChangeListener(l: OnHeaderChangeListener) {
         mChangeListener = l
-    }
-
-    fun setFloatingOffset(offset: Int) {
-        mFloatingOffset = offset
     }
 }

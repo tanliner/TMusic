@@ -57,6 +57,7 @@
     <dimen name="bottom_media_control_play_height">32dp</dimen>
 
     <!-- song list dimens -->
+    <dimen name="mine_song_list_title_size">20dp</dimen>
     <dimen name="mine_song_list_toolbar_height">48dp</dimen>
     <dimen name="mine_song_list_header_height">256dp</dimen>
     <dimen name="mine_song_list_header_vip_height">48dp</dimen>

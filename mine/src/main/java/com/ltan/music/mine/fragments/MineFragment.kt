@@ -23,7 +23,6 @@ import com.ltan.music.service.MusicService
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.MusicPlayerController
-import com.ltan.music.widget.SongListCategoryItem
 import com.ltan.music.widget.constants.State
 import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
@@ -280,7 +279,6 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         list.add(category1)
 
         val category2 = SongListCategoryObject(ID_CATEGORY_FAVORITE_LIST, getString(R.string.mine_song_list_category_favorite), 0)
-        category2.state = State.COLLAPSE
         list.add(category2)
         return list
     }
@@ -305,12 +303,15 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             if (item.id == ID_CATEGORY_FAVORITE_LIST) {
                 dataSource = category2
             }
-            val itemView = view as SongListCategoryItem
 
-            if (itemView.mState == State.EXPAND) {
+            if (item.state == State.COLLAPSE) {
+                item.state = State.EXPAND
+                adapter.notifyItemChanged(position)
                 items.addAll(index, dataSource)
                 adapter.notifyItemRangeInserted(index, dataSource.size)
             } else {
+                item.state = State.COLLAPSE
+                adapter.notifyItemChanged(position)
                 items.removeAll(dataSource)
                 adapter.notifyItemRangeRemoved(index, dataSource.size)
             }

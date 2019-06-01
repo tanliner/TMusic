@@ -48,7 +48,7 @@ class SongListCategoryItem @JvmOverloads constructor(
     private var mCreateImgIv: ImageView
     private var mMenuImgIv: ImageView
 
-    lateinit var mState: State
+    private var mState: State = State.COLLAPSE
 
     init {
         val inflater = LayoutInflater.from(context)
@@ -72,12 +72,10 @@ class SongListCategoryItem @JvmOverloads constructor(
     }
 
     fun setState(state: State) {
-        mState = state
-        if (state == State.EXPAND) {
-            mPrevImgIv.rotation = EXPAND_DEGREE
-        } else {
-            mPrevImgIv.rotation = SHRINK_DEGREE
+        if(mState == state) {
+            return
         }
+        doAnimation()
     }
 
     fun setName(name: String) {

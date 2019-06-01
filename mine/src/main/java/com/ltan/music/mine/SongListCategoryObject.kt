@@ -15,7 +15,6 @@ data class SongListCategoryObject(
     val id: Int,
     val title: String = "",
     var count: Int = 0,
-    var creatable: Boolean = false
-) {
-    var state = State.EXPAND
-}
+    var creatable: Boolean = false,
+    var state: State = State.COLLAPSE
+)

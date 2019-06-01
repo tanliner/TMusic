@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Bundle
 import android.os.IBinder
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -81,13 +80,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         mPresenter.attachView(this)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        mPresenter.subcount()
-        init()
-    }
-
-    private fun init() {
+    override fun init(view: View) {
+        super.init(view)
         mRclView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         mMultiAdapter = MultiTypeAdapter()
         // recycle
@@ -106,7 +100,8 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         songListBinder.setOnItemClick(SongListClickListener(this, mRcyItems))
 
         mRclView.adapter = mMultiAdapter
-
+        // http request, maybe after resume
+        mPresenter.subcount()
         startService()
     }
 
@@ -179,6 +174,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         for (i in 0 until min(mCreatedSongListCount, data.size)) {
             val playItem = data[i]
             val item = SongListItemObject(playItem.id, 0, playItem.coverImgUrl, playItem.name, playItem.trackCount)
+            item.owner = playItem.creator?.nickname
             mCreatedCategory.add(item)
         }
         if(mCreatedSongListCount > 0) {
@@ -188,6 +184,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
         for (i in mCreatedSongListCount until data.size) {
             val playItem = data[i]
             val item = SongListItemObject(playItem.id, 0, playItem.coverImgUrl, playItem.name, playItem.trackCount)
+            item.owner = playItem.creator?.nickname
             mSubCategory.add(item)
         }
         var favoriteOffset = CATEGORY_LIST_INDEX + 1
@@ -335,7 +332,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             val item = items[position] as SongListItemObject
             MusicLog.d(TAG, "SongListClickListener/ item=$item")
             val intent = Intent(frag.context, SongListActivity::class.java)
-            intent.putExtra(SongListActivity.ARG_SONG_ID, item.songId)
+            intent.putExtra(SongListActivity.ARG_SONG, item)
             frag.startActivity(intent)
         }
     }

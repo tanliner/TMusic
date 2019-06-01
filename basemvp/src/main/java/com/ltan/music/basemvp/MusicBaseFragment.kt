@@ -27,6 +27,7 @@ abstract class MusicBaseFragment : Fragment() {
     private lateinit var unBinder: Unbinder
 
     abstract fun initLayout(): Int
+    open fun init(view: View) {}
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(initLayout(), container, false)
@@ -35,6 +36,7 @@ abstract class MusicBaseFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         unBinder = ButterKnife.bind(this, view)
+        init(view)
     }
 
     override fun onDestroyView() {

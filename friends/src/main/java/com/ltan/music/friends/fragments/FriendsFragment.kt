@@ -1,6 +1,5 @@
 package com.ltan.music.friends.fragments
 
-import android.os.Bundle
 import android.view.View
 import com.ltan.music.basemvp.MusicBaseFragment
 import com.ltan.music.basemvp.setValue
@@ -32,13 +31,8 @@ class FriendsFragment : MusicBaseFragment() {
         return R.layout.friends_fragment
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        init(view)
-    }
-
-    fun init(view: View?) {
-        mHeader = view!!.findViewById(R.id.page_header)
+    override fun init(view: View) {
+        mHeader = view.findViewById(R.id.page_header)
         mHeader.setOnClickListener { v -> justTest(v); justTest(mHeader) }
     }
 

@@ -6,6 +6,7 @@ dependencies {
     api deps.SmartRefreshLayout
 
     api deps.gson
+    api deps.statusbar
     api deps.reactivex.rx_android
     api deps.rxbinding.rxbinding
     api deps.rxlifecycle.rxlifecycle

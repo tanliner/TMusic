@@ -2,9 +2,9 @@ package com.ltan.music
 
 import android.os.Bundle
 import androidx.viewpager.widget.ViewPager
+import com.jaeger.library.StatusBarUtil
 import com.ltan.music.adapter.MusicPagerAdapter
 import com.ltan.music.basemvp.MusicBaseActivity
-import com.ltan.music.common.StatusBarUtil
 import com.ltan.music.view.PageIndicator
 import com.ltan.music.widget.MenuItem
 import kotterknife.bindView

@@ -59,9 +59,10 @@
     <!-- song list dimens -->
     <dimen name="mine_song_list_title_size">20dp</dimen>
     <dimen name="mine_song_list_toolbar_height">48dp</dimen>
-    <dimen name="mine_song_list_header_height">256dp</dimen>
+    <dimen name="mine_song_list_header_height">300dp</dimen>
+    <dimen name="mine_song_list_header_blur_bg">232dp</dimen>
     <dimen name="mine_song_list_header_vip_height">48dp</dimen>
-    <dimen name="mine_song_list_header_padding_t">56dp</dimen>
+    <dimen name="mine_song_list_header_padding_t">80dp</dimen>
     <dimen name="mine_song_list_header_preview_size">120dp</dimen>
     <dimen name="mine_song_list_header_title_margin_l">16dp</dimen>
 

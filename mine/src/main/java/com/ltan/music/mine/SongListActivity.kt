@@ -11,12 +11,15 @@ import android.util.DisplayMetrics
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.collection.LongSparseArray
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.jaeger.library.StatusBarUtil
 import com.ltan.music.basemvp.BaseMVPActivity
 import com.ltan.music.common.MusicLog
+import com.ltan.music.common.StatusBar
 import com.ltan.music.common.ToastUtil
 import com.ltan.music.mine.adapter.PlaceItemBinder
 import com.ltan.music.mine.adapter.SongItemBinder
@@ -93,6 +96,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     private lateinit var mDisplayMetrics: DisplayMetrics
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        StatusBarUtil.setTransparent(this)
         super.onCreate(savedInstanceState)
         processArgs()
         initView()
@@ -132,10 +136,17 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
 
         songItemBinder.setOnItemClickListener(SongItemClick())
         mDisplayMetrics = resources.displayMetrics
+        val lp = mSongListToolbar.layoutParams as RelativeLayout.LayoutParams
+        lp.topMargin = StatusBar.getStatusBarHeight(this)
+        mSongListToolbar.layoutParams = lp
         // paddingTop + previewImgHeight + marginTop - toolbarHeight
-        val offset = (56 + 120 + 32 - 48) * mDisplayMetrics.density
-        val titleOffset = (56 + 20) * mDisplayMetrics.density
-        mSongsRcyView.setChangeListener(object : MusicRecycleView.OnHeaderChangeListener {
+        val offset = (80 + 120 + 32 - 48) * mDisplayMetrics.density - lp.topMargin
+        val titleOffset = (80 + 20) * mDisplayMetrics.density - lp.topMargin
+        mSongListToolbar.setPadding(0, (0 * mDisplayMetrics.density).toInt(), 0, 0)
+        // header alpha change
+        headerBinder.setOffset(titleOffset.toInt())
+        mSongsRcyView.addChangeListener(headerBinder)
+        mSongsRcyView.addChangeListener(object : MusicRecycleView.OnHeaderChangeListener {
             override fun onScrollChanged(scrollY: Int) {
                 if (scrollY >= titleOffset) {
                     mSongListName.text = songPlayListItem.title
@@ -147,10 +158,12 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
                     mFloatingHeader.visibility = View.VISIBLE
                     mSongListToolbar.setBackgroundColor(Color.DKGRAY)// -0x1000000
                     mFloatingHeader.setBackgroundColor(resources.getColor(R.color.color_song_list_floating_header))
+                    StatusBarUtil.setColor(this@SongListActivity, 0x444444)
                 } else {
                     mFloatingHeader.visibility = View.GONE
                     val alpha = 1.0F * scrollY / offset * 255
                     mSongListToolbar.setBackgroundColor(Color.argb(alpha.toInt(), 0x44, 0x44, 0x44))
+                    StatusBarUtil.setTranslucent(this@SongListActivity, (alpha * 0.8).toInt())
                 }
             }
         })

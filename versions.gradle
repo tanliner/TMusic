@@ -73,6 +73,7 @@ versions.gson = "2.8.5"
 versions.bugly = "2.6.6.1"
 versions.multidex = "2.0.0"
 versions.multidexv7 = "1.0.3"
+versions.statusbar = "1.5.1"
 
 
 def deps = [:]
@@ -255,6 +256,7 @@ navigation.ui = "androidx.navigation:navigation-ui:$versions.navigation"
 navigation.ui_ktx = "androidx.navigation:navigation-ui-ktx:$versions.navigation"
 navigation.safe_args_plugin = "androidx.navigation:navigation-safe-args-gradle-plugin:$versions.navigation"
 deps.navigation = navigation
+deps.statusbar = "com.jaeger.statusbarutil:library:$versions.statusbar"
 
 deps.gson = "com.google.code.gson:gson:$versions.gson"
 deps.fragmentation = "me.yokeyword:fragmentation:$versions.fragmentation"

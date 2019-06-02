@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.ltan.music.mine.R
 import com.ltan.music.mine.SongListHeaderObject
+import com.ltan.music.widget.MusicRecycleView
 import com.ltan.music.widget.constants.PlayListItemPreview
 import jp.wasabeef.glide.transformations.BlurTransformation
 import me.drakeet.multitype.ItemViewBinder
@@ -22,11 +23,24 @@ import me.drakeet.multitype.ItemViewBinder
  * @Date:   2019-05-21
  * @Version: 1.0
  */
-class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeaderBinder.ViewHolder>() {
+class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeaderBinder.ViewHolder>(),
+    MusicRecycleView.OnHeaderChangeListener {
+
+    private lateinit var mViewHolder: ViewHolder
+    private var offset = 0
+    fun setOffset(offset: Int) {
+        this.offset = offset
+    }
+
+    override fun onScrollChanged(scrollY: Int) {
+        val alpha = 0.2F * scrollY / offset
+        mViewHolder.updateAlpha(1 - alpha)
+    }
 
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {
         val view = inflater.inflate(R.layout.mine_song_list_header, parent, false)
-        return ViewHolder(view)
+        mViewHolder = ViewHolder(view)
+        return mViewHolder
     }
 
     override fun onBindViewHolder(holder: ViewHolder, item: SongListHeaderObject) {
@@ -51,11 +65,19 @@ class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeader
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val bgImg: ImageView = itemView.findViewById(R.id.iv_header_transform_test)
         val previewImg: ImageView = itemView.findViewById(R.id.iv_song_list_header_preview)
-        val playAllImg: ImageView = itemView.findViewById(R.id.iv_song_list_play_all)
         val songListTitle: TextView = itemView.findViewById(R.id.tv_song_list_header_title)
         val songListOwner: TextView = itemView.findViewById(R.id.tv_song_list_owner)
         val songListExtra: TextView = itemView.findViewById(R.id.tv_song_list_owner_extra_info)
         val playAllTxt: TextView = itemView.findViewById(R.id.tv_song_list_play_all)
+        val playAllImg: ImageView = itemView.findViewById(R.id.iv_song_list_play_all)
         val songListSize: TextView = itemView.findViewById(R.id.tv_song_list_play_all_summary)
+
+        fun updateAlpha(alpha: Float) {
+            bgImg.alpha = alpha
+            previewImg.alpha = alpha
+            songListTitle.alpha = alpha
+            songListOwner.alpha = alpha
+            songListExtra.alpha = alpha
+        }
     }
 }

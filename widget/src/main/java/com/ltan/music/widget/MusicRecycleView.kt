@@ -24,7 +24,7 @@ class MusicRecycleView @JvmOverloads constructor(
         fun onScrollChanged(scrollY: Int)
     }
 
-    private var mChangeListener: OnHeaderChangeListener? = null
+    private var mChangeListeners: ArrayList<OnHeaderChangeListener> = ArrayList()
 
     private var mScrollY = 0
 
@@ -33,12 +33,16 @@ class MusicRecycleView @JvmOverloads constructor(
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 mScrollY += dy
-                mChangeListener?.onScrollChanged(mScrollY)
+                if(mChangeListeners.isNotEmpty()) {
+                    for (l in mChangeListeners) {
+                        l.onScrollChanged(mScrollY)
+                    }
+                }
             }
         })
     }
 
-    fun setChangeListener(l: OnHeaderChangeListener) {
-        mChangeListener = l
+    fun addChangeListener(l: OnHeaderChangeListener) {
+        mChangeListeners.add(l)
     }
 }

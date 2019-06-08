@@ -58,7 +58,7 @@ class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeader
 
         Glide.with(ctx)
             .load(item.previewUrl)
-            .transform(BlurTransformation(28, 30))
+            .transform(BlurTransformation(28, 35))
             .into(holder.bgImg)
     }
 

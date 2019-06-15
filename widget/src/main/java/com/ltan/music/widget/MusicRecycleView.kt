@@ -21,6 +21,11 @@ class MusicRecycleView @JvmOverloads constructor(
     }
 
     interface OnHeaderChangeListener {
+        /**
+         * [scrollY] indicated the RecycleView scrolled distance
+         * Note: [mScrollY] It's not like the [android.view.View.getScrollY]
+         * because recycleview's position has not changed, just item moved
+         */
         fun onScrollChanged(scrollY: Int)
     }
 
@@ -29,7 +34,7 @@ class MusicRecycleView @JvmOverloads constructor(
     private var mScrollY = 0
 
     init {
-        addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        addOnScrollListener(object : OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 mScrollY += dy
@@ -42,7 +47,7 @@ class MusicRecycleView @JvmOverloads constructor(
         })
     }
 
-    fun addChangeListener(l: OnHeaderChangeListener) {
+    fun addOnScrollListener(l: OnHeaderChangeListener) {
         mChangeListeners.add(l)
     }
 }

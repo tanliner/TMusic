@@ -1,5 +1,6 @@
 package com.ltan.music.mine.adapter
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,16 +26,40 @@ import me.drakeet.multitype.ItemViewBinder
  */
 class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeaderBinder.ViewHolder>(),
     MusicRecycleView.OnHeaderChangeListener {
+    companion object {
+        const val MIN_ALPHA = 0.6F
+        const val MAX_ALPHA = 1F
+        const val MAX_ALPHA_NUMBER = 255
+    }
 
     private lateinit var mViewHolder: ViewHolder
-    private var offset = 0
-    fun setOffset(offset: Int) {
-        this.offset = offset
+    private lateinit var mFloatingHeader: ImageView
+    private var bgColorUpdateOffset = 0F
+
+    /**
+     * Update background of header item when scrollY > [offset]
+     */
+    fun setOffset(offset: Float) {
+        this.bgColorUpdateOffset = offset
+    }
+
+    fun setFloatingHeader(img: ImageView) {
+        mFloatingHeader = img
+        mFloatingHeader.setBackgroundColor(Color.TRANSPARENT)
+        mFloatingHeader.imageAlpha = 0
     }
 
     override fun onScrollChanged(scrollY: Int) {
-        val alpha = 0.2F * scrollY / offset
-        mViewHolder.updateAlpha(1 - alpha)
+        var alpha = MAX_ALPHA * scrollY / bgColorUpdateOffset
+        if (alpha >= MAX_ALPHA) {
+            alpha = MAX_ALPHA
+        }
+        alpha = if (alpha >= MIN_ALPHA) { 1 - (alpha - MIN_ALPHA) } else MAX_ALPHA
+        val drawable = mViewHolder.bgImg.drawable
+        if (drawable != null) {
+            drawable.mutate().alpha = (MAX_ALPHA_NUMBER * alpha).toInt()
+            mViewHolder.bgImg.setImageDrawable(drawable)
+        }
     }
 
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {
@@ -58,8 +83,13 @@ class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeader
 
         Glide.with(ctx)
             .load(item.previewUrl)
-            .transform(BlurTransformation(28, 30))
+            .transform(BlurTransformation(25, 38))
             .into(holder.bgImg)
+        // floating header, out of the RecycleView
+        Glide.with(ctx)
+            .load(item.previewUrl)
+            .transform(BlurTransformation(25, 38))
+            .into(mFloatingHeader)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -71,13 +101,5 @@ class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeader
         val playAllTxt: TextView = itemView.findViewById(R.id.tv_song_list_play_all)
         val playAllImg: ImageView = itemView.findViewById(R.id.iv_song_list_play_all)
         val songListSize: TextView = itemView.findViewById(R.id.tv_song_list_play_all_summary)
-
-        fun updateAlpha(alpha: Float) {
-            bgImg.alpha = alpha
-            previewImg.alpha = alpha
-            songListTitle.alpha = alpha
-            songListOwner.alpha = alpha
-            songListExtra.alpha = alpha
-        }
     }
 }

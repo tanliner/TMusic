@@ -47,7 +47,7 @@
 
     <dimen name="song_item_subtitle_margin_t">6dp</dimen>
     <dimen name="song_item_number_size">14dp</dimen>
-    <dimen name="song_item_title_size">14dp</dimen>
+    <dimen name="song_item_title_size">16dp</dimen>
     <dimen name="song_item_subtitle_size">12dp</dimen>
 
     <dimen name="list_item_menu_w">32dp</dimen>

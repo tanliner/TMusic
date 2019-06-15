@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
-import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
 import android.util.DisplayMetrics
@@ -74,9 +73,9 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
 
     private val mSongsRcyView: MusicRecycleView by bindView(R.id.rcy_mine_song_list)
     private val mSongListToolbar: LinearLayout by bindView(R.id.ll_song_list_toolbar)
+    private val mFloatingToolbarBg: ImageView by bindView(R.id.iv_song_list_toolbar_bg)
     // floating item view
-    private val mFloatingHeader: LinearLayout by bindView(R.id.ll_song_list_floating_header)
-    private val mFloatingPlayAllImg: ImageView by bindView(R.id.iv_song_list_play_all)
+    private val mFloatingContainer: LinearLayout by bindView(R.id.ll_song_list_floating_play_all)
     private val mFloatingPlayAll: TextView by bindView(R.id.tv_song_list_play_all)
     private val mFloatingPlayAllCount: TextView by bindView(R.id.tv_song_list_play_all_count)
 
@@ -91,7 +90,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
 
     private lateinit var mRcyItems: MutableList<Any>
     private var mHeaderSize: Int = 0
-    private var mFootererSize: Int = 0
+    private var mFooterSize: Int = 0
 
     private lateinit var mDisplayMetrics: DisplayMetrics
 
@@ -119,7 +118,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         mRcyItems.add(header) // header button
         mRcyItems.add(PlaceItem()) // footer space
         mHeaderSize = 1
-        mFootererSize = 1
+        mFooterSize = 1
     }
 
     private fun initView() {
@@ -144,38 +143,68 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         val titleOffset = (80 + 20) * mDisplayMetrics.density - lp.topMargin
         mSongListToolbar.setPadding(0, (0 * mDisplayMetrics.density).toInt(), 0, 0)
         // header alpha change
-        headerBinder.setOffset(titleOffset.toInt())
-        mSongsRcyView.addChangeListener(headerBinder)
-        mSongsRcyView.addChangeListener(object : MusicRecycleView.OnHeaderChangeListener {
+        headerBinder.setOffset(offset - titleOffset)
+        headerBinder.setFloatingHeader(mFloatingToolbarBg)
+        mSongsRcyView.addOnScrollListener(headerBinder)
+
+        // floating toolbar update by scrollY
+        mSongsRcyView.addOnScrollListener(object : MusicRecycleView.OnHeaderChangeListener {
             override fun onScrollChanged(scrollY: Int) {
-                if (scrollY >= titleOffset) {
-                    mSongListName.text = songPlayListItem.title
-                } else {
-                    mSongListName.text = resources.getString(R.string.mine_song_list_title)
-                }
-                if (scrollY >= offset) {
-                    mSongListToolbar.alpha = 1.0F
-                    mFloatingHeader.visibility = View.VISIBLE
-                    mSongListToolbar.setBackgroundColor(Color.DKGRAY)// -0x1000000
-                    mFloatingHeader.setBackgroundColor(resources.getColor(R.color.color_song_list_floating_header))
-                    StatusBarUtil.setColor(this@SongListActivity, 0x444444)
-                } else {
-                    mFloatingHeader.visibility = View.GONE
-                    val alpha = 1.0F * scrollY / offset * 255
-                    mSongListToolbar.setBackgroundColor(Color.argb(alpha.toInt(), 0x44, 0x44, 0x44))
-                    StatusBarUtil.setTranslucent(this@SongListActivity, (alpha * 0.8).toInt())
-                }
+                updateFloatingPlay(scrollY, offset, titleOffset)
+                updateToolbarAlpha(scrollY, offset)
             }
         })
-        initFloatingItem(songPlayListItem)
+        initFloatingPlay(songPlayListItem)
+        initFloatingToolbar()
 
         mSongsRcyView.layoutManager = LinearLayoutManager(this)
         mSongsRcyView.adapter = mRcyAdapter
     }
 
-    private fun initFloatingItem(item: SongListItemObject) {
+    private fun updateFloatingPlay(scrollY: Int, offset: Float, titleOffset: Float) {
+        if (scrollY >= offset) {
+            mFloatingContainer.visibility = View.VISIBLE
+        } else {
+            mFloatingContainer.visibility = View.GONE
+        }
+        if (scrollY >= titleOffset) {
+            mSongListName.text = songPlayListItem.title
+        } else {
+            mSongListName.text = resources.getString(R.string.mine_song_list_title)
+        }
+    }
+
+    private fun updateToolbarAlpha(scrollY: Int, offset: Float) {
+        mFloatingToolbarBg.visibility = View.VISIBLE
+        val alpha = if (scrollY >= offset) 255 else (255 * scrollY / offset).toInt()
+        mFloatingToolbarBg.drawable?.let {
+            val mutable = it.mutate()
+            mutable.alpha = alpha
+            mFloatingToolbarBg.setImageDrawable(mutable)
+        }
+    }
+
+    private fun initFloatingPlay(item: SongListItemObject) {
         mFloatingPlayAll.text = resources.getString(R.string.mine_song_list_header_play_all)
         mFloatingPlayAllCount.text = resources.getString(R.string.mine_song_list_header_song_count, item.count)
+    }
+
+    /**
+     * floating header margin top is negative
+     * let it below the view that both statusBar and toolbar
+     */
+    private fun initFloatingToolbar() {
+        val mlp = mFloatingToolbarBg.layoutParams as RelativeLayout.LayoutParams
+        mlp.topMargin = getTopMargin().toInt()
+        mFloatingToolbarBg.layoutParams = mlp
+    }
+
+    private fun getTopMargin(): Float {
+        val statusBarHeight: Int = StatusBar.getStatusBarHeight(this)
+        // -rcyItemHeaderHeight + toolbarHeight + statusBarHeight
+        return statusBarHeight +
+                resources.getDimension(R.dimen.mine_song_list_toolbar_height) -
+                resources.getDimension(R.dimen.mine_song_list_header_blur_bg)
     }
 
     private fun querySongList() {
@@ -188,7 +217,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
      */
     private fun querySongUrls(count: Int) {
         if (mRcyItems.size > mHeaderSize) {
-            val targetSize = min(mRcyItems.size - mFootererSize, count)
+            val targetSize = min(mRcyItems.size - mFooterSize, count)
             val array = LongArray(targetSize)
             for (i in mHeaderSize until targetSize) {
                 val songItemObject = mRcyItems[i] as SongItemObject
@@ -241,11 +270,11 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             songItem?.songUrl = songs[i].url
 
             MusicLog.v(TAG, "url returned: ${mCurrentSong.songId} vs ${songs[i].id} ${songs[i].url}")
-            if(mCurrentSong.songId == songs[i].id) {
+            if (mCurrentSong.songId == songs[i].id) {
                 songItem?.let { setCurrentSong(it) }
                 mCurrentSong.songUrl = songs[i].url
                 mCurrentSong.songUrl?.let { url ->
-                    if(mMusicBinder != null) {
+                    if (mMusicBinder != null) {
                         val song = mMusicBinder!!.getCurrentSong()
                         songItem?.let { song.id = it.songId }
                         song.title = getCurTitle()
@@ -261,11 +290,11 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     override fun onSongDetail(songDetails: SongDetailRsp?) {
         // todo AsyncTask callback when destroyed
         MusicLog.d(TAG, "onSongDetail: privileges${songDetails?.privileges}\ntracks: ${songDetails?.tracks}")
-        if(songDetails == null || songDetails.tracks.isNullOrEmpty()) {
+        if (songDetails == null || songDetails.tracks.isNullOrEmpty()) {
             return
         }
         mCurrentSongDetail = songDetails.tracks[0]
-        if(mCurrentSongDetail != null) {
+        if (mCurrentSongDetail != null) {
             updateControlPreview(mCurrentSongDetail!!)
         }
     }
@@ -309,7 +338,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     }
 
     private fun updateControlPreview(song: Track) {
-        if(song.al == null) {
+        if (song.al == null) {
             return
         }
         mMusicBinder?.let { it.getCurrentSong().picUrl = song.al.picUrl }
@@ -357,14 +386,14 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             val itemObject = mRcyItems[position] as SongItemObject
             setCurrentSong(itemObject)
             mControllerView.updateDisplay(itemObject.title, itemObject.subTitle)
-            if(mMusicBinder == null) {
+            if (mMusicBinder == null) {
                 MusicLog.e(TAG, "service bind error")
                 return
             }
             val ids: LongArray = arrayOf(itemObject.songId).toLongArray()
 
             mCurrentSongDetail?.id.let {
-                if(it != itemObject.songId) {
+                if (it != itemObject.songId) {
                     querySongDetail(buildArgs(ids), buildCollectors(ids))
                 } else {
                     // click the same item
@@ -373,7 +402,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             }
 
             val url = itemObject.songUrl
-            if(url.isNullOrEmpty()) {
+            if (url.isNullOrEmpty()) {
                 mCurrentSong.songId = itemObject.songId
                 querySongUrls(buildArgs(ids))
             } else {
@@ -403,10 +432,10 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             mControllerView.setPlayer(binder)
 
             val curSong = binder.getCurrentSong()
-            if(binder.isPlaying) {
+            if (binder.isPlaying) {
                 mControllerView.updateTitle(curSong.title)
                 mControllerView.setState(true)
-            } else if(curSong.id > 0) {
+            } else if (curSong.id > 0) {
                 mControllerView.updateDisplay(curSong.title, curSong.subtitle)
             }
         }

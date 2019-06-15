@@ -9,6 +9,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+    <ImageView
+            android:id="@+id/iv_song_list_toolbar_bg"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            android:layout_height="@dimen/mine_song_list_header_blur_bg"
+            android:scaleType="fitXY" />
+
     <LinearLayout
             android:id="@+id/ll_song_list_toolbar"
             android:layout_width="match_parent"
@@ -50,12 +57,13 @@
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/ll_song_list_floating_header"
+            android:id="@+id/ll_song_list_floating_play_all"
             android:layout_below="@id/ll_song_list_toolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/mine_song_list_header_vip_height"
             tools:visibility="visible"
             android:visibility="gone"
+            android:background="@color/color_song_list_floating_header"
             android:orientation="horizontal">
 
         <ImageView

@@ -30,6 +30,7 @@ import com.ltan.music.mine.beans.Track
 import com.ltan.music.mine.contract.ISongListContract
 import com.ltan.music.mine.presenter.SongListPresenter
 import com.ltan.music.service.MusicService
+import com.ltan.music.service.PlayerActivity
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.MusicPlayerController
@@ -430,6 +431,11 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             callback = PlayerCallbackImpl(mControllerView)
             mMusicBinder?.addCallback(callback)
             mControllerView.setPlayer(binder)
+            mControllerView.setOnClickListener {
+                val intent = Intent(this@SongListActivity, PlayerActivity::class.java)
+                intent.putExtra(PlayerActivity.ARG_OBJ, mMusicBinder?.getCurrentSong())
+                startActivity(intent)
+            }
 
             val curSong = binder.getCurrentSong()
             if (binder.isPlaying) {

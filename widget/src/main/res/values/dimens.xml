@@ -66,4 +66,8 @@
     <dimen name="mine_song_list_header_preview_size">120dp</dimen>
     <dimen name="mine_song_list_header_title_margin_l">16dp</dimen>
 
+    <!-- player service -->
+    <dimen name="player_service_title">16dp</dimen>
+    <dimen name="player_service_subtitle">14dp</dimen>
+
 </resources>

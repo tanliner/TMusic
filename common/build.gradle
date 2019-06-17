@@ -3,6 +3,13 @@ dependencies {
 
     implementation deps.support.recyclerview
     implementation deps.support.app_compat
+
+    // for all module to use glide
+    api deps.glide.runtime
+    api deps.glide.transformations
+    // must add annotationProcessor
+    annotationProcessor deps.glide.compiler
+
     api deps.SmartRefreshLayout
 
     api deps.gson

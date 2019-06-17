@@ -20,6 +20,7 @@ import com.ltan.music.mine.beans.SongSubCunt
 import com.ltan.music.mine.contract.IMineContract
 import com.ltan.music.mine.presenter.MinePresenter
 import com.ltan.music.service.MusicService
+import com.ltan.music.service.PlayerActivity
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.MusicPlayerController
@@ -350,6 +351,11 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             mPlayerCallback = PlayerCallbackImpl(mControllerView)
             mMusicBinder?.addCallback(mPlayerCallback!!)
             mControllerView.setPlayer(binder)
+            mControllerView.setOnClickListener {
+                val intent = Intent(context, PlayerActivity::class.java)
+                intent.putExtra(PlayerActivity.ARG_OBJ, mMusicBinder?.getCurrentSong())
+                startActivity(intent)
+            }
         }
     }
 }

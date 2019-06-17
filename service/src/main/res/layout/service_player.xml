@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+    <ImageView
+            android:id="@+id/iv_play_service_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"/>
+
+    <LinearLayout
+            android:id="@+id/ll_tool_bar_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/mine_song_list_toolbar_height"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:orientation="horizontal">
+    </LinearLayout>
+
+    <ImageView
+            android:id="@+id/iv_play_service_back"
+            android:layout_width="48dp"
+            android:layout_height="@dimen/mine_song_list_toolbar_height"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/right_arrow"
+            android:rotation="180"
+            android:scaleType="centerInside"
+            android:contentDescription="back" />
+
+    <LinearLayout
+            android:id="@+id/ll_play_service_song_container"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/mine_song_list_toolbar_height"
+            android:orientation="vertical"
+            android:layout_toEndOf="@id/iv_play_service_back"
+            android:layout_toStartOf="@+id/iv_play_service_share"
+            android:layout_alignTop="@id/iv_play_service_back"
+            android:gravity="center_vertical">
+
+        <TextView
+                android:id="@+id/tv_play_service_song_name"
+                android:layout_toEndOf="@id/iv_play_service_back"
+                style="@style/PlayerServiceTitle"
+                tools:text="Broken Angel"
+                />
+
+        <TextView
+                android:id="@+id/tv_play_service_song_artists"
+                style="@style/PlayerServiceTitle.Subtitle"
+                android:layout_alignStart="@id/tv_play_service_song_name"
+                android:layout_below="@id/tv_play_service_song_name"
+                tools:text="Artists" />
+    </LinearLayout>
+
+    <ImageView
+            android:id="@+id/iv_play_service_share"
+            android:layout_width="64dp"
+            android:layout_height="@dimen/mine_song_list_toolbar_height"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@id/iv_play_service_back"
+            android:scaleType="centerInside"
+            android:src="@drawable/right_arrow" />
+
+</RelativeLayout>

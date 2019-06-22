@@ -1,11 +1,18 @@
 package com.ltan.music.service
 
+import android.graphics.drawable.Drawable
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.ltan.music.basemvp.MusicBaseFragment
+import com.ltan.music.common.EasyBlur
 import com.ltan.music.common.StatusBar
 import com.ltan.music.widget.constants.PlayListItemPreview
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -49,11 +56,48 @@ class PlayFragment : MusicBaseFragment() {
         mSongName.text = mCurSong.title
         mSongArtist.text = mCurSong.subtitle
 
-        Glide.with(requireContext().applicationContext)
+        val appCtx = requireContext().applicationContext
+        Glide.with(appCtx)
             .load(mCurSong.picUrl)
             .error(PlayListItemPreview.ERROR_IMG)
             .placeholder(PlayListItemPreview.PLACEHOLDER_IMG)
-            .transform(BlurTransformation(20, 25))
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    mPreviewBg.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+                        override fun onPreDraw(): Boolean {
+                            mPreviewBg.isDrawingCacheEnabled = true
+                            val bitmap = mPreviewBg.drawingCache
+                            mPreviewBg.viewTreeObserver.removeOnPreDrawListener(this)
+                            val result = EasyBlur.sInstance
+                                .with(appCtx)
+                                .bitmap(bitmap)
+                                .radius(25)
+                                .scale(30)
+                                .blur()
+                            mPreviewBg.setImageBitmap(result)
+                            mPreviewBg.isDrawingCacheEnabled = false
+                            return false
+                        }
+                    })
+                    return false
+                }
+            })
+            .transform(BlurTransformation(20, 25)) /* fast blur in Java layer */
             .into(mPreviewBg)
     }
 

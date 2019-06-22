@@ -26,16 +26,24 @@ class EasyBlur private constructor() {
     private lateinit var mBitmap: Bitmap
     private var mRadius = 0
     private var mScale = SCALE
-    private var mAlgorithm = BlurAlgorithm.RS_BLUR //默认使用rs 模糊图片
+    private var mAlgorithm = BlurAlgorithm.RS_BLUR // default RenderScript
 
     companion object {
         const val TAG = "EasyBlur"
         const val SCALE = 1 / 8.0F //default scale
+        const val MAX_RADIUS = 25
         val sInstance: EasyBlur by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { EasyBlur() }
 
         fun rsBlur(ctx: Context, source: Bitmap, radius: Int, scale: Float): Bitmap {
-            val width = Math.round(source.width * scale)
-            val height = Math.round(source.height * scale)
+            var width = Math.round(source.width * scale)
+            var height = Math.round(source.height * scale)
+
+            if(width <= 2) {
+                width = 2
+            }
+            if(height <= 2) {
+                height = 2
+            }
 
             val outBitmap = Bitmap.createScaledBitmap(source, width, height, false)
 
@@ -87,6 +95,9 @@ class EasyBlur private constructor() {
 
     fun radius(r: Int): EasyBlur {
         mRadius = r
+        if(mRadius > MAX_RADIUS) {
+            mRadius = MAX_RADIUS
+        }
         return this
     }
 
@@ -108,9 +119,6 @@ class EasyBlur private constructor() {
 
     // the render script solution
     fun blur(): Bitmap {
-        if (mRadius <= 0 || mRadius > 26) {
-            throw IllegalArgumentException("radius must be positive, and less than 26")
-        }
         if (mAlgorithm != BlurAlgorithm.RS_BLUR || Build.VERSION.SDK_INT <= 8) {
             throw IllegalArgumentException("mAlgorithm must be renderscript, and sdk greater than 9")
         }

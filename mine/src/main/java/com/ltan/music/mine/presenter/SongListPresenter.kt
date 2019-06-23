@@ -3,11 +3,12 @@ package com.ltan.music.mine.presenter
 import com.ltan.music.business.api.ApiProxy
 import com.ltan.music.business.api.NormalSubscriber
 import com.ltan.music.business.api.RxPresenter
+import com.ltan.music.business.bean.SongDetailRsp
+import com.ltan.music.business.bean.SongUrlRsp
+import com.ltan.music.business.common.CommonApi
 import com.ltan.music.mine.MineApi
 import com.ltan.music.mine.beans.PlayListDetailRsp
-import com.ltan.music.mine.beans.SongDetailRsp
-import com.ltan.music.mine.beans.SongUrlRsp
-import com.ltan.music.mine.contract.ISongListContract
+import com.ltan.music.mine.contract.SongListContract
 
 /**
  * TMusic.com.ltan.music.mine.presenter
@@ -18,7 +19,7 @@ import com.ltan.music.mine.contract.ISongListContract
  * @Date:   2019-05-19
  * @Version: 1.0
  */
-class SongListPresenter : RxPresenter<ISongListContract.View>(), ISongListContract.Presenter {
+class SongListPresenter : RxPresenter<SongListContract.View>(), SongListContract.Presenter {
 
     override fun getPlayListDetail(id: Long) {
         observe(
@@ -32,7 +33,7 @@ class SongListPresenter : RxPresenter<ISongListContract.View>(), ISongListContra
     }
 
     override fun getSongUrl(ids: String) {
-        observe(ApiProxy.instance.getApi(MineApi::class.java)
+        observe(ApiProxy.instance.getApi(CommonApi::class.java)
             .getSongUrl(ids))
             .safeSubscribe(object : NormalSubscriber<SongUrlRsp>(){
                 override fun onNext(t: SongUrlRsp?) {
@@ -42,7 +43,7 @@ class SongListPresenter : RxPresenter<ISongListContract.View>(), ISongListContra
     }
 
     override fun getSongDetail(ids: String, collector: String) {
-        observe(ApiProxy.instance.getApi(MineApi::class.java)
+        observe(ApiProxy.instance.getApi(CommonApi::class.java)
             .getSongDetail(ids, collector))
             .safeSubscribe(object : NormalSubscriber<SongDetailRsp>(){
                 override fun onNext(t: SongDetailRsp?) {

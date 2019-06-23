@@ -41,4 +41,17 @@
         <item name="android:layout_height">@dimen/bottom_media_control_height</item>
     </style>
 
+    <style name="PlayerServiceTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/color_player_service_title</item>
+        <item name="android:textSize">@dimen/player_service_title</item>
+    </style>
+    <style name="PlayerServiceTitle.Subtitle">
+        <item name="android:textColor">@color/color_player_service_subtitle</item>
+        <item name="android:textSize">@dimen/player_service_subtitle</item>
+    </style>
+
 </resources>

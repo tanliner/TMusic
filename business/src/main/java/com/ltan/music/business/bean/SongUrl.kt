@@ -1,4 +1,4 @@
-package com.ltan.music.mine.beans
+package com.ltan.music.business.bean
 
 /**
  * TMusic.com.ltan.music.mine.beans

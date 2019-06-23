@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <com.ltan.music.widget.CircleImageView
+                android:id="@+id/crliv_black_bg"
+                android:layout_gravity="center"
+                android:src="@drawable/cd_player"
+                android:layout_width="@dimen/player_service_cd_bg_height"
+                android:layout_height="@dimen/player_service_cd_bg_height" />
+
+        <com.ltan.music.widget.CircleImageView
+                android:id="@+id/crliv_song_alb"
+                android:layout_gravity="center"
+                android:layout_width="@dimen/player_service_cd_height"
+                android:layout_height="@dimen/player_service_cd_height" />
+    </FrameLayout>
+
+</RelativeLayout>

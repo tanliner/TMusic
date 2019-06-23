@@ -3,10 +3,10 @@ package com.ltan.music.mine.presenter
 import com.ltan.music.business.api.ApiProxy
 import com.ltan.music.business.api.NormalSubscriber
 import com.ltan.music.business.api.RxPresenter
+import com.ltan.music.business.bean.PlayListRsp
 import com.ltan.music.mine.MineApi
-import com.ltan.music.mine.beans.PlayListRsp
 import com.ltan.music.mine.beans.SongSubCunt
-import com.ltan.music.mine.contract.IMineContract
+import com.ltan.music.mine.contract.MineContract
 
 /**
  * TMusic.com.ltan.music.index.presenter
@@ -17,7 +17,7 @@ import com.ltan.music.mine.contract.IMineContract
  * @Date:   2019-04-30
  * @Version: 1.0
  */
-class MinePresenter : RxPresenter<IMineContract.View>(), IMineContract.Presenter {
+class MinePresenter : RxPresenter<MineContract.View>(), MineContract.Presenter {
 
     companion object {
         const val TAG: String = "ltan/MinePresenter-"

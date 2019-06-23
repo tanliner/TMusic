@@ -1,19 +1,19 @@
 package com.ltan.music.mine.contract
 
 import com.ltan.music.basemvp.IBaseContract
-import com.ltan.music.mine.beans.PlayList
+import com.ltan.music.business.bean.PlayList
 import com.ltan.music.mine.beans.SongSubCunt
 
 /**
  * TMusic.com.ltan.music.index.contract
  *
- * @ClassName: IMineContract
+ * @ClassName: MineContract
  * @Description:
  * @Author: tanlin
  * @Date:   2019-04-30
  * @Version: 1.0
  */
-interface IMineContract {
+interface MineContract {
 
     interface View : IBaseContract.View<Presenter> {
         fun onSubcount(data: SongSubCunt?)

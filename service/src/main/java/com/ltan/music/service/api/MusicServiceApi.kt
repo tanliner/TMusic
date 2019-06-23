@@ -1,4 +1,4 @@
-package com.ltan.music.service
+package com.ltan.music.service.api
 
 import com.ltan.music.common.ApiConstants
 import com.ltan.music.common.LyricsRsp
@@ -10,13 +10,13 @@ import retrofit2.http.POST
 /**
  * TMusic.com.ltan.music.service
  *
- * @ClassName: IMusicServiceApi
+ * @ClassName: MusicServiceApi
  * @Description:
  * @Author: tanlin
  * @Date:   2019-05-26
  * @Version: 1.0
  */
-interface IMusicServiceApi {
+interface MusicServiceApi {
 
     /**
      * get lyric for the special song by [id] indicated

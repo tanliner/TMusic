@@ -43,6 +43,16 @@ abstract class MusicBaseFragment : Fragment() {
         super.onDestroyView()
         unBinder.unbind()
     }
+
+    open fun onBack() {
+        val manager = fragmentManager ?: return
+        if (manager.fragments.size == 1) {
+            // call activity finish
+            activity?.finish()
+        } else {
+            manager.popBackStack()
+        }
+    }
 }
 // for butterknife in Kotlin
 operator fun Any.setValue(fragment: Fragment, property: KProperty<*>, v: View) {

@@ -1,5 +1,8 @@
 package com.ltan.music.mine.beans
 
+import com.ltan.music.business.bean.PlayList
+import com.ltan.music.business.bean.Privileges
+
 /**
  * TMusic.com.ltan.music.mine.beans
  *

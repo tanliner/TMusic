@@ -15,6 +15,8 @@ So, I will imitate `Netease Music` for self-learning.
 **subCount**: artistCount/createdPlaylistCount/subPlaylistCount<br>
 **playlist**: the song detail in the play list<br>
 
+[![Build Status](https://travis-ci.org/tanliner/TMusic.svg?branch=master)](https://travis-ci.org/tanliner/TMusic/)
+
 ---
 
 git clone https://github.com/tanliner/TMusic.git<br>

@@ -30,20 +30,21 @@ android {
     }
 
     flavorDimensions "app"
-    productFlavors {
-        Product {
-            dimension "app"
-            // manifestPlaceholders = [
-            //         "SERVER_URL" : "https://api.tik.com/v",
-            //         "APP_CHANNEL": "Product"
-            // ]
-        }
-        Dev {
-            dimension "app"
-            // manifestPlaceholders = [
-            // ]
-        }
-    }
+    // todo chanel pack
+    // productFlavors {
+    //     Product {
+    //         dimension "app"
+    //         // manifestPlaceholders = [
+    //         //         "SERVER_URL" : "https://api.tik.com/v",
+    //         //         "APP_CHANNEL": "Product"
+    //         // ]
+    //     }
+    //     Dev {
+    //         dimension "app"
+    //         // manifestPlaceholders = [
+    //         // ]
+    //     }
+    // }
 
     // If you run into the following issue: "More than one file was found with OS independent path
     // 'META-INF/proguard/androidx-annotations.pro'", please put the following in your gradle file

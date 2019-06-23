@@ -69,5 +69,8 @@
     <!-- player service -->
     <dimen name="player_service_title">16dp</dimen>
     <dimen name="player_service_subtitle">14dp</dimen>
+    <dimen name="player_service_sticker_height">120dp</dimen>
+    <dimen name="player_service_cd_height">201dp</dimen>
+    <dimen name="player_service_cd_bg_height">320dp</dimen>
 
 </resources>

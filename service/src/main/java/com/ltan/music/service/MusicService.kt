@@ -13,6 +13,8 @@ import com.ltan.music.business.api.NormalSubscriber
 import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.LyricsUtil
 import com.ltan.music.common.MusicLog
+import com.ltan.music.common.bean.SongItemObject
+import com.ltan.music.service.api.MusicServiceApi
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
@@ -28,6 +30,7 @@ import io.reactivex.schedulers.Schedulers
 class MusicService : Service() {
     companion object {
         const val TAG = "MusicService"
+        const val ARGS_SONG_URL = "songUrl"
         const val MSG_UPDATE_LYRIC = 0x1001
         const val MSG_UPDATE_GAP = 1000L
     }
@@ -83,11 +86,13 @@ class MusicService : Service() {
         private var mLyrics: LyricsObj? = null
 
         private val mCallbacks: ArrayList<IPlayerCallback>
+        private var mPlayingList: ArrayList<SongItemObject>
 
         init {
             mUpdateThread.start()
             mCallbacks = ArrayList()
             mCurrentSong = SongPlaying(url = "")
+            mPlayingList = ArrayList()
         }
 
         fun init(player: MediaPlayer) {
@@ -141,6 +146,15 @@ class MusicService : Service() {
             return mCurrentSong
         }
 
+        fun setPlayingList(list: ArrayList<SongItemObject>) {
+            mPlayingList.clear()
+            mPlayingList.addAll(list)
+        }
+
+        fun getPlayingList(): ArrayList<SongItemObject> {
+            return mPlayingList
+        }
+
         fun play(song: SongPlaying) {
             play(song.url)
             queryLyric(song)
@@ -161,7 +175,8 @@ class MusicService : Service() {
         }
 
         private fun queryLyric(song: SongPlaying) {
-            ApiProxy.instance.getApi(IMusicServiceApi::class.java).getLyrics(song.id.toString())
+            mLyrics = null
+            ApiProxy.instance.getApi(MusicServiceApi::class.java).getLyrics(song.id.toString())
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .map { rsp ->

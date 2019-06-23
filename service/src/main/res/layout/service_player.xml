@@ -52,6 +52,7 @@
                 style="@style/PlayerServiceTitle.Subtitle"
                 android:layout_alignStart="@id/tv_play_service_song_name"
                 android:layout_below="@id/tv_play_service_song_name"
+                android:drawableRight="@drawable/fragmentation_ic_right"
                 tools:text="Artists" />
     </LinearLayout>
 
@@ -63,5 +64,19 @@
             android:layout_alignTop="@id/iv_play_service_back"
             android:scaleType="centerInside"
             android:src="@drawable/right_arrow" />
+    <ImageView
+            android:id="@+id/iv_cd_white_bg"
+            android:src="@drawable/cd_white_bg"
+            android:layout_below="@id/ll_play_service_song_container"
+            android:layout_marginTop="@dimen/player_service_sticker_height"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/player_service_cd_bg_height" />
+
+    <androidx.viewpager.widget.ViewPager
+            android:id="@+id/vp_song_playing"
+            android:layout_below="@id/ll_play_service_song_container"
+            android:layout_marginTop="@dimen/player_service_sticker_height"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/player_service_cd_bg_height"/>
 
 </RelativeLayout>

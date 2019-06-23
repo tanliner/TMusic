@@ -16,5 +16,5 @@
     <color name="color_song_list_floating_header">#F8FEFEFE</color>
 
     <color name="color_player_service_title">#FEFEFE</color>
-    <color name="color_player_service_subtitle">#A0EFEFEF</color>
+    <color name="color_player_service_subtitle">#DFDFDF</color>
 </resources>

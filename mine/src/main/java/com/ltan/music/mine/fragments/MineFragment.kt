@@ -11,13 +11,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ltan.music.account.utils.AccountUtil
 import com.ltan.music.basemvp.BaseMVPFragment
+import com.ltan.music.business.bean.PlayList
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.ToastUtil
 import com.ltan.music.mine.*
 import com.ltan.music.mine.adapter.*
-import com.ltan.music.mine.beans.PlayList
 import com.ltan.music.mine.beans.SongSubCunt
-import com.ltan.music.mine.contract.IMineContract
+import com.ltan.music.mine.contract.MineContract
 import com.ltan.music.mine.presenter.MinePresenter
 import com.ltan.music.service.MusicService
 import com.ltan.music.service.PlayerActivity
@@ -38,7 +38,7 @@ import kotlin.math.min
  * @Date:   2019-04-26
  * @Version: 1.0
  */
-class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
+class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
     companion object {
         const val TAG = "Mine/Frag/"
         const val ID_CATEGORY_CREATED_LIST = 0
@@ -354,6 +354,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), IMineContract.View {
             mControllerView.setOnClickListener {
                 val intent = Intent(context, PlayerActivity::class.java)
                 intent.putExtra(PlayerActivity.ARG_OBJ, mMusicBinder?.getCurrentSong())
+                intent.putExtra(PlayerActivity.ARG_SONG_LIST, mMusicBinder?.getPlayingList())
                 startActivity(intent)
             }
         }

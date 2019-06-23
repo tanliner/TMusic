@@ -17,20 +17,24 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.jaeger.library.StatusBarUtil
 import com.ltan.music.basemvp.BaseMVPActivity
+import com.ltan.music.business.bean.SongDetailRsp
+import com.ltan.music.business.bean.SongUrl
+import com.ltan.music.business.bean.Track
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.StatusBar
 import com.ltan.music.common.ToastUtil
+import com.ltan.music.common.bean.SongItemObject
+import com.ltan.music.common.song.ReqArgs.buildArgs
+import com.ltan.music.common.song.ReqArgs.buildCollectors
 import com.ltan.music.mine.adapter.PlaceItemBinder
 import com.ltan.music.mine.adapter.SongItemBinder
 import com.ltan.music.mine.adapter.SongListHeaderBinder
 import com.ltan.music.mine.beans.PlayListDetailRsp
-import com.ltan.music.mine.beans.SongDetailRsp
-import com.ltan.music.mine.beans.SongUrl
-import com.ltan.music.mine.beans.Track
-import com.ltan.music.mine.contract.ISongListContract
+import com.ltan.music.mine.contract.SongListContract
 import com.ltan.music.mine.presenter.SongListPresenter
 import com.ltan.music.service.MusicService
 import com.ltan.music.service.PlayerActivity
+import com.ltan.music.service.SongPlaying
 import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.MusicPlayerController
@@ -49,7 +53,7 @@ import kotlin.math.min
  * @Date:   2019-05-19
  * @Version: 1.0
  */
-class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract.View {
+class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.View {
 
     companion object {
         const val ARG_SONG = "song_list"
@@ -94,6 +98,14 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     private var mFooterSize: Int = 0
 
     private lateinit var mDisplayMetrics: DisplayMetrics
+
+    private var mDelayPlayingId: Long = 0
+
+    private fun bindService(songUrl: String?) {
+        val intent = Intent(baseContext, MusicService::class.java)
+        intent.putExtra(MusicService.ARGS_SONG_URL, songUrl)
+        bindService(intent, mServiceConn, Service.BIND_AUTO_CREATE)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         StatusBarUtil.setTransparent(this)
@@ -219,7 +231,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     private fun querySongUrls(count: Int) {
         if (mRcyItems.size > mHeaderSize) {
             val targetSize = min(mRcyItems.size - mFooterSize, count)
-            val array = LongArray(targetSize)
+            val array = Array<Long>(targetSize) { 0 }
             for (i in mHeaderSize until targetSize) {
                 val songItemObject = mRcyItems[i] as SongItemObject
                 array[i] = songItemObject.songId
@@ -254,6 +266,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
                 item.number = (i + 1)
                 item.title = tracks[i].name
                 item.subTitle = buildSubtitle(tracks[i])
+                item.artists = buildArtist(tracks[i])
                 indexMap.put(item.songId, item)
                 mRcyItems.add(mRcyItems.size - 1, item)
             }
@@ -271,18 +284,15 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             songItem?.songUrl = songs[i].url
 
             MusicLog.v(TAG, "url returned: ${mCurrentSong.songId} vs ${songs[i].id} ${songs[i].url}")
-            if (mCurrentSong.songId == songs[i].id) {
-                songItem?.let { setCurrentSong(it) }
+            if (mDelayPlayingId == songs[i].id) {
+                songItem?.let { updateCurrentSong(it) }
                 mCurrentSong.songUrl = songs[i].url
-                mCurrentSong.songUrl?.let { url ->
-                    if (mMusicBinder != null) {
-                        val song = mMusicBinder!!.getCurrentSong()
-                        songItem?.let { song.id = it.songId }
-                        song.title = getCurTitle()
-                        song.url = url
-                        song.subtitle = getCurSubtitle()
-                        mMusicBinder?.play(song)
-                    }
+                val binder = mMusicBinder
+
+                if(songs[i].url != null && binder != null) {
+                    val song = binder.getCurrentSong()
+                    updatePlayingSong(song)
+                    mMusicBinder?.play(song)
                 }
             }
         }
@@ -291,18 +301,24 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
     override fun onSongDetail(songDetails: SongDetailRsp?) {
         // todo AsyncTask callback when destroyed
         MusicLog.d(TAG, "onSongDetail: privileges${songDetails?.privileges}\ntracks: ${songDetails?.tracks}")
-        if (songDetails == null || songDetails.tracks.isNullOrEmpty()) {
+        val tracks = songDetails?.tracks
+        if (tracks == null || tracks.isNullOrEmpty()) {
             return
         }
-        mCurrentSongDetail = songDetails.tracks[0]
-        if (mCurrentSongDetail != null) {
-            updateControlPreview(mCurrentSongDetail!!)
+        mCurrentSongDetail = tracks[0]
+        mCurrentSongDetail?.let {
+            mCurrentSong.picUrl = it.al?.picUrl
+            updateControlPreview(it.al?.picUrl)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        mMusicBinder?.addCallback(mServiceConn.callback)
+        mMusicBinder?.let {
+            it.addCallback(mServiceConn.callback)
+            mCurrentSong.picUrl = it.getCurrentSong().picUrl
+        }
+        updateControlPreview(mCurrentSong.picUrl)
     }
 
     override fun onPause() {
@@ -310,7 +326,26 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
         mMusicBinder?.removeCallback(mServiceConn.callback)
     }
 
+    private fun updatePlayingSong(playing: SongPlaying) {
+        playing.id = mCurrentSong.songId
+        mCurrentSong.songUrl?.let { playing.url = it }
+        playing.title = mCurrentSong.title
+        playing.subtitle = mCurrentSong.subTitle
+        playing.artists =  mCurrentSong.artists
+        playing.picUrl = mCurrentSong.picUrl
+    }
+
     private fun buildSubtitle(tracks: Track): String {
+        val sb = StringBuilder()
+        sb.append(buildArtist(tracks))
+        val album = tracks.al
+        if (album != null) {
+            sb.append(" - ").append(album.name)
+        }
+        return sb.toString()
+    }
+
+    private fun buildArtist(tracks: Track): String {
         val sb = StringBuilder()
         val ar = tracks.ar
         if (ar != null) {
@@ -319,101 +354,91 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             }
             sb.deleteCharAt(sb.length - 1)
         }
-        if (tracks.al != null) {
-            sb.append(" - ").append(tracks.al.name)
-        }
         return sb.toString()
     }
 
-    private fun setCurrentSong(song: SongItemObject) {
+    private fun updateCurrentSong(song: SongItemObject) {
+        mCurrentSong.songId = song.songId
         mCurrentSong.title = song.title
         mCurrentSong.subTitle = song.subTitle
-    }
-
-    private fun getCurTitle(): String? {
-        return mCurrentSong.title
-    }
-
-    private fun getCurSubtitle(): String? {
-        return mCurrentSong.subTitle
-    }
-
-    private fun updateControlPreview(song: Track) {
-        if (song.al == null) {
-            return
+        mCurrentSong.artists = song.artists
+        // the current song detail contains picUrl
+        mCurrentSongDetail?.let {
+            mCurrentSong.picUrl = it.al?.picUrl
+            indexMap[song.songId]?.picUrl = mCurrentSong.picUrl
         }
-        mMusicBinder?.let { it.getCurrentSong().picUrl = song.al.picUrl }
+    }
+
+    /**
+     * Update the bottom control view
+     * ImagePreview song title, subtitle and so on
+     */
+    private fun updateControlPreview(picUrl: String?) {
+        mMusicBinder?.let { it.getCurrentSong().picUrl = picUrl }
         Glide.with(this)
-            .load(song.al.picUrl)
+            .load(picUrl)
             .error(PlayListItemPreview.ERROR_IMG)
             .placeholder(PlayListItemPreview.PLACEHOLDER_IMG)
             .into(mControllerView.mPreviewIv)
     }
 
-    private fun buildArgs(songIds: LongArray): String {
-        val idsBuilder = StringBuilder()
-        idsBuilder.append("[")
-        songIds.forEach {
-            idsBuilder.append(it).append(",")
+    /**
+     * return the adapter data exclude header and footer
+     */
+    private fun getPlayingList(): ArrayList<SongItemObject> {
+        val songItems = ArrayList<SongItemObject>()
+        for (i in mHeaderSize until (mRcyItems.size - mFooterSize)) {
+            val item = mRcyItems[i] as SongItemObject
+            songItems.add(item)
         }
-        idsBuilder.deleteCharAt(idsBuilder.length - 1)
-        idsBuilder.append("]")
-        return idsBuilder.toString()
-    }
-
-    private fun buildCollectors(songIds: LongArray): String {
-        val collectorBuilder = StringBuilder()
-        collectorBuilder.append("[")
-        songIds.forEach {
-            collectorBuilder.append("{\"id\":").append(it).append("},")
-        }
-        collectorBuilder.deleteCharAt(collectorBuilder.length - 1)
-        collectorBuilder.append("]")
-        return collectorBuilder.toString()
-    }
-
-    private fun bindService(songUrl: String?) {
-        // startService(Intent(this@SongListActivity.baseContext, MusicService::class.java))
-        val intent = Intent(baseContext, MusicService::class.java)
-        intent.putExtra("songUrl", songUrl)
-        bindService(intent, mServiceConn, Service.BIND_AUTO_CREATE)
+        return songItems
     }
 
     inner class SongItemClick : ListItemClickListener {
         private val TAG = "SongListAci/SongItemClick"
 
         override fun onItemClick(position: Int, v: View, type: ClickType) {
-            MusicLog.d(TAG, "item click $position $v $type")
+            MusicLog.v(TAG, "item click $position $v $type")
             val itemObject = mRcyItems[position] as SongItemObject
-            setCurrentSong(itemObject)
+            updateCurrentSong(itemObject)
             mControllerView.updateDisplay(itemObject.title, itemObject.subTitle)
-            if (mMusicBinder == null) {
+            val musicBinder = mMusicBinder
+            if (musicBinder == null) {
                 MusicLog.e(TAG, "service bind error")
                 return
             }
-            val ids: LongArray = arrayOf(itemObject.songId).toLongArray()
+            musicBinder.setPlayingList(getPlayingList())
+            val ids = itemObject.songId
 
             mCurrentSongDetail?.id.let {
                 if (it != itemObject.songId) {
                     querySongDetail(buildArgs(ids), buildCollectors(ids))
                 } else {
                     // click the same item
-                    updateControlPreview(mCurrentSongDetail!!)
+                    updateControlPreview(mCurrentSongDetail?.al?.picUrl)
                 }
             }
 
             val url = itemObject.songUrl
+            mCurrentSong.songId = itemObject.songId
+            mCurrentSong.songUrl = url
             if (url.isNullOrEmpty()) {
-                mCurrentSong.songId = itemObject.songId
                 querySongUrls(buildArgs(ids))
+                // delay playing
+                mDelayPlayingId = itemObject.songId
             } else {
-                mCurrentSong.songId = -1
-                val song = mMusicBinder!!.getCurrentSong()
-                song.id = itemObject.songId
-                song.url = url
-                song.title = getCurTitle()
-                song.subtitle = getCurSubtitle()
-                mMusicBinder?.play(song)
+                mDelayPlayingId = 0
+                val song = musicBinder.getCurrentSong()
+                if(itemObject.songId == song.id) {
+                    if(!musicBinder.isPlaying) {
+                        musicBinder.start()
+                    }
+                    // todo go playing page
+                } else {
+                    updatePlayingSong(song)
+                    musicBinder.play(song)
+                    // todo go playing page
+                }
             }
         }
     }
@@ -433,7 +458,10 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), ISongListContract
             mControllerView.setPlayer(binder)
             mControllerView.setOnClickListener {
                 val intent = Intent(this@SongListActivity, PlayerActivity::class.java)
+                val songList = getPlayingList()
                 intent.putExtra(PlayerActivity.ARG_OBJ, mMusicBinder?.getCurrentSong())
+                intent.putParcelableArrayListExtra(PlayerActivity.ARG_SONG_LIST, songList)
+                binder.setPlayingList(songList)
                 startActivity(intent)
             }
 

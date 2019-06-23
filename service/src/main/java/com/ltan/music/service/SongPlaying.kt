@@ -21,5 +21,6 @@ data class SongPlaying(
     // ImageUrl for preview during playing, load image with `Glide`
     var picUrl: String? = null,
     var title: String? = null,
-    var subtitle: String? = null
+    var subtitle: String? = null,
+    var artists: String = ""
 ): Parcelable

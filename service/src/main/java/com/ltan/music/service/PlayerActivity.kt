@@ -3,6 +3,7 @@ package com.ltan.music.service
 import android.os.Bundle
 import com.jaeger.library.StatusBarUtil
 import com.ltan.music.basemvp.MusicBaseActivity
+import com.ltan.music.common.bean.SongItemObject
 
 /**
  * TMusic.com.ltan.music.service
@@ -15,7 +16,8 @@ import com.ltan.music.basemvp.MusicBaseActivity
  */
 class PlayerActivity : MusicBaseActivity() {
     companion object {
-        const val ARG_OBJ = "songObj"
+        const val ARG_OBJ = "song"
+        const val ARG_SONG_LIST = "song_list"
     }
 
     override fun initLayout(): Int {
@@ -23,6 +25,7 @@ class PlayerActivity : MusicBaseActivity() {
     }
 
     private lateinit var mCurSong: SongPlaying
+    private lateinit var mSongList: ArrayList<SongItemObject>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         StatusBarUtil.setTransparent(this)
@@ -33,6 +36,7 @@ class PlayerActivity : MusicBaseActivity() {
         val target = PlayFragment.newInstance()
         val args = Bundle()
         args.putParcelable(ARG_OBJ, mCurSong)
+        args.putParcelableArrayList(ARG_SONG_LIST, mSongList)
         target.arguments = args
         transaction.add(R.id.container, target)
         transaction.commit()
@@ -40,5 +44,7 @@ class PlayerActivity : MusicBaseActivity() {
 
     private fun processArg() {
         mCurSong = intent.getParcelableExtra(ARG_OBJ)
+        mSongList = intent.getParcelableArrayListExtra<SongItemObject>(ARG_SONG_LIST)
+
     }
 }

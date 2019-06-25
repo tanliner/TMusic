@@ -48,17 +48,11 @@ class MusicService : Service() {
         fun onPicUrl(url: String?)
     }
 
-    private lateinit var mediaPlayer: MediaPlayer
     private lateinit var mBinder: MyBinder
-
-    override fun onCreate() {
-        super.onCreate()
-        mediaPlayer = MediaPlayer()
-    }
 
     override fun onBind(intent: Intent?): IBinder? {
         mBinder = MyBinder(this)
-        mBinder.init(mediaPlayer)
+        mBinder.init(MediaPlayer())
         return mBinder
     }
 
@@ -70,7 +64,6 @@ class MusicService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         mBinder.stop()
-        mediaPlayer.release()
     }
 
     class MyBinder(service: MusicService) : Binder(), MediaController.MediaPlayerControl {
@@ -101,6 +94,10 @@ class MusicService : Service() {
                 mBufferPercent = percent
                 onCallBackBuffer(percent)
                 MusicLog.d(TAG, "buffer percent.... $mBufferPercent")
+            }
+            player.setOnErrorListener { mp, what, extra ->
+                MusicLog.e(TAG, "mp:$mp , init what: $what, extra:$extra")
+                false
             }
             player.setOnPreparedListener {
                 start()
@@ -161,15 +158,33 @@ class MusicService : Service() {
         }
 
         private fun play(songUrl: String) {
-            mPlayer.reset()
+            if(isBuffering()) {
+                internalStop()
+                init(MediaPlayer())
+            } else {
+                // Just need reset
+                mPlayer.reset()
+            }
             mPlayer.setDataSource(songUrl)
             mPlayer.prepare()
             // start()
         }
 
+        private fun isBuffering(): Boolean {
+            return mPlayer.isPlaying && mBufferPercent < 100
+        }
+
+        private fun internalStop() {
+            val player = mPlayer
+            Thread(Runnable {
+                player.stop()
+                player.reset()
+                player.release()
+            }).start()
+        }
+
         fun stop() {
-            mPlayer.stop()
-            mPlayer.reset()
+            internalStop()
             mUpdateThread.quitSafely()
             mCallbacks.clear()
         }

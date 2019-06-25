@@ -4,11 +4,12 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
     <ImageView
             android:id="@+id/iv_play_service_bg"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="fitXY"/>
+            android:scaleType="fitXY" />
 
     <LinearLayout
             android:id="@+id/ll_tool_bar_header"
@@ -64,6 +65,7 @@
             android:layout_alignTop="@id/iv_play_service_back"
             android:scaleType="centerInside"
             android:src="@drawable/right_arrow" />
+
     <ImageView
             android:id="@+id/iv_cd_white_bg"
             android:src="@drawable/cd_white_bg"
@@ -77,6 +79,6 @@
             android:layout_below="@id/ll_play_service_song_container"
             android:layout_marginTop="@dimen/player_service_sticker_height"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/player_service_cd_bg_height"/>
+            android:layout_height="@dimen/player_service_cd_bg_height" />
 
 </RelativeLayout>

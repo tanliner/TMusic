@@ -13,3 +13,9 @@ dependencies {
     androidTestImplementation deps.test.runner
     androidTestImplementation deps.test.espresso
 }
+
+android {
+    lintOptions {
+        abortOnError false
+    }
+}

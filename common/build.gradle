@@ -8,7 +8,7 @@ dependencies {
     api deps.glide.runtime
     api deps.glide.transformations
     // must add annotationProcessor
-    annotationProcessor deps.glide.compiler
+    kapt deps.glide.compiler
 
     api deps.SmartRefreshLayout
 

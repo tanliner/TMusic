@@ -44,7 +44,7 @@
         <ImageView
                 android:id="@+id/iv_song_list_search"
                 android:layout_width="@dimen/mine_song_list_toolbar_height"
-                android:src="@drawable/search"
+                android:src="@drawable/icon_search"
                 android:scaleType="centerInside"
                 android:layout_height="match_parent" />
 

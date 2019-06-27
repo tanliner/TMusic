@@ -157,6 +157,10 @@ class MusicService : Service() {
             queryLyric(song)
         }
 
+        fun getLyric(): LyricsObj? {
+            return mLyrics
+        }
+
         private fun play(songUrl: String) {
             if(isBuffering()) {
                 internalStop()

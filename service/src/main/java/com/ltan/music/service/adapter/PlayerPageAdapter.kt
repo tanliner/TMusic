@@ -21,6 +21,9 @@ class PlayerPageAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     companion object {
         private const val TAG = "PlayerPageAdapter"
     }
+
+    var mClick: CdClickListener? = null
+
     private var mSongItems = ArrayList<SongItemObject>()
 
     fun setSongs(songs: ArrayList<SongItemObject>) {
@@ -29,11 +32,16 @@ class PlayerPageAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
         notifyDataSetChanged()
     }
 
+    fun setOnClickListener(l: CdClickListener) {
+        mClick = l
+    }
+
     override fun getItem(position: Int): Fragment {
         val frgPlayerCD = PlayerCDFragment.newInstance()
         val args = Bundle()
         args.putParcelable(PlayerCDFragment.ARGS_SONG, mSongItems[position])
         frgPlayerCD.arguments = args
+        frgPlayerCD.setCdClickListener(mClick)
         return frgPlayerCD
     }
 

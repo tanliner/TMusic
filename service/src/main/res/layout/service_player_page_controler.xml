@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:tools="http://schemas.android.com/tools"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+
+    <LinearLayout
+            android:id="@+id/ll_control_buttons_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/player_page_controller_padding_h"
+            android:paddingEnd="@dimen/player_page_controller_padding_h"
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            >
+
+        <ImageView
+                android:id="@+id/iv_song_play_mode"
+                style="@style/PlayerPageController.Button"
+                android:src="@drawable/icon_player_page_mode_single" />
+
+        <ImageView
+                android:id="@+id/iv_song_last_one"
+                style="@style/PlayerPageController.Button"
+                android:src="@drawable/icon_player_page_last_song" />
+
+        <ImageView
+                android:id="@+id/iv_song_playing"
+                style="@style/PlayerPageController.Button.Large"
+                android:src="@drawable/icon_player_page_play" />
+
+        <ImageView
+                android:id="@+id/iv_song_next_one"
+                style="@style/PlayerPageController.Button"
+                android:src="@drawable/icon_player_page_next_song" />
+
+        <ImageView
+                android:id="@+id/iv_song_play_list"
+                style="@style/PlayerPageController.Button"
+                android:src="@drawable/icon_player_page_song_list" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_above="@id/ll_control_buttons_container"
+            android:paddingStart="@dimen/player_page_controller_progress_padding_h"
+            android:paddingEnd="@dimen/player_page_controller_progress_padding_h">
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="01:19" />
+
+        <ProgressBar
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.Material.ProgressBar.Horizontal"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:layout_weight="1" />
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="04:31" />
+    </LinearLayout>
+
+</merge>

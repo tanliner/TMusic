@@ -315,7 +315,8 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
     override fun onResume() {
         super.onResume()
         mMusicBinder?.let {
-            it.addCallback(mServiceConn.callback)
+            mControllerView.setState(it.isPlaying)
+            it.addCallback(mServiceConn.playerCallback)
             mCurrentSong.picUrl = it.getCurrentSong().picUrl
         }
         updateControlPreview(mCurrentSong.picUrl)
@@ -323,7 +324,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
 
     override fun onPause() {
         super.onPause()
-        mMusicBinder?.removeCallback(mServiceConn.callback)
+        mMusicBinder?.removeCallback(mServiceConn.playerCallback)
     }
 
     private fun updatePlayingSong(playing: SongPlaying) {
@@ -394,6 +395,16 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         return songItems
     }
 
+    private fun goPlayerPage() {
+        val binder = mMusicBinder ?: return
+        val intent = Intent(this@SongListActivity, PlayerActivity::class.java)
+        val songList = getPlayingList()
+        intent.putExtra(PlayerActivity.ARG_OBJ, mMusicBinder?.getCurrentSong())
+        intent.putParcelableArrayListExtra(PlayerActivity.ARG_SONG_LIST, songList)
+        binder.setPlayingList(songList)
+        startActivity(intent)
+    }
+
     inner class SongItemClick : ListItemClickListener {
         private val TAG = "SongListAci/SongItemClick"
 
@@ -433,18 +444,17 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
                     if(!musicBinder.isPlaying) {
                         musicBinder.start()
                     }
-                    // todo go playing page
+                    goPlayerPage()
                 } else {
                     updatePlayingSong(song)
                     musicBinder.play(song)
-                    // todo go playing page
                 }
             }
         }
     }
 
     inner class PlayerConnection : ServiceConnection {
-        lateinit var callback: PlayerCallbackImpl
+        lateinit var playerCallback: PlayerCallbackImpl
         override fun onServiceDisconnected(name: ComponentName?) {
             mMusicBinder = null
         }
@@ -453,16 +463,11 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
             MusicLog.i(TAG, "service connected...")
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
-            callback = PlayerCallbackImpl(mControllerView)
-            mMusicBinder?.addCallback(callback)
+            playerCallback = PlayerCallbackImpl(mControllerView)
+            binder.addCallback(playerCallback)
             mControllerView.setPlayer(binder)
             mControllerView.setOnClickListener {
-                val intent = Intent(this@SongListActivity, PlayerActivity::class.java)
-                val songList = getPlayingList()
-                intent.putExtra(PlayerActivity.ARG_OBJ, mMusicBinder?.getCurrentSong())
-                intent.putParcelableArrayListExtra(PlayerActivity.ARG_SONG_LIST, songList)
-                binder.setPlayingList(songList)
-                startActivity(intent)
+                goPlayerPage()
             }
 
             val curSong = binder.getCurrentSong()

@@ -58,5 +58,5 @@ data class LyricsObj (
 
 data class LyricsLine(
     var start: Long = 0,
-    var txt: String? = null
+    var txt: String = ""
 )

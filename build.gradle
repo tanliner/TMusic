@@ -44,7 +44,7 @@ subprojects {
 
         // for module name rule
         if (name != "style" && name != "widget") {
-            resourcePrefix project.getName() + "_"
+            // resourcePrefix project.getName() + "_"
         }
         defaultConfig {
             minSdkVersion build_versions.min_sdk

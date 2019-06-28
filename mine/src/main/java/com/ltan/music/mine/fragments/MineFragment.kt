@@ -119,10 +119,11 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
 
     override fun onResume() {
         super.onResume()
-        if(mMusicBinder != null) {
-            val curSong = mMusicBinder!!.getCurrentSong()
-            mPlayerCallback?.let { mMusicBinder!!.addCallback(it) }
-            if(mMusicBinder!!.isPlaying) {
+        val binder = mMusicBinder
+        if(binder != null) {
+            val curSong = binder.getCurrentSong()
+            mPlayerCallback?.let { binder.addCallback(it) }
+            if(binder.isPlaying) {
                 mControllerView.updateTitle(curSong.title)
                 mControllerView.setState(true)
             } else {
@@ -134,9 +135,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
 
     override fun onPause() {
         super.onPause()
-        if(mMusicBinder != null) {
-            mPlayerCallback?.let { mMusicBinder!!.removeCallback(it) }
-        }
+        mMusicBinder?.removeCallback(mPlayerCallback!!)
     }
 
     override fun onDestroy() {

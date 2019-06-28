@@ -2,6 +2,7 @@ package com.ltan.music.service
 
 import android.os.Bundle
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.ltan.music.basemvp.BaseMVPFragment
@@ -11,6 +12,7 @@ import com.ltan.music.business.bean.Track
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.bean.SongItemObject
 import com.ltan.music.common.song.ReqArgs
+import com.ltan.music.service.adapter.CdClickListener
 import com.ltan.music.service.contract.ServiceContract
 import com.ltan.music.service.presenter.ServicePresenter
 import com.ltan.music.widget.constants.PlayListItemPreview
@@ -35,8 +37,10 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
         }
     }
 
+    private val mSingerBgFl: FrameLayout by bindView(R.id.fl_cd_singer_preview)
     private val mSongAlbumIv: ImageView by bindView(R.id.crliv_song_alb)
     private var mCurrentSongDetail: Track? = null
+    private var mClickListener: CdClickListener? = null
 
     private lateinit var mCurrentSong: SongItemObject
 
@@ -79,6 +83,10 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
         MusicLog.d(TAG, "onSongUrl returned $songs")
     }
 
+    fun setCdClickListener(clickListener: CdClickListener?) {
+        mClickListener = clickListener
+    }
+
     private fun querySongDetail(ids: String, collector: String) {
         mPresenter.getSongDetail(ids, collector)
     }
@@ -104,6 +112,18 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
             val id = mCurrentSong.songId
             querySongDetail(ReqArgs.buildArgs(id), ReqArgs.buildCollectors(id))
             querySongUrls(ReqArgs.buildArgs(id))
+        }
+        mSingerBgFl.setOnLongClickListener(object : View.OnLongClickListener {
+            override fun onLongClick(v: View?): Boolean {
+                val longClick = mClickListener
+                if (longClick != null) {
+                    return longClick.onLongClick()
+                }
+                return false
+            }
+        })
+        mSingerBgFl.setOnClickListener {
+            mClickListener?.onClick()
         }
     }
 

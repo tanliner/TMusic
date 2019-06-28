@@ -10,6 +10,7 @@ import android.os.IBinder
 import android.widget.MediaController
 import com.ltan.music.business.api.ApiProxy
 import com.ltan.music.business.api.NormalSubscriber
+import com.ltan.music.common.LyricPosition
 import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.LyricsUtil
 import com.ltan.music.common.MusicLog
@@ -44,7 +45,7 @@ class MusicService : Service() {
         fun onPause()
         fun onCompleted(song: SongPlaying)
         fun onBufferUpdated(per: Int)
-        fun updateLyric(title: String?, txt: String?)
+        fun updateLyric(title: String?, txt: String?, index: Int = 0)
         fun onPicUrl(url: String?)
     }
 
@@ -93,7 +94,7 @@ class MusicService : Service() {
             player.setOnBufferingUpdateListener { mp, percent ->
                 mBufferPercent = percent
                 onCallBackBuffer(percent)
-                MusicLog.d(TAG, "buffer percent.... $mBufferPercent")
+                MusicLog.v(TAG, "buffer percent.... $mBufferPercent")
             }
             player.setOnErrorListener { mp, what, extra ->
                 MusicLog.e(TAG, "mp:$mp , init what: $what, extra:$extra")
@@ -225,12 +226,12 @@ class MusicService : Service() {
             }
             val curPos = currentPosition
             val lyricPosition = LyricsUtil.getCurrentSongLine(lyricsObj, curPos)
-            if (lyricPosition.nextDur == 0L && curPos > MSG_UPDATE_GAP) {
+            if (curPos >= duration && curPos > MSG_UPDATE_GAP) {
                 return false
             }
             val msgDelay: Long =
                 if (lyricPosition.nextDur >= MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
-            onCallBackUpdateLyric(mCurrentSong.title, lyricPosition.txt)
+            onCallBackUpdateLyric(mCurrentSong.title, lyricPosition)
 
             val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
             mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
@@ -243,9 +244,9 @@ class MusicService : Service() {
             }
         }
 
-        private fun onCallBackUpdateLyric(title: String?, lyricTxt: String?) {
+        private fun onCallBackUpdateLyric(title: String?, lyricPosition: LyricPosition) {
             mCallbacks.forEach {
-                it.updateLyric(title, lyricTxt)
+                it.updateLyric(title, lyricPosition.txt, lyricPosition.index)
             }
         }
 

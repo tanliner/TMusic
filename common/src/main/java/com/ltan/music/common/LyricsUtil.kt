@@ -22,22 +22,25 @@ object LyricsUtil {
     private const val S_OFFSET = "[offset:"
 
     fun getCurrentSongLine(obj: LyricsObj, pos: Int): LyricPosition {
-        if(obj.songTexts.isNullOrEmpty()) {
+        val texts = obj.songTexts
+        if(texts.isNullOrEmpty()) {
             return LyricPosition()
         }
         var j = 0
         val positionObj = LyricPosition()
-        val size = obj.songTexts!!.size
+        val size = texts.size
         for (i in (size - 1) downTo 0) {
-            val it = obj.songTexts!![i]
+            val it = texts[i]
             if(pos >= it.start) {
-                positionObj.txt = it.txt.toString()
+                positionObj.txt = it.txt
+                positionObj.index = i
+                positionObj.nextDur = 1000
                 j = i
                 break
             }
         }
         if(j < size - 1) {
-            positionObj.nextDur = obj.songTexts!![j + 1].start - pos
+            positionObj.nextDur = texts[j + 1].start - pos
         }
         return positionObj
     }

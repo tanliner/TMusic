@@ -53,6 +53,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         fun newInstance(): PlayFragment {
             return PlayFragment()
         }
+        const val FOCUS_COLOR = Color.GREEN
+        const val DEFAULT_COLOR = Color.WHITE
     }
 
     interface ResourceReady {
@@ -61,6 +63,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     }
 
     private lateinit var mCurSong: SongPlaying
+    private lateinit var mInitSong: SongPlaying
     private var mSongList: ArrayList<SongItemObject>? = null
     private val mPreviewBg: ImageView by bindView(R.id.iv_play_service_bg)
     private val mNavIcon: ImageView by bindView(R.id.iv_play_service_back)
@@ -79,6 +82,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private var mServiceConn = PlayerConnection()
     private var mCurrentSelectId = 0L
     private var mMusicBinder: MusicService.MyBinder? = null
+    private lateinit var mLyricHighLight: ScrollLyricHighLight
 
     override fun initLayout(): Int {
         return R.layout.service_player
@@ -149,6 +153,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     override fun onPause() {
         super.onPause()
         mMusicBinder?.removeCallback(mServiceConn.playerCallback)
+        mInitSong = mCurSong
+        mMusicBinder?.let { mCurSong = it.getCurrentSong() }
     }
 
     private fun updateServiceSong() {
@@ -166,6 +172,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private fun processArgs() {
         val args = arguments ?: return
         mCurSong = args.get(PlayerActivity.ARG_OBJ) as SongPlaying
+        mInitSong = mCurSong
         mSongList = args.getParcelableArrayList(PlayerActivity.ARG_SONG_LIST)
     }
 
@@ -240,27 +247,58 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     /**
      * Get lyric from service
      * new TextView into lyric container
+     *
+     * Space
+     * line -- text
+     * line -- text
+     * ...
+     * Space
      */
     private fun generateLyric() {
+        if(mLyricContainer.childCount > 2 && mCurSong.id == mInitSong.id) {
+            // same song
+            return
+        }
         mLyricContainer.removeAllViews()
         val binder = mMusicBinder ?: return
         val lyrics = binder.getLyric() ?: return
         val texts = lyrics.songTexts ?: return
-        val sb = StringBuilder()
+
+        val headerSpace = TextView(activity)
+        val headerLP = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400)
+        headerSpace.layoutParams = headerLP
+        mLyricContainer.addView(headerSpace)
+
         for (lineObj in texts) {
             val line = lineObj.txt
             val start = lineObj.start
 
-            sb.append(line).append("\n")
-            val tv = TextView(activity)
-            val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            tv.gravity = Gravity.CENTER
-            tv.text = line
-            tv.textSize = 16.0F
-            tv.setTextColor(Color.WHITE)
-            tv.layoutParams = lp
-            mLyricContainer.addView(tv)
+            val itemView = generateLyricItem(line)
+            mLyricContainer.addView(itemView)
         }
+        val footerSpace = TextView(activity)
+        val footerLP = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400)
+        footerSpace.layoutParams = footerLP
+        mLyricContainer.addView(footerSpace)
+    }
+
+    /**
+     * [line] lyric text
+     * [TextView] return the lyric ItemView
+     */
+    private fun generateLyricItem(line: String): TextView {
+        val tv = TextView(activity)
+        val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        if(line.isEmpty()) {
+            // lp.height = 0
+        }
+        tv.setPadding(0, 20, 0, 20)
+        tv.gravity = Gravity.CENTER
+        tv.text = line
+        tv.textSize = 16.0F
+        tv.setTextColor(Color.WHITE)
+        tv.layoutParams = lp
+        return tv
     }
 
     override fun onDestroy() {
@@ -367,11 +405,41 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val musicBinder = service as MusicService.MyBinder
             playerCallback = PlayerCallbackImpl(mPlayerPageController)
+
+            mLyricHighLight = ScrollLyricHighLight()
+            playerCallback.setLyricHighLight(mLyricHighLight)
+
             mMusicBinder = musicBinder
             musicBinder.addCallback(playerCallback)
             // update current media service state
             mPlayerPageController.setState(musicBinder.isPlaying)
             mPlayerPageController.setMediaPlayer(musicBinder)
+        }
+    }
+
+    inner class ScrollLyricHighLight : LyricHighLight {
+        var mLyricLastIndex = -10
+        override fun onHighLight(txt: String?, index: Int) {
+            if(mLyricContainer.childCount <= 1) {
+                return
+            }
+            val headerItemCount = 1
+            var lastIndex = index - 1 + headerItemCount
+            val lyricIndex = index + headerItemCount
+            // last line is empty
+            if (mLyricLastIndex == index - 2) {
+                lastIndex = index - 1
+            }
+            mLyricLastIndex = index
+            val curItem: TextView = mLyricContainer.getChildAt(lyricIndex) as TextView
+            val lastItem: TextView = mLyricContainer.getChildAt(lastIndex) as TextView
+            mLyricContainer.post {
+                curItem.setTextColor(FOCUS_COLOR)
+                lastItem.setTextColor(DEFAULT_COLOR)
+            }
+            mLyricContainer.postDelayed({
+                mSongLyricSv.smoothScrollTo(0, (index - 4) * curItem.measuredHeight)
+            }, 100L)
         }
     }
 }

@@ -95,6 +95,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/ll_play_service_song_container"
             android:layout_above="@id/service_pager_controller"
+            android:scrollbars="none"
             android:visibility="gone"
             tools:visibility="visible">
         <LinearLayout

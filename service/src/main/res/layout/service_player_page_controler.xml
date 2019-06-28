@@ -50,11 +50,13 @@
             android:paddingEnd="@dimen/player_page_controller_progress_padding_h">
 
         <TextView
+                android:id="@+id/tv_current_playing_position"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="01:19" />
 
         <ProgressBar
+                android:id="@+id/progress_playing_song"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 style="@android:style/Widget.Material.ProgressBar.Horizontal"
@@ -63,6 +65,7 @@
                 android:layout_weight="1" />
 
         <TextView
+                android:id="@+id/tv_song_total_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="04:31" />

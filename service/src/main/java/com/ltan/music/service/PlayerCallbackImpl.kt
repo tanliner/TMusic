@@ -18,6 +18,12 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
     }
 
     private val controller = control
+    private lateinit var lyricHighlight: LyricHighLight
+
+    fun setLyricHighLight(highLight: LyricHighLight) {
+        this.lyricHighlight = highLight
+    }
+
     override fun onStart() {
         controller.setState(true)
     }
@@ -37,10 +43,11 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
     /**
      * call on sub thread
      */
-    override fun updateLyric(title: String?, txt: String?) {
-        if(txt.isNullOrEmpty()) {
+    override fun updateLyric(title: String?, txt: String?, index: Int) {
+        if (txt.isNullOrEmpty()) {
             return
         }
+        lyricHighlight.onHighLight(txt, index)
     }
 
     override fun onPicUrl(url: String?) {

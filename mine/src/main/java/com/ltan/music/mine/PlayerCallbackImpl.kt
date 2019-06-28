@@ -41,11 +41,11 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
     /**
      * call on sub thread
      */
-    override fun updateLyric(title: String?, txt: String?) {
-        if(txt.isNullOrEmpty()) {
+    override fun updateLyric(title: String?, txt: String?, index: Int) {
+        if (txt.isNullOrEmpty()) {
             return
         }
-        if(title != controller.getTitle()) {
+        if (title != controller.getTitle()) {
             controller.post { controller.updateTitle(title) }
         }
         controller.post { controller.updateSummary(txt) }

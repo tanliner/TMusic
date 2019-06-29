@@ -165,17 +165,17 @@ class ApiProxy private constructor() {
             val request: Request
 
             val headers = oldRequest.headers()
-            if (headers.size() > 0) {
+            request = if (headers.size() > 0) {
                 val cookie = headers.get(HEADER_COOKIE)
                 val hasToken = cookie?.matches(Regex(HEADER_COOKIE_CSRF_PATTERN))
-                MusicLog.d(TAG, "CSRTokenInterceptor cookies: $cookie")
-                request = if (hasToken != null) {
+                MusicLog.v(TAG, "CSRTokenInterceptor cookies: $cookie")
+                if (hasToken != null) {
                     addParam(oldRequest, BODY_QUERY_CSRF, cookie.split(";")[1])
                 } else {
                     addParam(oldRequest, BODY_QUERY_CSRF, "")
                 }
             } else {
-                request = oldRequest
+                oldRequest
             }
 
             return chain.proceed(request)
@@ -259,7 +259,7 @@ class ApiProxy private constructor() {
 
         private fun selectPostParams(request: Request): Request {
             val json = JsonObject()
-            MusicLog.d(TAG, "request body: ${request.body()}")
+            MusicLog.v(TAG, "request body: ${request.body()}")
             if (request.body() is FormBody) {
                 val oldFormBody = request.body() as FormBody
                 for (i in 0 until oldFormBody.size()) {

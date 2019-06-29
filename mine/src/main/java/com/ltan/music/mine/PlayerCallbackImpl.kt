@@ -1,6 +1,7 @@
 package com.ltan.music.mine
 
 import com.bumptech.glide.Glide
+import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.MusicLog
 import com.ltan.music.service.MusicService
 import com.ltan.music.service.SongPlaying
@@ -36,6 +37,9 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
 
     override fun onBufferUpdated(per: Int) {
         MusicLog.v(TAG, "music source buffered $per")
+    }
+
+    override fun onLyricComplete(lyric: LyricsObj?) {
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.ltan.music.service
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.ComponentName
 import android.content.Context
@@ -10,6 +11,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.os.Message
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +28,7 @@ import com.ltan.music.business.bean.SongDetailRsp
 import com.ltan.music.business.bean.SongUrl
 import com.ltan.music.business.bean.Track
 import com.ltan.music.common.EasyBlur
+import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.StatusBar
 import com.ltan.music.common.bean.SongItemObject
@@ -53,6 +56,9 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         fun newInstance(): PlayFragment {
             return PlayFragment()
         }
+
+        private const val TAG = "PlayFragment"
+        const val UPDATE_PREVIEW = 0x1000
         const val FOCUS_COLOR = Color.GREEN
         const val DEFAULT_COLOR = Color.WHITE
     }
@@ -63,15 +69,17 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     }
 
     private lateinit var mCurSong: SongPlaying
-    private lateinit var mInitSong: SongPlaying
+    private var mLastSongId = -1L
     private var mSongList: ArrayList<SongItemObject>? = null
     private val mPreviewBg: ImageView by bindView(R.id.iv_play_service_bg)
     private val mNavIcon: ImageView by bindView(R.id.iv_play_service_back)
+    private val mCDWhiteBg: ImageView by bindView(R.id.iv_cd_white_bg)
     private val mSongName: TextView by bindView(R.id.tv_play_service_song_name)
     private val mSongArtist: TextView by bindView(R.id.tv_play_service_song_artists)
     private val mSongPager: ViewPager by bindView(R.id.vp_song_playing)
     private val mPagerContainer: LinearLayout by bindView(R.id.ll_pager_container)
     private val mSongLyricSv: ScrollView by bindView(R.id.scroll_lyric)
+    private val mLyricContainerRoot: LinearLayout by bindView(R.id.ll_song_text_container_root)
     private val mLyricContainer: LinearLayout by bindView(R.id.ll_song_text_container)
     private val mPlayerPageController: PlayerPageController by bindView(R.id.service_pager_controller)
 
@@ -83,6 +91,19 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private var mCurrentSelectId = 0L
     private var mMusicBinder: MusicService.MyBinder? = null
     private lateinit var mLyricHighLight: ScrollLyricHighLight
+    private val mHandler = MyHandler()
+    // lyric of current song playing
+    private var mLyric: LyricsObj? = null
+
+    @SuppressLint("HandlerLeak")
+    inner class MyHandler : Handler() {
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+            when (msg.what) {
+                UPDATE_PREVIEW -> updateCurrentBg(msg.obj as SongItemObject)
+            }
+        }
+    }
 
     override fun initLayout(): Int {
         return R.layout.service_player
@@ -153,7 +174,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     override fun onPause() {
         super.onPause()
         mMusicBinder?.removeCallback(mServiceConn.playerCallback)
-        mInitSong = mCurSong
+        mLastSongId = mCurSong.id
         mMusicBinder?.let { mCurSong = it.getCurrentSong() }
     }
 
@@ -172,8 +193,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private fun processArgs() {
         val args = arguments ?: return
         mCurSong = args.get(PlayerActivity.ARG_OBJ) as SongPlaying
-        mInitSong = mCurSong
         mSongList = args.getParcelableArrayList(PlayerActivity.ARG_SONG_LIST)
+        mLastSongId = mCurSong.id
     }
 
     private fun initView() {
@@ -200,7 +221,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             mPlayerPageController.setDataSource(it)
         }
 
-        adapter.setOnClickListener(object : CdClickListener{
+        adapter.setOnClickListener(object : CdClickListener {
             override fun onLongClick(): Boolean {
                 MusicLog.d(TAG, "onLongClick show original image")
                 return true
@@ -212,12 +233,39 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         })
         mPlayerPageController.setOnClickListener { showLyric() }
         mSongLyricSv.setOnClickListener { showLyric() }
-        mLyricContainer.setOnClickListener { showLyric() }
+        mLyricContainerRoot.setOnClickListener { showLyric() }
         mPagerContainer.setOnClickListener { showLyric() }
     }
 
     private fun appendSpace(artist: String): String {
         return StringBuilder().append(artist).append(' ').toString()
+    }
+
+    /**
+     * Blur bg of current song playing by Glide
+     */
+    private fun updateCurrentBg(curItem: SongItemObject) {
+        mSongName.text = curItem.title
+        mSongArtist.text = curItem.artists
+
+        mPreviewBg.setImageResource(PlayListItemPreview.ALPHA_PLAYER_BG)
+
+        // update current playing song, and sync to service
+        mCurrentSelectId = curItem.songId
+        mCurSong.id = curItem.songId
+        mCurSong.title = curItem.title
+        mCurSong.picUrl = curItem.picUrl
+        curItem.songUrl?.let { mCurSong.url = it }
+        updateServiceSong()
+
+        // just replay if picUrl not empty, otherwise to query the song detail and song-url
+        if (curItem.picUrl != null) {
+            setLayoutBg(curItem.picUrl)
+            mMusicBinder?.play(mCurSong)
+        } else {
+            mPresenter.getSongDetail(ReqArgs.buildArgs(curItem.songId), ReqArgs.buildCollectors(curItem.songId))
+            mPresenter.getSongUrl(ReqArgs.buildArgs(curItem.songId))
+        }
     }
 
     private fun setLayoutBg(picUrl: String?) {
@@ -231,15 +279,17 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     }
 
     private fun showLyric() {
-        val lyricShowing = mSongPager.visibility == View.VISIBLE
-        if (lyricShowing) {
-            mSongPager.visibility = View.GONE
+        val isShowingCD = mPagerContainer.visibility == View.VISIBLE
+        if (isShowingCD) {
+            mPagerContainer.visibility = View.GONE
+            mCDWhiteBg.visibility = View.GONE
             mSongLyricSv.visibility = View.VISIBLE
             mSongLyricSv.post {
                 generateLyric()
             }
         } else {
-            mSongPager.visibility = View.VISIBLE
+            mPagerContainer.visibility = View.VISIBLE
+            mCDWhiteBg.visibility = View.VISIBLE
             mSongLyricSv.visibility = View.GONE
         }
     }
@@ -255,31 +305,26 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
      * Space
      */
     private fun generateLyric() {
-        if(mLyricContainer.childCount > 2 && mCurSong.id == mInitSong.id) {
+        if (mLyricContainer.visibility != View.VISIBLE) {
+            return
+        }
+        if (mLyricContainer.childCount > 0 && mCurSong.id == mLastSongId) {
             // same song
             return
         }
+        // todo recycle view
+        mLastSongId = mCurSong.id
         mLyricContainer.removeAllViews()
-        val binder = mMusicBinder ?: return
-        val lyrics = binder.getLyric() ?: return
-        val texts = lyrics.songTexts ?: return
 
-        val headerSpace = TextView(activity)
-        val headerLP = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400)
-        headerSpace.layoutParams = headerLP
-        mLyricContainer.addView(headerSpace)
+        mLyric?.songTexts?.let {
+            for (lineObj in it) {
+                val line = lineObj.txt
+                val start = lineObj.start
 
-        for (lineObj in texts) {
-            val line = lineObj.txt
-            val start = lineObj.start
-
-            val itemView = generateLyricItem(line)
-            mLyricContainer.addView(itemView)
+                val itemView = generateLyricItem(line)
+                mLyricContainer.addView(itemView)
+            }
         }
-        val footerSpace = TextView(activity)
-        val footerLP = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400)
-        footerSpace.layoutParams = footerLP
-        mLyricContainer.addView(footerSpace)
     }
 
     /**
@@ -289,8 +334,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private fun generateLyricItem(line: String): TextView {
         val tv = TextView(activity)
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        if(line.isEmpty()) {
-            // lp.height = 0
+        if (line.isEmpty()) {
+            lp.height = 0
         }
         tv.setPadding(0, 20, 0, 20)
         tv.gravity = Gravity.CENTER
@@ -373,27 +418,16 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
         override fun onPageSelected(position: Int) {
             val curItem = mSongList[position]
-            Handler().postDelayed({
-                mSongName.text = curItem.title
-                mSongArtist.text = curItem.artists
 
-                // update current playing song, and sync to service
-                mCurrentSelectId = curItem.songId
-                mCurSong.id = curItem.songId
-                mCurSong.title = curItem.title
-                mCurSong.picUrl = curItem.picUrl
-                curItem.songUrl?.let { mCurSong.url = it }
-                updateServiceSong()
-
-                // just replay if picUrl not empty, otherwise to query the song detail and song-url
-                if (curItem.picUrl != null) {
-                    setLayoutBg(curItem.picUrl)
-                    mMusicBinder?.play(mCurSong)
-                } else {
-                    mPresenter.getSongDetail(ReqArgs.buildArgs(curItem.songId), ReqArgs.buildCollectors(curItem.songId))
-                    mPresenter.getSongUrl(ReqArgs.buildArgs(curItem.songId))
-                }
-            }, 500)
+            // pause media player
+            mMusicBinder?.pause()
+            mLyricContainer.removeAllViews()
+            mLyric = null
+            mLastSongId = -1
+            mHandler.removeMessages(UPDATE_PREVIEW)
+            val msg = Message.obtain(mHandler, UPDATE_PREVIEW)
+            msg.obj = curItem
+            mHandler.sendMessageDelayed(msg, 500)
         }
     }
 
@@ -411,6 +445,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
             mMusicBinder = musicBinder
             musicBinder.addCallback(playerCallback)
+            // set the current lyric
+            mLyric = musicBinder.getLyric()
             // update current media service state
             mPlayerPageController.setState(musicBinder.isPlaying)
             mPlayerPageController.setMediaPlayer(musicBinder)
@@ -418,20 +454,18 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     }
 
     inner class ScrollLyricHighLight : LyricHighLight {
-        var mLyricLastIndex = -10
+        private var mLyricLastIndex = -10
         override fun onHighLight(txt: String?, index: Int) {
-            if(mLyricContainer.childCount <= 1) {
+            if(mLyricContainer.childCount <= 0) {
                 return
             }
-            val headerItemCount = 1
-            var lastIndex = index - 1 + headerItemCount
-            val lyricIndex = index + headerItemCount
+            var lastIndex = index - 1
             // last line is empty
             if (mLyricLastIndex == index - 2) {
-                lastIndex = index - 1
+                lastIndex = mLyricLastIndex
             }
             mLyricLastIndex = index
-            val curItem: TextView = mLyricContainer.getChildAt(lyricIndex) as TextView
+            val curItem: TextView = mLyricContainer.getChildAt(index) as TextView
             val lastItem: TextView = mLyricContainer.getChildAt(lastIndex) as TextView
             mLyricContainer.post {
                 curItem.setTextColor(FOCUS_COLOR)
@@ -440,6 +474,18 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             mLyricContainer.postDelayed({
                 mSongLyricSv.smoothScrollTo(0, (index - 4) * curItem.measuredHeight)
             }, 100L)
+        }
+
+        override fun onStart() {
+            val binder = mMusicBinder ?: return
+            mCurSong = binder.getCurrentSong()
+        }
+
+        override fun onLyric(lyric: LyricsObj?) {
+            mLyric = lyric
+            if (mSongLyricSv.visibility == View.VISIBLE) {
+                mHandler.post { generateLyric() }
+            }
         }
     }
 }

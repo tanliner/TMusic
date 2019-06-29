@@ -45,6 +45,10 @@ class MusicService : Service() {
         fun onPause()
         fun onCompleted(song: SongPlaying)
         fun onBufferUpdated(per: Int)
+        /**
+         * lyric ready
+         */
+        fun onLyricComplete(lyric: LyricsObj?)
         fun updateLyric(title: String?, txt: String?, index: Int = 0)
         fun onPicUrl(url: String?)
     }
@@ -130,8 +134,7 @@ class MusicService : Service() {
         fun addCallback(cb: IPlayerCallback) {
             mCallbacks.add(cb)
             if (isPlaying) {
-                mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
-                mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
+                updateCallbackLyric(mLyrics)
             }
             cb.onPicUrl(mCurrentSong.picUrl)
         }
@@ -210,8 +213,9 @@ class MusicService : Service() {
                     override fun onNext(t: LyricsObj?) {
                         MusicLog.d(MusicService.TAG, "lyric of ${song.title}: $t")
                         mLyrics = t
+                        onLyricComplete(t)
                         mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
-                        mLyricsUpdater.sendMessage(mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC))
+                        updateCallbackLyric(t)
                     }
                 })
         }
@@ -236,6 +240,12 @@ class MusicService : Service() {
             val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
             mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
             return true
+        }
+
+        private fun onLyricComplete(lyric: LyricsObj?) {
+            mCallbacks.forEach {
+                it.onLyricComplete(lyric)
+            }
         }
 
         private fun onCallBackBuffer(per: Int) {
@@ -282,8 +292,8 @@ class MusicService : Service() {
 
         override fun pause() {
             mPlayer.pause()
-            onCallBackPause()
             mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
+            onCallBackPause()
         }
 
         override fun getBufferPercentage(): Int {
@@ -305,8 +315,7 @@ class MusicService : Service() {
         override fun start() {
             mPlayer.start()
             onCallBackStart()
-            mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
-            mLyricsUpdater.sendEmptyMessage(MSG_UPDATE_LYRIC)
+            updateCallbackLyric(mLyrics)
         }
 
         override fun getAudioSessionId(): Int {

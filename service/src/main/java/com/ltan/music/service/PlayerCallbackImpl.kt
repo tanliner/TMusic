@@ -1,5 +1,6 @@
 package com.ltan.music.service
 
+import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.MusicLog
 import com.ltan.music.service.widget.PlayerPageController
 
@@ -26,6 +27,7 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
 
     override fun onStart() {
         controller.setState(true)
+        lyricHighlight.onStart()
     }
 
     override fun onPause() {
@@ -38,6 +40,10 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
 
     override fun onBufferUpdated(per: Int) {
         MusicLog.v(TAG, "music source buffered $per")
+    }
+
+    override fun onLyricComplete(lyric: LyricsObj?) {
+        lyricHighlight.onLyric(lyric)
     }
 
     /**

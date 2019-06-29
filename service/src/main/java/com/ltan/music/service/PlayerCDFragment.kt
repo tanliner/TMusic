@@ -75,12 +75,15 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
         }
         mCurrentSongDetail = tracks[0]
         mCurrentSongDetail?.let {
+            // update picUrl, the ImageBg need
+            mCurrentSong.picUrl = it.al?.picUrl
             showPreviewImage(it.al?.picUrl)
         }
     }
 
     override fun onSongUrl(songs: List<SongUrl>?) {
         MusicLog.d(TAG, "onSongUrl returned $songs")
+        mCurrentSong.songUrl = songs?.get(0)?.url
     }
 
     fun setCdClickListener(clickListener: CdClickListener?) {
@@ -101,7 +104,7 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
             return
         }
         mCurrentSong = args.getParcelable(ARGS_SONG) ?: throw IllegalArgumentException("Must process a SongItemObject")
-        MusicLog.i(TAG, "mCurrentSong : $mCurrentSong")
+        MusicLog.v(TAG, "mCurrentSong : $mCurrentSong")
     }
 
     private fun initView(root: View) {

@@ -1,5 +1,7 @@
 package com.ltan.music.service
 
+import com.ltan.music.common.LyricsObj
+
 /**
  * TMusic.com.ltan.music.service
  *
@@ -10,5 +12,7 @@ package com.ltan.music.service
  * @Version: 1.0
  */
 interface LyricHighLight {
+    fun onStart()
+    fun onLyric(lyric: LyricsObj?)
     fun onHighLight(txt: String?, index: Int = 0)
 }

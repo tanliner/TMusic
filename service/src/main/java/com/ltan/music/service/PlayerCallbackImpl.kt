@@ -32,6 +32,7 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
 
     override fun onPause() {
         controller.setState(false)
+        lyricHighlight.onPause()
     }
 
     override fun onCompleted(song: SongPlaying) {

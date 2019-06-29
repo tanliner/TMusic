@@ -13,6 +13,8 @@ import com.ltan.music.common.LyricsObj
  */
 interface LyricHighLight {
     fun onStart()
+    fun onPause()
+    fun onComplete()
     fun onLyric(lyric: LyricsObj?)
     fun onHighLight(txt: String?, index: Int = 0)
 }

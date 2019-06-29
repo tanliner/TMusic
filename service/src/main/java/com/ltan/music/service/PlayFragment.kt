@@ -58,7 +58,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         }
 
         private const val TAG = "PlayFragment"
-        const val UPDATE_PREVIEW = 0x1000
+        const val MSG_UPDATE_PREVIEW = 0x1000
+        const val MSG_UPDATE_SEEKBAR_PROGRESS = 0x1001
         const val FOCUS_COLOR = Color.GREEN
         const val DEFAULT_COLOR = Color.WHITE
     }
@@ -100,7 +101,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
             when (msg.what) {
-                UPDATE_PREVIEW -> updateCurrentBg(msg.obj as SongItemObject)
+                MSG_UPDATE_PREVIEW -> updateCurrentBg(msg.obj as SongItemObject)
+                MSG_UPDATE_SEEKBAR_PROGRESS -> updateCurrentPos()
             }
         }
     }
@@ -128,66 +130,6 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         initView()
         setLayoutBg(mCurSong.picUrl)
         bindService(mCurSong.url)
-    }
-
-    override fun initPresenter() {
-        mPresenter.attachView(this)
-    }
-
-    override fun onSongUrl(songs: List<SongUrl>?) {
-        if (songs.isNullOrEmpty()) {
-            return
-        }
-        for (i in 0 until songs.size) {
-            if (mCurrentSelectId == songs[i].id) {
-                songs[i].url?.let { mCurSong.url = it }
-                break
-            }
-        }
-
-        updateServiceSong()
-        mMusicBinder?.play(mCurSong)
-    }
-
-    override fun onSongDetail(songDetails: SongDetailRsp?) {
-        val tracks = songDetails?.tracks
-        if (tracks == null || tracks.isNullOrEmpty()) {
-            return
-        }
-        mCurrentSongDetail = tracks[0]
-        mCurrentSongDetail?.let {
-            MusicLog.i(TAG, "onSongDetail pic: ${it.al}")
-            setLayoutBg(it.al?.picUrl)
-            mCurSong.picUrl = it.al?.picUrl
-            updateServiceSong()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mMusicBinder?.let {
-            mPlayerPageController.setState(it.isPlaying)
-            it.addCallback(mServiceConn.playerCallback)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mMusicBinder?.removeCallback(mServiceConn.playerCallback)
-        mLastSongId = mCurSong.id
-        mMusicBinder?.let { mCurSong = it.getCurrentSong() }
-    }
-
-    private fun updateServiceSong() {
-        val song = mMusicBinder?.getCurrentSong() ?: return
-        val curSong = mCurSong
-
-        song.id = curSong.id
-        song.url = curSong.url
-        song.title = curSong.title
-        song.subtitle = curSong.subtitle
-        song.artists = curSong.artists
-        song.picUrl = curSong.picUrl
     }
 
     private fun processArgs() {
@@ -237,6 +179,71 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         mPagerContainer.setOnClickListener { showLyric() }
     }
 
+    override fun initPresenter() {
+        mPresenter.attachView(this)
+    }
+
+    override fun onSongUrl(songs: List<SongUrl>?) {
+        if (songs.isNullOrEmpty()) {
+            return
+        }
+        for (i in 0 until songs.size) {
+            if (mCurrentSelectId == songs[i].id) {
+                songs[i].url?.let { mCurSong.url = it }
+                break
+            }
+        }
+
+        updateServiceSong()
+        mMusicBinder?.play(mCurSong)
+    }
+
+    override fun onSongDetail(songDetails: SongDetailRsp?) {
+        val tracks = songDetails?.tracks
+        if (tracks == null || tracks.isNullOrEmpty()) {
+            return
+        }
+        mCurrentSongDetail = tracks[0]
+        mCurrentSongDetail?.let {
+            MusicLog.i(TAG, "onSongDetail pic: ${it.al}")
+            setLayoutBg(it.al?.picUrl)
+            mCurSong.picUrl = it.al?.picUrl
+            updateServiceSong()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mMusicBinder?.let {
+            mPlayerPageController.setState(it.isPlaying)
+            if (it.isPlaying) {
+                updateCurrentPos()
+            }
+            it.addCallback(mServiceConn.playerCallback)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mHandler.removeMessages(MSG_UPDATE_SEEKBAR_PROGRESS)
+        mHandler.removeMessages(MSG_UPDATE_PREVIEW)
+        mMusicBinder?.removeCallback(mServiceConn.playerCallback)
+        mLastSongId = mCurSong.id
+        mMusicBinder?.let { mCurSong = it.getCurrentSong() }
+    }
+
+    private fun updateServiceSong() {
+        val song = mMusicBinder?.getCurrentSong() ?: return
+        val curSong = mCurSong
+
+        song.id = curSong.id
+        song.url = curSong.url
+        song.title = curSong.title
+        song.subtitle = curSong.subtitle
+        song.artists = curSong.artists
+        song.picUrl = curSong.picUrl
+    }
+
     private fun appendSpace(artist: String): String {
         return StringBuilder().append(artist).append(' ').toString()
     }
@@ -276,6 +283,14 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             .listener(DefRequestListener(ImageBlur(appCtx, mPreviewBg)))
             .transform(BlurTransformation(20, 25)) /* fast blur in Java layer */
             .into(mPreviewBg)
+    }
+
+    private fun updateCurrentPos() {
+        val binder = mMusicBinder ?: return
+        mPlayerPageController.updateCur(binder.currentPosition.toLong())
+        mHandler.removeMessages(MSG_UPDATE_SEEKBAR_PROGRESS)
+        val msg = mHandler.obtainMessage(MSG_UPDATE_SEEKBAR_PROGRESS)
+        mHandler.sendMessageDelayed(msg, 1000)
     }
 
     private fun showLyric() {
@@ -335,7 +350,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         val tv = TextView(activity)
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         if (line.isEmpty()) {
-            lp.height = 0
+            // lp.height = 0
         }
         tv.setPadding(0, 20, 0, 20)
         tv.gravity = Gravity.CENTER
@@ -424,8 +439,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             mLyricContainer.removeAllViews()
             mLyric = null
             mLastSongId = -1
-            mHandler.removeMessages(UPDATE_PREVIEW)
-            val msg = Message.obtain(mHandler, UPDATE_PREVIEW)
+            mHandler.removeMessages(MSG_UPDATE_PREVIEW)
+            val msg = Message.obtain(mHandler, MSG_UPDATE_PREVIEW)
             msg.obj = curItem
             mHandler.sendMessageDelayed(msg, 500)
         }
@@ -450,6 +465,10 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             // update current media service state
             mPlayerPageController.setState(musicBinder.isPlaying)
             mPlayerPageController.setMediaPlayer(musicBinder)
+            // update seekbar position
+            if (musicBinder.isPlaying) {
+                updateCurrentPos()
+            }
         }
     }
 
@@ -459,26 +478,49 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             if(mLyricContainer.childCount <= 0) {
                 return
             }
-            var lastIndex = index - 1
-            // last line is empty
-            if (mLyricLastIndex == index - 2) {
-                lastIndex = mLyricLastIndex
+            updateHighlight(index)
+        }
+
+        /**
+         * Please run on UI
+         */
+        private fun updateHighlight(index: Int) {
+            val container = mLyricContainer
+            mHandler.post {
+                for (i in 0 until container.childCount) {
+                    val child = container.getChildAt(i) as TextView
+                    if (index == i) {
+                        child.setTextColor(FOCUS_COLOR)
+                    } else {
+                        child.setTextColor(DEFAULT_COLOR)
+                    }
+                }
             }
             mLyricLastIndex = index
-            val curItem: TextView = mLyricContainer.getChildAt(index) as TextView
-            val lastItem: TextView = mLyricContainer.getChildAt(lastIndex) as TextView
-            mLyricContainer.post {
-                curItem.setTextColor(FOCUS_COLOR)
-                lastItem.setTextColor(DEFAULT_COLOR)
-            }
-            mLyricContainer.postDelayed({
-                mSongLyricSv.smoothScrollTo(0, (index - 4) * curItem.measuredHeight)
+            // delay to scroll all lyric lines
+            mHandler.postDelayed({
+                val itemHeight = container.getChildAt(index).measuredHeight
+                mSongLyricSv.smoothScrollTo(0, (index - 6) * itemHeight)
             }, 100L)
         }
 
         override fun onStart() {
             val binder = mMusicBinder ?: return
             mCurSong = binder.getCurrentSong()
+            if (mLyricLastIndex == 0) {
+                mSongLyricSv.smoothScrollTo(0, 0)
+            }
+            mPlayerPageController.updateMax(binder.duration)
+            mHandler.obtainMessage(MSG_UPDATE_SEEKBAR_PROGRESS).sendToTarget()
+        }
+
+        override fun onPause() {
+            mHandler.removeMessages(MSG_UPDATE_SEEKBAR_PROGRESS)
+        }
+
+        override fun onComplete() {
+            mLyricLastIndex = 0
+            mHandler.removeMessages(MSG_UPDATE_SEEKBAR_PROGRESS)
         }
 
         override fun onLyric(lyric: LyricsObj?) {

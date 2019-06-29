@@ -58,6 +58,7 @@ class MusicService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         mBinder = MyBinder(this)
         mBinder.init(MediaPlayer())
+        mBinder.checkThread()
         return mBinder
     }
 
@@ -86,8 +87,14 @@ class MusicService : Service() {
         private val mCallbacks: ArrayList<IPlayerCallback>
         private var mPlayingList: ArrayList<SongItemObject>
 
+        // for media player release, BLOCKED when player._reset or player._release in Native
+        private val mMPReleaseThreads = ArrayList<Thread>()
+        private var mReleaseThread: HandlerThread = HandlerThread("MusicService/MediaPlayerRelease")
+        private lateinit var mReleaseThreadsWacher: Handler
+
         init {
             mUpdateThread.start()
+            mReleaseThread.start()
             mCallbacks = ArrayList()
             mCurrentSong = SongPlaying(url = "")
             mPlayingList = ArrayList()
@@ -121,6 +128,7 @@ class MusicService : Service() {
                     }
                 }
             })
+            mReleaseThreadsWacher = Handler(mReleaseThread.looper)
         }
 
         fun getService(): MusicService {
@@ -174,27 +182,52 @@ class MusicService : Service() {
                 mPlayer.reset()
             }
             mPlayer.setDataSource(songUrl)
-            mPlayer.prepare()
+            // asynchronously
+            mPlayer.prepareAsync()
             // start()
         }
 
         private fun isBuffering(): Boolean {
-            return mPlayer.isPlaying && mBufferPercent < 100
+            return mBufferPercent < 100
         }
 
         private fun internalStop() {
             val player = mPlayer
-            Thread(Runnable {
+            val t = Thread(Runnable {
                 player.stop()
                 player.reset()
                 player.release()
-            }).start()
+            })
+            t.name = "Thread-$mBufferPercent%:" + System.currentTimeMillis() + ":" + mCurrentSong.title
+            mMPReleaseThreads.add(t)
+            t.start()
         }
 
         fun stop() {
             internalStop()
             mUpdateThread.quitSafely()
             mCallbacks.clear()
+        }
+
+        /**
+         * because _reset the MediaPlayer will block Main-Thread, will use a sub thread to
+         * stop & release MP.
+         *
+         * But, we want to know how long it is.
+         * see [internalStop]
+         */
+        fun checkThread() {
+            val iterator = mMPReleaseThreads.iterator()
+            while (iterator.hasNext()) {
+                val t = iterator.next()
+                val state = t.state
+                val alive = t.isAlive
+                MusicLog.i(TAG, "watchThread : ${t.name}, state: $state, isAlive: $alive")
+                if (state == Thread.State.TERMINATED || !alive) {
+                    iterator.remove()
+                }
+            }
+            mReleaseThreadsWacher.postDelayed({ checkThread() }, 5000)
         }
 
         private fun queryLyric(song: SongPlaying) {
@@ -302,6 +335,9 @@ class MusicService : Service() {
 
         override fun seekTo(pos: Int) {
             mPlayer.seekTo(pos)
+            if(isPlaying) {
+                updateCallbackLyric(mLyrics)
+            }
         }
 
         override fun getCurrentPosition(): Int {

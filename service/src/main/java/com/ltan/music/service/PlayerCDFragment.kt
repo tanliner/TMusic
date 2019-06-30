@@ -8,7 +8,6 @@ import com.bumptech.glide.Glide
 import com.ltan.music.basemvp.BaseMVPFragment
 import com.ltan.music.business.bean.SongDetailRsp
 import com.ltan.music.business.bean.SongUrl
-import com.ltan.music.business.bean.Track
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.bean.SongItemObject
 import com.ltan.music.common.song.ReqArgs
@@ -39,7 +38,6 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
 
     private val mSingerBgFl: FrameLayout by bindView(R.id.fl_cd_singer_preview)
     private val mSongAlbumIv: ImageView by bindView(R.id.crliv_song_alb)
-    private var mCurrentSongDetail: Track? = null
     private var mClickListener: CdClickListener? = null
 
     private lateinit var mCurrentSong: SongItemObject
@@ -64,7 +62,7 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
 
     override fun onResume() {
         super.onResume()
-        showPreviewImage(mCurrentSongDetail?.al?.picUrl)
+        showPreviewImage(mCurrentSong.picUrl)
     }
 
     override fun onSongDetail(songDetails: SongDetailRsp?) {
@@ -73,11 +71,12 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
         if (tracks == null || tracks.isNullOrEmpty()) {
             return
         }
-        mCurrentSongDetail = tracks[0]
-        mCurrentSongDetail?.let {
-            // update picUrl, the ImageBg need
-            mCurrentSong.picUrl = it.al?.picUrl
-            showPreviewImage(it.al?.picUrl)
+        for (song in tracks) {
+            if (song.id == mCurrentSong.songId) {
+                mCurrentSong.picUrl = song.al?.picUrl
+                showPreviewImage(song.al?.picUrl)
+                break
+            }
         }
     }
 

@@ -156,6 +156,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             for (i in 0 until it.size) {
                 if (it[i].songId == mCurSong.id) {
                     index = i
+                    break
                 }
             }
             mSongPager.setCurrentItem(index, true)
@@ -205,7 +206,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         }
         mCurrentSongDetail = tracks[0]
         mCurrentSongDetail?.let {
-            MusicLog.i(TAG, "onSongDetail pic: ${it.al}")
+            MusicLog.d(TAG, "onSongDetail pic for ${mCurSong.title}: ${it.al?.picUrl}")
             setLayoutBg(it.al?.picUrl)
             mCurSong.picUrl = it.al?.picUrl
             updateServiceSong()

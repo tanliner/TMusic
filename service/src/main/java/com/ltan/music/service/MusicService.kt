@@ -108,10 +108,12 @@ class MusicService : Service() {
                 MusicLog.v(TAG, "buffer percent.... $mBufferPercent")
             }
             player.setOnErrorListener { mp, what, extra ->
+                // (-38,0) https://www.cnblogs.com/getherBlog/p/3939033.html
                 MusicLog.e(TAG, "mp:$mp , init what: $what, extra:$extra")
                 false
             }
             player.setOnPreparedListener {
+                // (-38,0), already in onPrepared
                 start()
             }
             player.setOnCompletionListener {

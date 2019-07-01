@@ -59,4 +59,12 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
 
     override fun onPicUrl(url: String?) {
     }
+
+    /**
+     * ignore the [subtitle], artist1/artist2-xx
+     */
+    override fun updateTitle(title: String?, subtitle: String?, artist: String?) {
+        // prevent compile error
+        lyricHighlight.onSongChange(title.toString(), artist.toString())
+    }
 }

@@ -5,9 +5,14 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.SeekBar
+import android.widget.TextView
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.bean.SongItemObject
+import com.ltan.music.common.song.MusicController
+import com.ltan.music.common.song.PlayMode
 import com.ltan.music.service.R
 
 /**
@@ -36,7 +41,7 @@ class PlayerPageController @JvmOverloads constructor(
     private var mSeekBar: SeekBar
     private var seekBarFromUsr = false
 
-    private lateinit var mController: MediaController.MediaPlayerControl
+    private lateinit var mController: MusicController
     private lateinit var mDataSource: ArrayList<SongItemObject>
     // current index of data list
     private var mCurPlayIndex = 0
@@ -57,17 +62,11 @@ class PlayerPageController @JvmOverloads constructor(
     private fun init() {
         mPlayModeIv.setOnClickListener {
             Log.d(TAG, "init mPlayModeIv click")
+            mController.onModeChange(PlayMode.SINGLE)
         }
         mPlayLastIv.setOnClickListener {
             Log.d(TAG, "init mPlayLastIv click")
-            if (mDataSource.size > 0) {
-                val next = mCurPlayIndex - 1
-                if (next < 0) {
-                    // if last -1, select the last one
-                    mCurPlayIndex = mDataSource.size - 1
-                }
-                mCurPlayIndex = next % mDataSource.size
-            }
+            mController.onLast()
         }
         mPlayingIv.setOnClickListener {
             Log.d(TAG, "init mPlayingIv click")
@@ -81,16 +80,12 @@ class PlayerPageController @JvmOverloads constructor(
         }
         mPlayNextIv.setOnClickListener {
             Log.d(TAG, "init mPlayNextIv click")
-            if (mDataSource.size > 0) {
-                val next = mCurPlayIndex + 1 // circle
-                mCurPlayIndex = next % mDataSource.size
-            }
-
+            mController.onNext()
         }
         mPlayListIv.setOnClickListener {
             Log.d(TAG, "init mPlayListIv click ${mDataSource.size}")
+            mController.showList()
         }
-
 
         mSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -123,7 +118,7 @@ class PlayerPageController @JvmOverloads constructor(
         }
     }
 
-    fun setMediaPlayer(controller: MediaController.MediaPlayerControl) {
+    fun setMediaPlayer(controller: MusicController) {
         mController = controller
         mCurPosTv.text = processTimeStr(mController.currentPosition.toLong())
         mSongDurationTv.text = processTimeStr(mController.duration.toLong())

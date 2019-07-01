@@ -60,4 +60,8 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
             .load(url)
             .into(controller.mPreviewIv)
     }
+
+    override fun updateTitle(title: String?, subtitle: String?, artist: String?) {
+        controller.updateDisplay(title, subtitle)
+    }
 }

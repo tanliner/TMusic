@@ -17,4 +17,5 @@ interface LyricHighLight {
     fun onComplete()
     fun onLyric(lyric: LyricsObj?)
     fun onHighLight(txt: String?, index: Int = 0)
+    fun onSongChange(title: String, subtitle: String)
 }

@@ -101,7 +101,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
             when (msg.what) {
-                MSG_UPDATE_PREVIEW -> updateCurrentBg(msg.obj as SongItemObject)
+                // MSG_UPDATE_PREVIEW -> updateCurrentBg(msg.obj as SongItemObject)
+                MSG_UPDATE_PREVIEW -> onPageSelected(msg.obj as SongItemObject)
                 MSG_UPDATE_SEEKBAR_PROGRESS -> updateCurrentPos()
             }
         }
@@ -249,30 +250,41 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         return StringBuilder().append(artist).append(' ').toString()
     }
 
-    /**
-     * Blur bg of current song playing by Glide
-     */
-    private fun updateCurrentBg(curItem: SongItemObject) {
-        mSongName.text = curItem.title
-        mSongArtist.text = curItem.artists
+    private fun updateTitle(title: String? = "", artist: String? = "") {
+        val pos = mMusicBinder?.getCurrentIndex() ?: return // binder is null
+        val curItem = mSongList?.get(pos) ?: return         // item is null
+        updateTitle(curItem)
+    }
 
-        mPreviewBg.setImageResource(PlayListItemPreview.ALPHA_PLAYER_BG)
+    private fun updateTitle(item: SongItemObject) {
+        mSongName.text = item.title
+        mSongArtist.text = item.artists
+    }
 
-        // update current playing song, and sync to service
-        mCurrentSelectId = curItem.songId
-        mCurSong.id = curItem.songId
-        mCurSong.title = curItem.title
-        mCurSong.picUrl = curItem.picUrl
-        curItem.songUrl?.let { mCurSong.url = it }
+    private fun onPageSelected(item: SongItemObject) {
+        updateTitle(item)
+        updateCurrentSong(item)
         updateServiceSong()
+        prepareSongPlaying(item)
+    }
 
+    private fun updateCurrentSong(item: SongItemObject) {
+        // update current playing song, and sync to service
+        mCurrentSelectId = item.songId
+        mCurSong.id = item.songId
+        mCurSong.title = item.title
+        mCurSong.picUrl = item.picUrl
+        item.songUrl?.let { mCurSong.url = it }
+    }
+
+    private fun prepareSongPlaying(song: SongItemObject) {
         // just replay if picUrl not empty, otherwise to query the song detail and song-url
-        if (curItem.picUrl != null) {
-            setLayoutBg(curItem.picUrl)
+        if (song.picUrl != null) {
+            setLayoutBg(song.picUrl)
             mMusicBinder?.play(mCurSong)
         } else {
-            mPresenter.getSongDetail(ReqArgs.buildArgs(curItem.songId), ReqArgs.buildCollectors(curItem.songId))
-            mPresenter.getSongUrl(ReqArgs.buildArgs(curItem.songId))
+            mPresenter.getSongDetail(ReqArgs.buildArgs(song.songId), ReqArgs.buildCollectors(song.songId))
+            mPresenter.getSongUrl(ReqArgs.buildArgs(song.songId))
         }
     }
 
@@ -476,7 +488,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     inner class ScrollLyricHighLight : LyricHighLight {
         private var mLyricLastIndex = -10
         override fun onHighLight(txt: String?, index: Int) {
-            if(mLyricContainer.childCount <= 0) {
+            if (mLyricContainer.childCount <= 0) {
                 return
             }
             updateHighlight(index)
@@ -529,6 +541,10 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             if (mSongLyricSv.visibility == View.VISIBLE) {
                 mHandler.post { generateLyric() }
             }
+        }
+
+        override fun onSongChange(title: String, subtitle: String) {
+            updateTitle(title, subtitle)
         }
     }
 }

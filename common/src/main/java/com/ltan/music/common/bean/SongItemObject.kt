@@ -1,6 +1,7 @@
 package com.ltan.music.common.bean
 
 import android.os.Parcelable
+import com.ltan.music.common.LyricsObj
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -19,6 +20,7 @@ data class SongItemObject(
     var songId: Long = 0,
     var subTitle: String? = null,
     var artists: String = "",
+    var lyrics: LyricsObj? = null,
     var video: Boolean = false,
     var songUrl: String? = null,
     var picUrl: String? = null

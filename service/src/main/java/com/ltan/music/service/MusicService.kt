@@ -10,6 +10,7 @@ import android.os.IBinder
 import com.ltan.music.business.api.ApiProxy
 import com.ltan.music.business.api.NormalSubscriber
 import com.ltan.music.business.bean.SongUrl
+import com.ltan.music.business.bean.Track
 import com.ltan.music.business.common.CommonApi
 import com.ltan.music.common.LyricPosition
 import com.ltan.music.common.LyricsObj
@@ -23,6 +24,7 @@ import com.ltan.music.service.api.MusicServiceApi
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * TMusic.com.ltan.music.service
@@ -39,6 +41,7 @@ class MusicService : Service() {
         const val ARGS_SONG_URL = "songUrl"
         const val MSG_UPDATE_LYRIC = 0x1001
         const val MSG_UPDATE_GAP = 1000L
+        const val CONS_THREAD_CHECK_GAP = 5000L
     }
 
     /**
@@ -54,6 +57,7 @@ class MusicService : Service() {
          * lyric ready
          */
         fun onLyricComplete(lyric: LyricsObj?)
+
         fun updateLyric(title: String?, txt: String?, index: Int = 0)
         fun updateTitle(title: String? = "", subtitle: String? = "", artist: String? = "")
         fun onPicUrl(url: String?)
@@ -99,6 +103,8 @@ class MusicService : Service() {
         private lateinit var mReleaseThreadsWatcher: Handler
 
         private var mCurPlayIndex = 0
+        private val unavailableSongs = ConcurrentHashMap<Long, SongItemObject>()
+        private val mServiceApiUtil = ApiUtil()
 
         init {
             mUpdateThread.start()
@@ -106,6 +112,32 @@ class MusicService : Service() {
             mCallbacks = ArrayList()
             mCurrentSong = SongPlaying(url = "")
             mPlayingList = ArrayList()
+            mServiceApiUtil.setCallBack(object : ApiUtil.ApiCallback {
+                override fun onLyrics(lyric: LyricsObj?) {
+                    setLyrics(lyric)
+                    updateCurrentLyric(lyric)
+                }
+
+                override fun onPicUrl(url: String?) {
+                    setPicUrl(url)
+                }
+
+                override fun onSongDetail() {
+                }
+
+                override fun onSongUrl(url: String?, nextOne: SongItemObject, backward: Boolean) {
+                    setSongUrl(url, nextOne)
+                    if (url == null && backward) {
+                        putUnavailableSong(nextOne)
+                        onLast()
+                    } else if (url == null) {
+                        putUnavailableSong(nextOne)
+                        onNext()
+                    } else {
+                        play(mCurrentSong)
+                    }
+                }
+            })
         }
 
         fun init(player: MediaPlayer) {
@@ -176,7 +208,13 @@ class MusicService : Service() {
 
         fun play(song: SongPlaying) {
             play(song.url)
-            queryLyric(song)
+            if (song.lyrics != null) {
+                setLyrics(song.lyrics)
+                updateCurrentLyric(song.lyrics)
+            } else {
+                // queryLyric(song)
+                mServiceApiUtil.getLyric(song)
+            }
         }
 
         fun getLyric(): LyricsObj? {
@@ -191,7 +229,7 @@ class MusicService : Service() {
         }
 
         private fun play(songUrl: String) {
-            if(isBuffering()) {
+            if (isBuffering()) {
                 internalStop()
                 init(MediaPlayer())
             } else {
@@ -244,30 +282,7 @@ class MusicService : Service() {
                     iterator.remove()
                 }
             }
-            mReleaseThreadsWatcher.postDelayed({ checkThread() }, 5000)
-        }
-
-        private fun queryLyric(song: SongPlaying) {
-            mLyrics = null
-            ApiProxy.instance.getApi(MusicServiceApi::class.java).getLyrics(song.id.toString())
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .map { rsp ->
-                    if (rsp.lrc == null) {
-                        LyricsObj()
-                    }
-                    LyricsUtil.parseLyricsInfo(rsp.lrc?.lyric)
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .safeSubscribe(object : NormalSubscriber<LyricsObj>() {
-                    override fun onNext(t: LyricsObj?) {
-                        MusicLog.d(MusicService.TAG, "lyric of ${song.title}: $t")
-                        mLyrics = t
-                        onLyricComplete(t)
-                        mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
-                        updateCallbackLyric(t)
-                    }
-                })
+            mReleaseThreadsWatcher.postDelayed({ checkThread() }, CONS_THREAD_CHECK_GAP)
         }
 
         /**
@@ -287,6 +302,7 @@ class MusicService : Service() {
                 if (lyricPosition.nextDur >= MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
             onCallBackUpdateLyric(mCurrentSong.title, lyricPosition)
 
+            // todo: SKIP if no callback exist
             val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
             mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
             return true
@@ -358,7 +374,7 @@ class MusicService : Service() {
 
         override fun seekTo(pos: Int) {
             mPlayer.seekTo(pos)
-            if(isPlaying) {
+            if (isPlaying) {
                 updateCallbackLyric(mLyrics)
             }
         }
@@ -386,40 +402,24 @@ class MusicService : Service() {
         }
 
         override fun onNext() {
-            MusicLog.d(TAG, "onNext init onNext click, curIndex: $mCurPlayIndex")
             if (mPlayingList.size > 0) {
                 val next = mCurPlayIndex + 1 // circle
                 mCurPlayIndex = next % mPlayingList.size
             }
-            MusicLog.d(TAG, "onNext init onNext click, after curIndex: $mCurPlayIndex")
             val nextOne = mPlayingList[mCurPlayIndex]
-            processNextSong(nextOne)
+            processNextSong(nextOne, false)
         }
 
         override fun onLast() {
-            MusicLog.d(TAG, "onNext init onLast click, curIndex: $mCurPlayIndex")
             if (mPlayingList.size > 0) {
-                val next = mCurPlayIndex - 1 // circle
+                var next = mCurPlayIndex - 1 // circle
                 if (next < 0) {
-                    // if last -1, select the last one
-                    mCurPlayIndex = mPlayingList.size - 1
+                    next = mPlayingList.size - 1
                 }
                 mCurPlayIndex = next % mPlayingList.size
             }
-            MusicLog.d(TAG, "onNext init onLast click, after curIndex: $mCurPlayIndex")
             val nextOne = mPlayingList[mCurPlayIndex]
-            processNextSong(nextOne)
-        }
-
-        private fun processNextSong(nextOne: SongItemObject) {
-            mCurrentSong.id = nextOne.songId
-            mCurrentSong.picUrl = nextOne.picUrl
-            mCurrentSong.title = nextOne.title
-            mCurrentSong.subtitle = nextOne.subTitle // TODO name roule
-            mCurrentSong.url = nextOne.songUrl.toString()
-            playNextSong(nextOne)
-            // Mine/SongListActivity; Service/PlayerFragment
-            updateTitle(nextOne.title, nextOne.subTitle, nextOne.artists)
+            processNextSong(nextOne, true)
         }
 
         override fun showList() {
@@ -428,14 +428,176 @@ class MusicService : Service() {
         override fun onModeChange(mode: PlayMode) {
         }
 
-        private fun playNextSong(nextOne: SongItemObject) {
-            // Assert: songUrl follow the picUrl
-            if (nextOne.picUrl != null && nextOne.songUrl != null) {
-                play(nextOne.songUrl!!)
+        private fun processNextSong(nextOne: SongItemObject, backward: Boolean) {
+            if (handleUnavailableSong(nextOne, backward)) {
                 return
             }
-            val LTAG = TAG
-            val song = mCurrentSong
+            mCurrentSong.id = nextOne.songId
+            mCurrentSong.picUrl = nextOne.picUrl
+            mCurrentSong.title = nextOne.title
+            mCurrentSong.subtitle = nextOne.subTitle // TODO name roule
+            mCurrentSong.url = nextOne.songUrl.toString()
+            mCurrentSong.lyrics = nextOne.lyrics
+            playNextSong(nextOne, backward)
+        }
+
+        private fun playNextSong(nextOne: SongItemObject, backward: Boolean = false) {
+            if (nextOne.picUrl != null && nextOne.songUrl != null) {
+                play(mCurrentSong)
+                updateTitle(nextOne.title, nextOne.subTitle, nextOne.artists)
+                return
+            }
+            mServiceApiUtil.getSongDetail(mCurrentSong)
+            mServiceApiUtil.getSongUrl(mCurrentSong, nextOne, backward)
+        }
+
+        private fun setSongUrl(url: String?, nextOne: SongItemObject) {
+            mPlayingList[mCurPlayIndex].songUrl = url
+            url?.let {
+                mCurrentSong.url = it
+                // Mine/SongListActivity; Service/PlayerFragment
+                updateTitle(nextOne.title, nextOne.subTitle, nextOne.artists)
+            }
+        }
+
+        private fun setPicUrl(url: String?) {
+            mPlayingList[mCurPlayIndex].picUrl = url
+            mCurrentSong.picUrl = url
+        }
+
+        private fun setLyrics(lyrics: LyricsObj?) {
+            mPlayingList[mCurPlayIndex].lyrics = lyrics
+            mCurrentSong.lyrics = lyrics
+            mLyrics = lyrics
+        }
+
+        /**
+         * update lyric to client with a background loop
+         */
+        private fun updateCurrentLyric(lyric: LyricsObj?) {
+            onLyricComplete(lyric)
+            mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
+            updateCallbackLyric(lyric)
+        }
+
+        private fun putUnavailableSong(item: SongItemObject) {
+            unavailableSongs[item.songId] = item
+        }
+
+        private fun unavailableSong(song: SongItemObject): Boolean {
+            return unavailableSongs.containsKey(song.songId)
+        }
+
+        /**
+         * [nextOne] may not be free version, song url is empty.
+         * so, find the next Song via [backward] or forward
+         */
+        private fun handleUnavailableSong(nextOne: SongItemObject, backward: Boolean): Boolean {
+            val unavailable = unavailableSong(nextOne)
+            var handled = false
+            if (unavailable && backward) {
+                onLast()
+                handled = true
+            } else if (unavailable) {
+                onNext()
+                handled = true
+            }
+            return handled
+        }
+    }
+
+    /**
+     * for service http request
+     *
+     * ApiProxy.instance.getApi().getData().subscribe()
+     */
+    class ApiUtil {
+        companion object {
+            private const val TAG = "ApiUtil"
+        }
+
+        interface ApiCallback {
+            /** request song lyric */
+            fun onLyrics(lyric: LyricsObj?)
+            fun onPicUrl(url: String?)
+            /** request song detail, just use a picurl now */
+            fun onSongDetail()
+            /** request song url, xxx.mp3 */
+            fun onSongUrl(url: String?, nextOne: SongItemObject, backward: Boolean)
+        }
+
+        private var mCallBackImpl: ApiCallback? = null
+
+        fun setCallBack(cb: ApiCallback) {
+            mCallBackImpl = cb
+        }
+
+        fun getLyric(song: SongPlaying) {
+            ApiProxy.instance.getApi(MusicServiceApi::class.java).getLyrics(song.id.toString())
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .map { rsp ->
+                    if (rsp.lrc == null) {
+                        LyricsObj()
+                    }
+                    LyricsUtil.parseLyricsInfo(rsp.lrc?.lyric)
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .safeSubscribe(object : NormalSubscriber<LyricsObj>() {
+                    override fun onNext(t: LyricsObj?) {
+                        MusicLog.d(MusicService.TAG, "lyric of ${song.title}: $t")
+                        mCallBackImpl?.onLyrics(t)
+                    }
+                })
+        }
+
+        fun getSongDetail(song: SongPlaying) {
+
+            val ids = ReqArgs.buildArgs(song.id)
+            val controllers = ReqArgs.buildCollectors(song.id)
+
+            ApiProxy.instance.getApi(CommonApi::class.java).getSongDetail(ids, controllers)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .map { it.tracks }
+                .safeSubscribe(object : NormalSubscriber<List<Track>>() {
+                    override fun onNext(t: List<Track>?) {
+                        val tracks = t ?: return
+                        for (track in tracks) {
+                            if (track.id == song.id) {
+                                // just update the picUrl
+                                mCallBackImpl?.onPicUrl(track.al?.picUrl)
+                                MusicLog.d(TAG, "onNext what a Rxjava2 picurl is:${track.al?.picUrl} ")
+                                break
+                            }
+                        }
+                    }
+                })
+        }
+
+        fun getSongUrl(song: SongPlaying, nextOne: SongItemObject, backward: Boolean) {
+            val ids = ReqArgs.buildArgs(song.id)
+            ApiProxy.instance.getApi(CommonApi::class.java).getSongUrl(ids)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .flatMap { Flowable.fromIterable(it.data) }
+                .filter { it.id == song.id }
+                .observeOn(AndroidSchedulers.mainThread())
+                .safeSubscribe(object : NormalSubscriber<SongUrl>() {
+                    override fun onNext(t: SongUrl?) {
+                        MusicLog.d(TAG, "onNext what a Rxjava2 songurl ${song.title} is$t\nurl:${t?.url}")
+                        t ?: return
+                        mCallBackImpl?.onSongUrl(t.url, nextOne, backward)
+                    }
+                })
+        }
+
+        /**
+         * for test
+         *
+         * Deprecated
+         */
+        private fun testFlatMap(song: SongPlaying, nextOne: SongItemObject) {
             val ids = ReqArgs.buildArgs(song.id)
             val controllers = ReqArgs.buildCollectors(song.id)
             ApiProxy.instance.getApi(CommonApi::class.java).getSongDetail(ids, controllers)
@@ -444,12 +606,11 @@ class MusicService : Service() {
                 .flatMap { rsp ->
                     val tracks = rsp.tracks
                     if (!tracks.isNullOrEmpty()) {
-                        mCurrentSong.picUrl = tracks[0].al?.picUrl
+                        song.picUrl = tracks[0].al?.picUrl
                         for (track in tracks) {
-                            if (track.id == mCurrentSong.id) {
-                                // just update the picUrl
-                                mCurrentSong.picUrl = track.al?.picUrl
-                                MusicLog.d(LTAG, "onNext what a Rxjava2 picurl is:${track.al?.picUrl} ")
+                            if (track.id == song.id) {
+                                mCallBackImpl?.onPicUrl(track.al?.picUrl)
+                                MusicLog.d(TAG, "onNext what a Rxjava2 picurl is:${track.al?.picUrl} ")
                                 break
                             }
                         }
@@ -461,15 +622,13 @@ class MusicService : Service() {
                             Flowable.fromIterable(t.data)
                         }
                 }
-                .filter { it.id == mCurrentSong.id }
+                .filter { it.id == song.id }
                 .observeOn(AndroidSchedulers.mainThread())
                 .safeSubscribe(object : NormalSubscriber<SongUrl>() {
                     override fun onNext(t: SongUrl?) {
-                        MusicLog.d(LTAG, "onNext what a Rxjava2 songurl is$t\nurl:${t?.url}")
-                        t?.url?.let {
-                            mCurrentSong.url = it
-                            play(mCurrentSong)
-                        }
+                        MusicLog.d(TAG, "onNext what a Rxjava2 songurl ${song.title} is$t\nurl:${t?.url}")
+                        val reqSongUrl = t ?: return
+                        mCallBackImpl?.onSongUrl(t.url, nextOne, backward = false)
                     }
                 })
         }

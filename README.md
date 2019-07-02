@@ -15,6 +15,12 @@ So, I will imitate `Netease Music` for self-learning.
 **subCount**: artistCount/createdPlaylistCount/subPlaylistCount<br>
 **playlist**: the song detail in the play list<br>
 
+### Ref
+[core-api-in:NeteaseClouldMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi)<br>
+[disoul/electron-cloud-music](https://github.com/disoul/electron-cloud-music)<br>
+[darknessomi/musicbox](https://github.com/darknessomi/musicbox)<br>
+[sqaiyan/netmusic-node](https://github.com/sqaiyan/netmusic-node)<br>
+
 [![Build Status](https://travis-ci.org/tanliner/TMusic.svg?branch=master)](https://travis-ci.org/tanliner/TMusic/)
 
 ---

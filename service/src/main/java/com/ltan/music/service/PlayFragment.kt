@@ -71,7 +71,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
     private lateinit var mCurSong: SongPlaying
     private var mLastSongId = -1L
-    private var mSongList: ArrayList<SongItemObject>? = null
+    private lateinit var mSongList: ArrayList<SongItemObject>
     private val mPreviewBg: ImageView by bindView(R.id.iv_play_service_bg)
     private val mNavIcon: ImageView by bindView(R.id.iv_play_service_back)
     private val mCDWhiteBg: ImageView by bindView(R.id.iv_cd_white_bg)
@@ -95,6 +95,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private val mHandler = MyHandler()
     // lyric of current song playing
     private var mLyric: LyricsObj? = null
+
+    private lateinit var mPageChangeListener: PagerChangeListener
 
     @SuppressLint("HandlerLeak")
     inner class MyHandler : Handler() {
@@ -136,7 +138,14 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private fun processArgs() {
         val args = arguments ?: return
         mCurSong = args.get(PlayerActivity.ARG_OBJ) as SongPlaying
-        mSongList = args.getParcelableArrayList(PlayerActivity.ARG_SONG_LIST)
+        // make sure not null
+        val songList: ArrayList<SongItemObject> = args.getParcelableArrayList(PlayerActivity.ARG_SONG_LIST)
+        mSongList = if (songList.isNullOrEmpty()) {
+            ArrayList()
+        } else {
+            songList
+        }
+        // mSongList = args.getParcelableArrayList(PlayerActivity.ARG_SONG_LIST)
         mLastSongId = mCurSong.id
     }
 
@@ -151,19 +160,18 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
         adapter = PlayerPageAdapter(childFragmentManager)
         mSongPager.adapter = adapter
-        mSongList?.let {
-            adapter.setSongs(it)
-            var index = 0
-            for (i in 0 until it.size) {
-                if (it[i].songId == mCurSong.id) {
-                    index = i
-                    break
-                }
+        adapter.setSongs(mSongList)
+        var index = 0
+        for (i in 0 until mSongList.size) {
+            if (mSongList[i].songId == mCurSong.id) {
+                index = i
+                break
             }
-            mSongPager.setCurrentItem(index, true)
-            mSongPager.addOnPageChangeListener(PagerChangeListener(it))
-            mPlayerPageController.setDataSource(it)
         }
+        mSongPager.setCurrentItem(index, true)
+        mPageChangeListener = PagerChangeListener(mSongList)
+        mSongPager.addOnPageChangeListener(mPageChangeListener)
+        mPlayerPageController.setDataSource(mSongList)
 
         adapter.setOnClickListener(object : CdClickListener {
             override fun onLongClick(): Boolean {
@@ -252,7 +260,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
     private fun updateTitle(title: String? = "", artist: String? = "") {
         val pos = mMusicBinder?.getCurrentIndex() ?: return // binder is null
-        val curItem = mSongList?.get(pos) ?: return         // item is null
+        val curItem = mSongList.get(pos) ?: return         // item is null
         updateTitle(curItem)
     }
 
@@ -449,6 +457,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
             // pause media player
             mMusicBinder?.pause()
+            mMusicBinder?.setCurrentIndex(mSongPager.currentItem)
             mLyricContainer.removeAllViews()
             mLyric = null
             mLastSongId = -1
@@ -544,7 +553,34 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         }
 
         override fun onSongChange(title: String, subtitle: String) {
-            updateTitle(title, subtitle)
+            mHandler.post {
+                updateTitle(title, subtitle)
+            }
+            val curIndex = mSongPager.currentItem
+            val binder = mMusicBinder ?: return
+            val targetIndex = binder.getCurrentIndex()
+            mHandler.post {
+                swipeViewPager(curIndex, targetIndex)
+                mSongPager.addOnPageChangeListener(mPageChangeListener)
+            }
+        }
+
+        override fun onSongPreviewUpdate(url: String?) {
+            val binder = mMusicBinder ?: return
+            val curIndex = mSongPager.currentItem
+            val targetIndex = binder.getCurrentIndex()
+            mHandler.post {
+                swipeViewPager(curIndex, targetIndex)
+                setLayoutBg(url)
+            }
+        }
+
+        private fun swipeViewPager(curIndex: Int, targetIndex: Int) {
+            mSongPager.removeOnPageChangeListener(mPageChangeListener)
+            if (curIndex != targetIndex) {
+                mSongPager.setCurrentItem(targetIndex, true)
+            }
+            mSongPager.addOnPageChangeListener(mPageChangeListener)
         }
     }
 }

@@ -60,7 +60,7 @@ class MusicService : Service() {
 
         fun updateLyric(title: String?, txt: String?, index: Int = 0)
         fun updateTitle(title: String? = "", subtitle: String? = "", artist: String? = "")
-        fun onPicUrl(url: String?)
+        fun onSongPicUpdated(url: String?)
     }
 
     private lateinit var mBinder: MyBinder
@@ -186,7 +186,7 @@ class MusicService : Service() {
             if (isPlaying) {
                 updateCallbackLyric(mLyrics)
             }
-            cb.onPicUrl(mCurrentSong.picUrl)
+            cb.onSongPicUpdated(mCurrentSong.picUrl)
         }
 
         fun removeCallback(cb: IPlayerCallback) {
@@ -208,7 +208,7 @@ class MusicService : Service() {
 
         fun play(song: SongPlaying) {
             play(song.url)
-            if (song.lyrics != null) {
+            if (!song.lyrics?.songTexts.isNullOrEmpty()) {
                 setLyrics(song.lyrics)
                 updateCurrentLyric(song.lyrics)
             } else {
@@ -226,6 +226,13 @@ class MusicService : Service() {
          */
         fun getCurrentIndex(): Int {
             return mCurPlayIndex
+        }
+
+        /**
+         * index update by swipe view-page
+         */
+        fun setCurrentIndex(index: Int) {
+            mCurPlayIndex = index
         }
 
         private fun play(songUrl: String) {
@@ -312,6 +319,10 @@ class MusicService : Service() {
             mCallbacks.forEach {
                 it.updateTitle(title, subtitle, artist)
             }
+        }
+
+        private fun updateSongPic(url: String?) {
+            mCallbacks.forEach { it.onSongPicUpdated(url) }
         }
 
         private fun onLyricComplete(lyric: LyricsObj?) {
@@ -445,6 +456,7 @@ class MusicService : Service() {
             if (nextOne.picUrl != null && nextOne.songUrl != null) {
                 play(mCurrentSong)
                 updateTitle(nextOne.title, nextOne.subTitle, nextOne.artists)
+                updateSongPic(nextOne.picUrl)
                 return
             }
             mServiceApiUtil.getSongDetail(mCurrentSong)
@@ -463,6 +475,7 @@ class MusicService : Service() {
         private fun setPicUrl(url: String?) {
             mPlayingList[mCurPlayIndex].picUrl = url
             mCurrentSong.picUrl = url
+            updateSongPic(url)
         }
 
         private fun setLyrics(lyrics: LyricsObj?) {
@@ -545,7 +558,7 @@ class MusicService : Service() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .safeSubscribe(object : NormalSubscriber<LyricsObj>() {
                     override fun onNext(t: LyricsObj?) {
-                        MusicLog.d(MusicService.TAG, "lyric of ${song.title}: $t")
+                        MusicLog.d(ApiUtil.TAG, "lyric of ${song.title}: $t")
                         mCallBackImpl?.onLyrics(t)
                     }
                 })
@@ -567,7 +580,7 @@ class MusicService : Service() {
                             if (track.id == song.id) {
                                 // just update the picUrl
                                 mCallBackImpl?.onPicUrl(track.al?.picUrl)
-                                MusicLog.d(TAG, "onNext what a Rxjava2 picurl is:${track.al?.picUrl} ")
+                                MusicLog.d(ApiUtil.TAG, "onNext what a Rxjava2 picurl is:${track.al?.picUrl} ")
                                 break
                             }
                         }
@@ -585,7 +598,7 @@ class MusicService : Service() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .safeSubscribe(object : NormalSubscriber<SongUrl>() {
                     override fun onNext(t: SongUrl?) {
-                        MusicLog.d(TAG, "onNext what a Rxjava2 songurl ${song.title} is$t\nurl:${t?.url}")
+                        MusicLog.d(ApiUtil.TAG, "onNext what a Rxjava2 songurl ${song.title} is$t\nurl:${t?.url}")
                         t ?: return
                         mCallBackImpl?.onSongUrl(t.url, nextOne, backward)
                     }

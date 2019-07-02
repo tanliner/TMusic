@@ -55,7 +55,7 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
         controller.post { controller.updateSummary(txt) }
     }
 
-    override fun onPicUrl(url: String?) {
+    override fun onSongPicUpdated(url: String?) {
         Glide.with(controller.context)
             .load(url)
             .into(controller.mPreviewIv)

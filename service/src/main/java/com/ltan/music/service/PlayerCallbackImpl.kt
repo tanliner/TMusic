@@ -57,7 +57,8 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
         lyricHighlight.onHighLight(txt, index)
     }
 
-    override fun onPicUrl(url: String?) {
+    override fun onSongPicUpdated(url: String?) {
+        lyricHighlight.onSongPreviewUpdate(url)
     }
 
     /**

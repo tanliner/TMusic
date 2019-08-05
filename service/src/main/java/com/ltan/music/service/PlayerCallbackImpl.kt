@@ -1,10 +1,12 @@
 package com.ltan.music.service
 
+import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.MusicLog
 import com.ltan.music.service.widget.PlayerPageController
 
 /**
  * TMusic.com.ltan.music.service
+ * call from MusicService
  *
  * @ClassName: PlayerCallbackImpl
  * @Description:
@@ -18,12 +20,34 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
     }
 
     private val controller = control
+    private lateinit var lyricHighlight: LyricHighLight
+    private var mViewPagerUpdater: IViewPagerUpdate? = null
+
+    fun setLyricHighLight(highLight: LyricHighLight) {
+        this.lyricHighlight = highLight
+    }
+
+    fun setViewPagerUpdate(pagerUpdater: IViewPagerUpdate) {
+        mViewPagerUpdater = pagerUpdater
+    }
+
     override fun onStart() {
         controller.setState(true)
+        lyricHighlight.onStart()
     }
 
     override fun onPause() {
+        MusicLog.w(TAG, "service PlayerCallbackImpl on pause")
         controller.setState(false)
+        lyricHighlight.onPause()
+    }
+
+    override fun onNext(index: Int, curSong: SongPlaying) {
+        mViewPagerUpdater?.onNext(index, curSong)
+    }
+
+    override fun onLast(index: Int, curSong: SongPlaying) {
+        mViewPagerUpdater?.onLast(index, curSong)
     }
 
     override fun onCompleted(song: SongPlaying) {
@@ -34,15 +58,29 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
         MusicLog.v(TAG, "music source buffered $per")
     }
 
+    override fun onLyricComplete(lyric: LyricsObj?) {
+        lyricHighlight.onLyric(lyric)
+    }
+
     /**
      * call on sub thread
      */
-    override fun updateLyric(title: String?, txt: String?) {
-        if(txt.isNullOrEmpty()) {
+    override fun updateLyric(title: String?, txt: String?, index: Int) {
+        if (txt.isNullOrEmpty()) {
             return
         }
+        lyricHighlight.onHighLight(txt, index)
     }
 
-    override fun onPicUrl(url: String?) {
+    override fun onSongPicUpdated(url: String?) {
+        lyricHighlight.onSongPreviewUpdate(url)
+    }
+
+    /**
+     * ignore the [subtitle], artist1/artist2-xx
+     */
+    override fun updateTitle(title: String?, subtitle: String?, artist: String?) {
+        // prevent compile error
+        lyricHighlight.onSongChange(title.toString(), artist.toString())
     }
 }

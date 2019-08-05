@@ -61,9 +61,9 @@ class MusicPlayerController @JvmOverloads constructor(
             return
         }
         if (mPlayer!!.isPlaying) {
-            onPaulse()
+            mPlayer?.pause()
         } else {
-            onPlay()
+            mPlayer?.start()
         }
         setState(mPlayer!!.isPlaying)
     }
@@ -102,14 +102,6 @@ class MusicPlayerController @JvmOverloads constructor(
         } else {
             mPlayIv.setImageResource(R.drawable.note_btn_play_white)
         }
-    }
-
-    private fun onPlay() {
-        mPlayer?.start()
-    }
-
-    private fun onPaulse() {
-        mPlayer?.pause()
     }
 
     fun onFavorite() {

@@ -1,6 +1,7 @@
 package com.ltan.music.mine
 
 import com.bumptech.glide.Glide
+import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.MusicLog
 import com.ltan.music.service.MusicService
 import com.ltan.music.service.SongPlaying
@@ -29,6 +30,12 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
         controller.setState(false)
     }
 
+    override fun onNext(index: Int, curSong: SongPlaying) {
+    }
+
+    override fun onLast(index: Int, curSong: SongPlaying) {
+    }
+
     override fun onCompleted(song: SongPlaying) {
         controller.setState(false)
         controller.updateDisplay(song.title, song.subtitle)
@@ -38,22 +45,32 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
         MusicLog.v(TAG, "music source buffered $per")
     }
 
+    override fun onLyricComplete(lyric: LyricsObj?) {
+    }
+
     /**
      * call on sub thread
      */
-    override fun updateLyric(title: String?, txt: String?) {
-        if(txt.isNullOrEmpty()) {
+    override fun updateLyric(title: String?, txt: String?, index: Int) {
+        if (txt.isNullOrEmpty()) {
             return
         }
-        if(title != controller.getTitle()) {
+        if (title != controller.getTitle()) {
             controller.post { controller.updateTitle(title) }
         }
         controller.post { controller.updateSummary(txt) }
     }
 
-    override fun onPicUrl(url: String?) {
+    /**
+     * should run on UI thread
+     */
+    override fun onSongPicUpdated(url: String?) {
         Glide.with(controller.context)
             .load(url)
             .into(controller.mPreviewIv)
+    }
+
+    override fun updateTitle(title: String?, subtitle: String?, artist: String?) {
+        controller.updateDisplay(title, subtitle)
     }
 }

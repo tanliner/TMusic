@@ -73,7 +73,7 @@
     <dimen name="player_service_cd_height">201dp</dimen>
     <dimen name="player_service_cd_bg_height">320dp</dimen>
 
-    <dimen name="player_page_controller_height">60dp</dimen>
+    <dimen name="player_page_controller_height">90dp</dimen>
     <dimen name="player_page_controller_padding_h">20dp</dimen>
     <dimen name="player_page_controller_progress_padding_h">10dp</dimen>
 

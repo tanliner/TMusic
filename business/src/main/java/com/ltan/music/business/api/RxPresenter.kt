@@ -30,7 +30,7 @@ open class RxPresenter<V: IBaseContract.View<*>> : IBaseContract.Presenter<V> {
     protected var mViewAttached: Boolean = false
 
     override fun attachView(view: V) {
-        MusicLog.d(TAG, "attachView called $view")
+        MusicLog.v(TAG, "attachView called $view")
         mView = view
         mViewAttached = true
     }

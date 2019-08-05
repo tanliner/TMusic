@@ -1,5 +1,8 @@
 package com.ltan.music.common
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 /**
  * TMusic.com.ltan.music.common
  *
@@ -47,6 +50,7 @@ data class Lrc(
     val lyric: String? = null
 )
 
+@Parcelize
 data class LyricsObj (
     var title: String? = null,
     var artist: String? = null,
@@ -54,9 +58,10 @@ data class LyricsObj (
     var uploader: String? = null,
     var offset: Long = 0,
     var songTexts: MutableList<LyricsLine>? = null
-)
+) : Parcelable
 
+@Parcelize
 data class LyricsLine(
     var start: Long = 0,
     var txt: String = ""
-)
+) : Parcelable

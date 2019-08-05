@@ -7,11 +7,12 @@
     <LinearLayout
             android:id="@+id/ll_control_buttons_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:paddingStart="@dimen/player_page_controller_padding_h"
             android:paddingEnd="@dimen/player_page_controller_padding_h"
             android:orientation="horizontal"
             android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
             android:gravity="center"
             >
 
@@ -46,15 +47,17 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_above="@id/ll_control_buttons_container"
+            android:gravity="center_vertical"
             android:paddingStart="@dimen/player_page_controller_progress_padding_h"
             android:paddingEnd="@dimen/player_page_controller_progress_padding_h">
 
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/tv_current_playing_position"
+                style="@style/PlayerPageController.Timer"
                 tools:text="01:19" />
 
-        <ProgressBar
+        <SeekBar
+                android:id="@+id/seekbar_playing_song"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 style="@android:style/Widget.Material.ProgressBar.Horizontal"
@@ -63,8 +66,8 @@
                 android:layout_weight="1" />
 
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/tv_song_total_duration"
+                style="@style/PlayerPageController.Timer"
                 tools:text="04:31" />
     </LinearLayout>
 

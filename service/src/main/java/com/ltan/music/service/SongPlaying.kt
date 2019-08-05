@@ -1,6 +1,7 @@
 package com.ltan.music.service
 
 import android.os.Parcelable
+import com.ltan.music.common.LyricsObj
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -22,5 +23,6 @@ data class SongPlaying(
     var picUrl: String? = null,
     var title: String? = null,
     var subtitle: String? = null,
+    var lyrics: LyricsObj? = null,
     var artists: String = ""
 ): Parcelable

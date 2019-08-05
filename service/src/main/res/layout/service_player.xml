@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
+                android:background="@drawable/icon_app_default"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -8,6 +9,7 @@
             android:id="@+id/iv_play_service_bg"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@android:color/transparent"
             android:scaleType="fitXY" />
 
     <LinearLayout
@@ -68,20 +70,6 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/player_service_cd_bg_height" />
 
-    <LinearLayout
-            android:id="@+id/ll_pager_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/service_pager_controller"
-            android:layout_below="@id/ll_play_service_song_container"
-            >
-        <androidx.viewpager.widget.ViewPager
-                android:id="@+id/vp_song_playing"
-                android:layout_marginTop="@dimen/player_service_sticker_height"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/player_service_cd_bg_height" />
-    </LinearLayout>
-
     <com.ltan.music.service.widget.PlayerPageController
             android:id="@+id/service_pager_controller"
             android:layout_alignParentBottom="true"
@@ -89,20 +77,60 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/player_page_controller_height" />
 
+    <LinearLayout
+            android:id="@+id/ll_pager_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/service_pager_controller"
+            android:layout_below="@id/ll_play_service_song_container"
+            >
+
+        <androidx.viewpager.widget.ViewPager
+                android:id="@+id/vp_song_playing"
+                android:layout_marginTop="@dimen/player_service_sticker_height"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/player_service_cd_bg_height" />
+        <!--<com.ltan.music.service.widget.CdViewPager-->
+                <!--android:id="@+id/vp_song_playing"-->
+                <!--android:layout_marginTop="@dimen/player_service_sticker_height"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="@dimen/player_service_cd_bg_height"-->
+                <!--/>-->
+    </LinearLayout>
+
     <ScrollView
             android:id="@+id/scroll_lyric"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/ll_play_service_song_container"
             android:layout_above="@id/service_pager_controller"
+            android:scrollbars="none"
             android:visibility="gone"
             tools:visibility="visible">
+
         <LinearLayout
-                android:id="@+id/ll_song_text_container"
+                android:id="@+id/ll_song_text_container_root"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/player_service_sticker_height" />
+
+            <LinearLayout
+                    android:id="@+id/ll_song_text_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_weight="1">
+            </LinearLayout>
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/player_service_sticker_height" />
         </LinearLayout>
 
     </ScrollView>

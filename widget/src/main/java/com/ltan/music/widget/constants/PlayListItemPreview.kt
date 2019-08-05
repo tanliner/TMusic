@@ -16,4 +16,5 @@ object PlayListItemPreview {
     val PLACEHOLDER_IMG = R.drawable.icon_app_default
     val ALBUM_EMG = R.drawable.big_icon_app_default
     val SONG_LIST_PREVIEW = R.drawable.cd_player
+    val ALPHA_PLAYER_BG = R.drawable.cd_player_bg
 }

@@ -24,8 +24,8 @@ import com.ltan.music.common.MusicLog
 import com.ltan.music.common.StatusBar
 import com.ltan.music.common.ToastUtil
 import com.ltan.music.common.bean.SongItemObject
-import com.ltan.music.common.song.ReqArgs.buildArgs
-import com.ltan.music.common.song.ReqArgs.buildCollectors
+import com.ltan.music.common.song.SongUtils.buildArgs
+import com.ltan.music.common.song.SongUtils.buildCollectors
 import com.ltan.music.mine.adapter.PlaceItemBinder
 import com.ltan.music.mine.adapter.SongItemBinder
 import com.ltan.music.mine.adapter.SongListHeaderBinder
@@ -46,6 +46,7 @@ import kotlin.math.min
 
 /**
  * TMusic.com.ltan.music.mine
+ * song-list
  *
  * @ClassName: SongListActivity
  * @Description:
@@ -174,6 +175,10 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         mSongsRcyView.adapter = mRcyAdapter
     }
 
+    /**
+     * [titleOffset] show title when list scroll up
+     * [offset] the floating play-all view
+     */
     private fun updateFloatingPlay(scrollY: Int, offset: Float, titleOffset: Float) {
         if (scrollY >= offset) {
             mFloatingContainer.visibility = View.VISIBLE
@@ -305,10 +310,15 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         if (tracks == null || tracks.isNullOrEmpty()) {
             return
         }
-        mCurrentSongDetail = tracks[0]
-        mCurrentSongDetail?.let {
-            mCurrentSong.picUrl = it.al?.picUrl
-            updateControlPreview(it.al?.picUrl)
+        for (song in tracks) {
+            // update current song detail, usually preview picture
+            if (mDelayPlayingId == song.id) {
+                mCurrentSongDetail = song
+                val picUrl = song.al?.picUrl ?: continue
+                mCurrentSong.picUrl = picUrl
+                indexMap[song.id]?.picUrl = picUrl
+                updateControlPreview(picUrl)
+            }
         }
     }
 
@@ -319,7 +329,6 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
             it.addCallback(mServiceConn.playerCallback)
             mCurrentSong.picUrl = it.getCurrentSong().picUrl
         }
-        updateControlPreview(mCurrentSong.picUrl)
     }
 
     override fun onPause() {
@@ -363,11 +372,6 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         mCurrentSong.title = song.title
         mCurrentSong.subTitle = song.subTitle
         mCurrentSong.artists = song.artists
-        // the current song detail contains picUrl
-        mCurrentSongDetail?.let {
-            mCurrentSong.picUrl = it.al?.picUrl
-            indexMap[song.songId]?.picUrl = mCurrentSong.picUrl
-        }
     }
 
     /**
@@ -413,28 +417,24 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
             val itemObject = mRcyItems[position] as SongItemObject
             updateCurrentSong(itemObject)
             mControllerView.updateDisplay(itemObject.title, itemObject.subTitle)
-            val musicBinder = mMusicBinder
-            if (musicBinder == null) {
-                MusicLog.e(TAG, "service bind error")
-                return
-            }
+
+            val musicBinder = mMusicBinder ?: return
             musicBinder.setPlayingList(getPlayingList())
-            val ids = itemObject.songId
 
-            mCurrentSongDetail?.id.let {
-                if (it != itemObject.songId) {
-                    querySongDetail(buildArgs(ids), buildCollectors(ids))
-                } else {
-                    // click the same item
-                    updateControlPreview(mCurrentSongDetail?.al?.picUrl)
-                }
+            // query song detail, picUrl
+            if (itemObject.picUrl.isNullOrEmpty()) {
+                mControllerView.mPreviewIv.setImageResource(PlayListItemPreview.ALBUM_EMG)
+                querySongDetail(buildArgs(itemObject.songId), buildCollectors(itemObject.songId))
+            } else {
+                mCurrentSongDetail = null
+                updateControlPreview(itemObject.picUrl)
             }
 
-            val url = itemObject.songUrl
+            // query song url
             mCurrentSong.songId = itemObject.songId
-            mCurrentSong.songUrl = url
-            if (url.isNullOrEmpty()) {
-                querySongUrls(buildArgs(ids))
+            mCurrentSong.songUrl = itemObject.songUrl
+            if (itemObject.songUrl.isNullOrEmpty()) {
+                querySongUrls(buildArgs(itemObject.songId))
                 // delay playing
                 mDelayPlayingId = itemObject.songId
             } else {

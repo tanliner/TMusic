@@ -10,6 +10,7 @@ package com.ltan.music.common
  * @Version: 1.0
  */
 data class LyricPosition(
+    var index: Int = 0,
     var nextDur: Long = 0,
     var txt: String = ""
 )

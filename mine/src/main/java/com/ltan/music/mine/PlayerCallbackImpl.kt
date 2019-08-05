@@ -30,6 +30,12 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
         controller.setState(false)
     }
 
+    override fun onNext(index: Int, curSong: SongPlaying) {
+    }
+
+    override fun onLast(index: Int, curSong: SongPlaying) {
+    }
+
     override fun onCompleted(song: SongPlaying) {
         controller.setState(false)
         controller.updateDisplay(song.title, song.subtitle)
@@ -55,6 +61,9 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
         controller.post { controller.updateSummary(txt) }
     }
 
+    /**
+     * should run on UI thread
+     */
     override fun onSongPicUpdated(url: String?) {
         Glide.with(controller.context)
             .load(url)

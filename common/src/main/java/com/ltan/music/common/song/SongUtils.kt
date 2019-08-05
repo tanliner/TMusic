@@ -3,13 +3,13 @@ package com.ltan.music.common.song
 /**
  * TMusic.com.ltan.music.common.song
  *
- * @ClassName: ReqArgs
+ * @ClassName: SongUtils
  * @Description:
  * @Author: tanlin
  * @Date:   2019-06-23
  * @Version: 1.0
  */
-object ReqArgs {
+object SongUtils {
     fun buildArgs(vararg ids: Long): String {
         return buildArgs(ids.toTypedArray())
     }
@@ -38,5 +38,29 @@ object ReqArgs {
         collectorBuilder.deleteCharAt(collectorBuilder.length - 1)
         collectorBuilder.append("]")
         return collectorBuilder.toString()
+    }
+
+    /**
+     * find out the last index by mode [size]
+     */
+    fun getLastIndex(cur: Int, size: Int): Int {
+        var last = cur - 1
+        if (size > 0) {
+            var next = cur - 1 // circle
+            if (next < 0) {
+                next = size - 1
+            }
+            last = next % size
+        }
+        return last
+    }
+
+    /**
+     * find out the next index by mode [size]
+     */
+    fun getNextIndex(cur: Int, size: Int): Int {
+        var next = cur + 1 // circle
+        next %= size
+        return next
     }
 }

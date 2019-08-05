@@ -2,7 +2,6 @@ package com.ltan.music.service.widget
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -28,7 +27,7 @@ class PlayerPageController @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr), View.OnClickListener {
     companion object {
-        private const val TAG = "TMusic/PlayerPage"
+        private const val TAG = "PlayerPageController"
     }
 
     private var mPlayModeIv: ImageView
@@ -61,15 +60,12 @@ class PlayerPageController @JvmOverloads constructor(
 
     private fun init() {
         mPlayModeIv.setOnClickListener {
-            Log.d(TAG, "init mPlayModeIv click")
             mController.onModeChange(PlayMode.SINGLE)
         }
         mPlayLastIv.setOnClickListener {
-            Log.d(TAG, "init mPlayLastIv click")
             mController.onLast()
         }
         mPlayingIv.setOnClickListener {
-            Log.d(TAG, "init mPlayingIv click")
             if(mController.isPlaying) {
                 setState(false)
                 mController.pause()
@@ -79,11 +75,10 @@ class PlayerPageController @JvmOverloads constructor(
             }
         }
         mPlayNextIv.setOnClickListener {
-            Log.d(TAG, "init mPlayNextIv click")
             mController.onNext()
         }
         mPlayListIv.setOnClickListener {
-            Log.d(TAG, "init mPlayListIv click ${mDataSource.size}")
+            MusicLog.d(TAG, "init mPlayListIv click ${mDataSource.size}")
             mController.showList()
         }
 
@@ -110,6 +105,9 @@ class PlayerPageController @JvmOverloads constructor(
         })
     }
 
+    /**
+     * Update image for resume/pause
+     */
     fun setState(isPlaying: Boolean) {
         if (isPlaying) {
             mPlayingIv.setImageResource(R.drawable.icon_player_page_pause)

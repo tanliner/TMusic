@@ -10,7 +10,7 @@ import com.ltan.music.business.bean.SongDetailRsp
 import com.ltan.music.business.bean.SongUrl
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.bean.SongItemObject
-import com.ltan.music.common.song.ReqArgs
+import com.ltan.music.common.song.SongUtils
 import com.ltan.music.service.adapter.CdClickListener
 import com.ltan.music.service.contract.ServiceContract
 import com.ltan.music.service.presenter.ServicePresenter
@@ -112,8 +112,8 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
         }
         if (mCurrentSong.picUrl == null) {
             val id = mCurrentSong.songId
-            querySongDetail(ReqArgs.buildArgs(id), ReqArgs.buildCollectors(id))
-            querySongUrls(ReqArgs.buildArgs(id))
+            querySongDetail(SongUtils.buildArgs(id), SongUtils.buildCollectors(id))
+            querySongUrls(SongUtils.buildArgs(id))
         }
         mSingerBgFl.setOnLongClickListener(object : View.OnLongClickListener {
             override fun onLongClick(v: View?): Boolean {

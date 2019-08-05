@@ -24,8 +24,8 @@ import com.ltan.music.common.MusicLog
 import com.ltan.music.common.StatusBar
 import com.ltan.music.common.ToastUtil
 import com.ltan.music.common.bean.SongItemObject
-import com.ltan.music.common.song.ReqArgs.buildArgs
-import com.ltan.music.common.song.ReqArgs.buildCollectors
+import com.ltan.music.common.song.SongUtils.buildArgs
+import com.ltan.music.common.song.SongUtils.buildCollectors
 import com.ltan.music.mine.adapter.PlaceItemBinder
 import com.ltan.music.mine.adapter.SongItemBinder
 import com.ltan.music.mine.adapter.SongListHeaderBinder
@@ -46,6 +46,7 @@ import kotlin.math.min
 
 /**
  * TMusic.com.ltan.music.mine
+ * song-list
  *
  * @ClassName: SongListActivity
  * @Description:
@@ -174,6 +175,10 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         mSongsRcyView.adapter = mRcyAdapter
     }
 
+    /**
+     * [titleOffset] show title when list scroll up
+     * [offset] the floating play-all view
+     */
     private fun updateFloatingPlay(scrollY: Int, offset: Float, titleOffset: Float) {
         if (scrollY >= offset) {
             mFloatingContainer.visibility = View.VISIBLE

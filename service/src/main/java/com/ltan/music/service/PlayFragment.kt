@@ -32,7 +32,7 @@ import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.StatusBar
 import com.ltan.music.common.bean.SongItemObject
-import com.ltan.music.common.song.ReqArgs
+import com.ltan.music.common.song.SongUtils
 import com.ltan.music.service.adapter.CdClickListener
 import com.ltan.music.service.adapter.PlayerPageAdapter
 import com.ltan.music.service.contract.ServiceContract
@@ -44,6 +44,7 @@ import kotterknife.bindView
 
 /**
  * TMusic.com.ltan.music.service
+ * playing with a CD-image
  *
  * @ClassName: PlayFragment
  * @Description:
@@ -78,6 +79,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private val mSongName: TextView by bindView(R.id.tv_play_service_song_name)
     private val mSongArtist: TextView by bindView(R.id.tv_play_service_song_artists)
     private val mSongPager: ViewPager by bindView(R.id.vp_song_playing)
+    // todo slow down viewpager swipe
+    // private val mSongPager: CdViewPager by bindView(R.id.vp_song_playing)
     private val mPagerContainer: LinearLayout by bindView(R.id.ll_pager_container)
     private val mSongLyricSv: ScrollView by bindView(R.id.scroll_lyric)
     private val mLyricContainerRoot: LinearLayout by bindView(R.id.ll_song_text_container_root)
@@ -160,6 +163,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
         adapter = PlayerPageAdapter(childFragmentManager)
         mSongPager.adapter = adapter
+        // TODO slow down viewpager swipe
+        // mSongPager.setDurationScroll(1)
         adapter.setSongs(mSongList)
         var index = 0
         for (i in 0 until mSongList.size) {
@@ -252,6 +257,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         song.subtitle = curSong.subtitle
         song.artists = curSong.artists
         song.picUrl = curSong.picUrl
+        song.lyrics = curSong.lyrics
     }
 
     private fun appendSpace(artist: String): String {
@@ -276,12 +282,16 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         prepareSongPlaying(item)
     }
 
+    /**
+     * transfer [SongItemObject] into [SongPlaying] used by [MusicService]
+     */
     private fun updateCurrentSong(item: SongItemObject) {
         // update current playing song, and sync to service
         mCurrentSelectId = item.songId
         mCurSong.id = item.songId
         mCurSong.title = item.title
         mCurSong.picUrl = item.picUrl
+        mCurSong.lyrics = item.lyrics
         item.songUrl?.let { mCurSong.url = it }
     }
 
@@ -291,8 +301,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             setLayoutBg(song.picUrl)
             mMusicBinder?.play(mCurSong)
         } else {
-            mPresenter.getSongDetail(ReqArgs.buildArgs(song.songId), ReqArgs.buildCollectors(song.songId))
-            mPresenter.getSongUrl(ReqArgs.buildArgs(song.songId))
+            mPresenter.getSongDetail(SongUtils.buildArgs(song.songId), SongUtils.buildCollectors(song.songId))
+            mPresenter.getSongUrl(SongUtils.buildArgs(song.songId))
         }
     }
 
@@ -303,6 +313,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             .placeholder(PlayListItemPreview.PLACEHOLDER_IMG)
             .listener(DefRequestListener(ImageBlur(appCtx, mPreviewBg)))
             .transform(BlurTransformation(20, 25)) /* fast blur in Java layer */
+            .transform(BlurTransformation(20, 26))
             .into(mPreviewBg)
     }
 
@@ -479,9 +490,12 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
             mLyricHighLight = ScrollLyricHighLight()
             playerCallback.setLyricHighLight(mLyricHighLight)
+            playerCallback.setViewPagerUpdate(ViewPagerUpdateImpl())
 
             mMusicBinder = musicBinder
             musicBinder.addCallback(playerCallback)
+            // update the index recycler-view, the 'Next-Song' button will change it
+            musicBinder.setCurrentIndex(mSongPager.currentItem)
             // set the current lyric
             mLyric = musicBinder.getLyric()
             // update current media service state
@@ -504,7 +518,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         }
 
         /**
-         * Please run on UI
+         * highlight the lyric line, and scroll-up with 100ms, make lyric center-vertical
+         * Note: Please run on UI
          */
         private fun updateHighlight(index: Int) {
             val container = mLyricContainer
@@ -521,7 +536,9 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             mLyricLastIndex = index
             // delay to scroll all lyric lines
             mHandler.postDelayed({
-                val itemHeight = container.getChildAt(index).measuredHeight
+                // NPE if switch to next song, and lyric line not the first one
+                val lyricItem = container.getChildAt(index) ?: return@postDelayed
+                val itemHeight = lyricItem.measuredHeight
                 mSongLyricSv.smoothScrollTo(0, (index - 6) * itemHeight)
             }, 100L)
         }
@@ -546,6 +563,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         }
 
         override fun onLyric(lyric: LyricsObj?) {
+            MusicLog.w(TAG, "wtf onLyric ===== $lyric\n${mSongLyricSv.visibility}")
             mLyric = lyric
             if (mSongLyricSv.visibility == View.VISIBLE) {
                 mHandler.post { generateLyric() }
@@ -556,31 +574,42 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             mHandler.post {
                 updateTitle(title, subtitle)
             }
-            val curIndex = mSongPager.currentItem
-            val binder = mMusicBinder ?: return
-            val targetIndex = binder.getCurrentIndex()
-            mHandler.post {
-                swipeViewPager(curIndex, targetIndex)
-                mSongPager.addOnPageChangeListener(mPageChangeListener)
-            }
         }
 
         override fun onSongPreviewUpdate(url: String?) {
             val binder = mMusicBinder ?: return
             val curIndex = mSongPager.currentItem
             val targetIndex = binder.getCurrentIndex()
+            MusicLog.d(TAG, "onSongPreviewUpdate swipe index. $curIndex vs $targetIndex")
+            mHandler.post { setLayoutBg(url) }
+        }
+    }
+
+    inner class ViewPagerUpdateImpl : IViewPagerUpdate {
+        override fun onNext(index: Int, curSong: SongPlaying) {
+            val curIndex = mSongPager.currentItem
+            mCurSong = curSong
             mHandler.post {
-                swipeViewPager(curIndex, targetIndex)
-                setLayoutBg(url)
+                swipeViewPager(curIndex, index)
+            }
+        }
+
+        override fun onLast(index: Int, curSong: SongPlaying) {
+            val curIndex = mSongPager.currentItem
+            mCurSong = curSong
+            mHandler.post {
+                swipeViewPager(curIndex, index)
             }
         }
 
         private fun swipeViewPager(curIndex: Int, targetIndex: Int) {
             mSongPager.removeOnPageChangeListener(mPageChangeListener)
             if (curIndex != targetIndex) {
-                mSongPager.setCurrentItem(targetIndex, true)
+                mHandler.post {
+                    mSongPager.setCurrentItem(targetIndex, true)
+                    mSongPager.addOnPageChangeListener(mPageChangeListener)
+                }
             }
-            mSongPager.addOnPageChangeListener(mPageChangeListener)
         }
     }
 }

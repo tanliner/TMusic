@@ -6,6 +6,7 @@ import com.ltan.music.service.widget.PlayerPageController
 
 /**
  * TMusic.com.ltan.music.service
+ * call from MusicService
  *
  * @ClassName: PlayerCallbackImpl
  * @Description:
@@ -20,9 +21,14 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
 
     private val controller = control
     private lateinit var lyricHighlight: LyricHighLight
+    private var mViewPagerUpdater: IViewPagerUpdate? = null
 
     fun setLyricHighLight(highLight: LyricHighLight) {
         this.lyricHighlight = highLight
+    }
+
+    fun setViewPagerUpdate(pagerUpdater: IViewPagerUpdate) {
+        mViewPagerUpdater = pagerUpdater
     }
 
     override fun onStart() {
@@ -31,8 +37,17 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
     }
 
     override fun onPause() {
+        MusicLog.w(TAG, "service PlayerCallbackImpl on pause")
         controller.setState(false)
         lyricHighlight.onPause()
+    }
+
+    override fun onNext(index: Int, curSong: SongPlaying) {
+        mViewPagerUpdater?.onNext(index, curSong)
+    }
+
+    override fun onLast(index: Int, curSong: SongPlaying) {
+        mViewPagerUpdater?.onLast(index, curSong)
     }
 
     override fun onCompleted(song: SongPlaying) {

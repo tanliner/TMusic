@@ -7,6 +7,7 @@ import com.ltan.music.common.bean.SongItemObject
 
 /**
  * TMusic.com.ltan.music.service
+ * playing fragment container
  *
  * @ClassName: PlayerActivity
  * @Description:

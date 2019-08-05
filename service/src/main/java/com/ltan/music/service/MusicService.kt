@@ -19,7 +19,7 @@ import com.ltan.music.common.MusicLog
 import com.ltan.music.common.bean.SongItemObject
 import com.ltan.music.common.song.MusicController
 import com.ltan.music.common.song.PlayMode
-import com.ltan.music.common.song.ReqArgs
+import com.ltan.music.common.song.SongUtils
 import com.ltan.music.service.api.MusicServiceApi
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -58,9 +58,34 @@ class MusicService : Service() {
          */
         fun onLyricComplete(lyric: LyricsObj?)
 
+        /**
+         * Update new lyric line
+         * [title] of current song, [txt] lyric line, [index] of all lyrics
+         */
         fun updateLyric(title: String?, txt: String?, index: Int = 0)
+
+        /**
+         * Usually to update the bottom MediaController view.
+         */
         fun updateTitle(title: String? = "", subtitle: String? = "", artist: String? = "")
+
+        /**
+         * called when picture of current song ready
+         */
         fun onSongPicUpdated(url: String?)
+        /**
+         * the next song find out, notify callbacks
+         * [index] the new song index
+         * [curSong] the new song, the lyric maybe not ready, please check the [onLyricComplete]
+         */
+        fun onNext(index: Int, curSong: SongPlaying)
+
+        /**
+         * the last song find out, notify callbacks
+         * [index] the new song index
+         * [curSong] the new song, the lyric maybe not ready, please check the [onLyricComplete]
+         */
+        fun onLast(index: Int, curSong: SongPlaying)
     }
 
     private lateinit var mBinder: MyBinder
@@ -150,7 +175,8 @@ class MusicService : Service() {
             player.setOnErrorListener { mp, what, extra ->
                 // (-38,0) https://www.cnblogs.com/getherBlog/p/3939033.html
                 MusicLog.e(TAG, "mp:$mp , init what: $what, extra:$extra")
-                false
+                // prevent completed
+                true
             }
             player.setOnPreparedListener {
                 // (-38,0), already in onPrepared
@@ -206,6 +232,9 @@ class MusicService : Service() {
             return mPlayingList
         }
 
+        /**
+         * Prepare play a new song, It's necessary to query lyrics if empty.
+         */
         fun play(song: SongPlaying) {
             play(song.url)
             if (!song.lyrics?.songTexts.isNullOrEmpty()) {
@@ -235,6 +264,12 @@ class MusicService : Service() {
             mCurPlayIndex = index
         }
 
+        /**
+         * play a online song [songUrl]
+         *
+         * Note: ANR if buffering a FLAC music while switch a new song.
+         * so, create a new MediaPlayer to handle the new song, a sub-thread to watch the FLAC music
+         */
         private fun play(songUrl: String) {
             if (isBuffering()) {
                 internalStop()
@@ -316,9 +351,7 @@ class MusicService : Service() {
         }
 
         private fun updateTitle(title: String? = "", subtitle: String? = "", artist: String? = "") {
-            mCallbacks.forEach {
-                it.updateTitle(title, subtitle, artist)
-            }
+            mCallbacks.forEach { it.updateTitle(title, subtitle, artist) }
         }
 
         private fun updateSongPic(url: String?) {
@@ -326,39 +359,35 @@ class MusicService : Service() {
         }
 
         private fun onLyricComplete(lyric: LyricsObj?) {
-            mCallbacks.forEach {
-                it.onLyricComplete(lyric)
-            }
+            mCallbacks.forEach { it.onLyricComplete(lyric) }
         }
 
         private fun onCallBackBuffer(per: Int) {
-            mCallbacks.forEach {
-                it.onBufferUpdated(per)
-            }
+            mCallbacks.forEach { it.onBufferUpdated(per) }
         }
 
         private fun onCallBackUpdateLyric(title: String?, lyricPosition: LyricPosition) {
-            mCallbacks.forEach {
-                it.updateLyric(title, lyricPosition.txt, lyricPosition.index)
-            }
+            mCallbacks.forEach { it.updateLyric(title, lyricPosition.txt, lyricPosition.index) }
         }
 
         private fun onCallBackComplete(curSong: SongPlaying) {
-            mCallbacks.forEach {
-                it.onCompleted(mCurrentSong)
-            }
+            mCallbacks.forEach { it.onCompleted(mCurrentSong) }
         }
 
         private fun onCallBackStart() {
-            mCallbacks.forEach {
-                it.onStart()
-            }
+            mCallbacks.forEach { it.onStart() }
         }
 
         private fun onCallBackPause() {
-            mCallbacks.forEach {
-                it.onPause()
-            }
+            mCallbacks.forEach { it.onPause() }
+        }
+
+        private fun onCallBackNext() {
+            mCallbacks.forEach { it.onNext(mCurPlayIndex, mCurrentSong) }
+        }
+
+        private fun onCallBackLast() {
+            mCallbacks.forEach { it.onLast(mCurPlayIndex, mCurrentSong) }
         }
 
         override fun isPlaying(): Boolean {
@@ -413,24 +442,21 @@ class MusicService : Service() {
         }
 
         override fun onNext() {
-            if (mPlayingList.size > 0) {
-                val next = mCurPlayIndex + 1 // circle
-                mCurPlayIndex = next % mPlayingList.size
-            }
+            mPlayer.pause()
+            mCurPlayIndex = SongUtils.getNextIndex(mCurPlayIndex, mPlayingList.size)
             val nextOne = mPlayingList[mCurPlayIndex]
-            processNextSong(nextOne, false)
+            if (processNextSong(nextOne, false)) {
+                onCallBackNext()
+            }
         }
 
         override fun onLast() {
-            if (mPlayingList.size > 0) {
-                var next = mCurPlayIndex - 1 // circle
-                if (next < 0) {
-                    next = mPlayingList.size - 1
-                }
-                mCurPlayIndex = next % mPlayingList.size
-            }
+            mPlayer.pause()
+            mCurPlayIndex = SongUtils.getLastIndex(mCurPlayIndex, mPlayingList.size)
             val nextOne = mPlayingList[mCurPlayIndex]
-            processNextSong(nextOne, true)
+            if(processNextSong(nextOne, true)) {
+                onCallBackLast()
+            }
         }
 
         override fun showList() {
@@ -439,17 +465,18 @@ class MusicService : Service() {
         override fun onModeChange(mode: PlayMode) {
         }
 
-        private fun processNextSong(nextOne: SongItemObject, backward: Boolean) {
+        private fun processNextSong(nextOne: SongItemObject, backward: Boolean): Boolean {
             if (handleUnavailableSong(nextOne, backward)) {
-                return
+                return false
             }
             mCurrentSong.id = nextOne.songId
             mCurrentSong.picUrl = nextOne.picUrl
             mCurrentSong.title = nextOne.title
-            mCurrentSong.subtitle = nextOne.subTitle // TODO name roule
+            mCurrentSong.subtitle = nextOne.subTitle // TODO name rule
             mCurrentSong.url = nextOne.songUrl.toString()
             mCurrentSong.lyrics = nextOne.lyrics
             playNextSong(nextOne, backward)
+            return true
         }
 
         private fun playNextSong(nextOne: SongItemObject, backward: Boolean = false) {
@@ -478,6 +505,10 @@ class MusicService : Service() {
             updateSongPic(url)
         }
 
+        /**
+         * update the lyric for the current playing song,
+         * and save for the play-list, reduce the NetWork Request
+         */
         private fun setLyrics(lyrics: LyricsObj?) {
             mPlayingList[mCurPlayIndex].lyrics = lyrics
             mCurrentSong.lyrics = lyrics
@@ -493,17 +524,23 @@ class MusicService : Service() {
             updateCallbackLyric(lyric)
         }
 
+        /**
+         * the song url is empty, unless a VIP user
+         */
         private fun putUnavailableSong(item: SongItemObject) {
             unavailableSongs[item.songId] = item
         }
 
+        /**
+         * may be a vip song-url
+         */
         private fun unavailableSong(song: SongItemObject): Boolean {
             return unavailableSongs.containsKey(song.songId)
         }
 
         /**
          * [nextOne] may not be free version, song url is empty.
-         * so, find the next Song via [backward] or forward
+         * so, find the next Song via [backward]
          */
         private fun handleUnavailableSong(nextOne: SongItemObject, backward: Boolean): Boolean {
             val unavailable = unavailableSong(nextOne)
@@ -566,8 +603,8 @@ class MusicService : Service() {
 
         fun getSongDetail(song: SongPlaying) {
 
-            val ids = ReqArgs.buildArgs(song.id)
-            val controllers = ReqArgs.buildCollectors(song.id)
+            val ids = SongUtils.buildArgs(song.id)
+            val controllers = SongUtils.buildCollectors(song.id)
 
             ApiProxy.instance.getApi(CommonApi::class.java).getSongDetail(ids, controllers)
                 .subscribeOn(Schedulers.io())
@@ -589,7 +626,7 @@ class MusicService : Service() {
         }
 
         fun getSongUrl(song: SongPlaying, nextOne: SongItemObject, backward: Boolean) {
-            val ids = ReqArgs.buildArgs(song.id)
+            val ids = SongUtils.buildArgs(song.id)
             ApiProxy.instance.getApi(CommonApi::class.java).getSongUrl(ids)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
@@ -611,8 +648,8 @@ class MusicService : Service() {
          * Deprecated
          */
         private fun testFlatMap(song: SongPlaying, nextOne: SongItemObject) {
-            val ids = ReqArgs.buildArgs(song.id)
-            val controllers = ReqArgs.buildCollectors(song.id)
+            val ids = SongUtils.buildArgs(song.id)
+            val controllers = SongUtils.buildCollectors(song.id)
             ApiProxy.instance.getApi(CommonApi::class.java).getSongDetail(ids, controllers)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())

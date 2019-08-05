@@ -49,7 +49,7 @@ class EasyBlur private constructor() {
 
             val renderScript = RenderScript.create(ctx)
 
-            MusicLog.i(TAG, "out scale size:" + outBitmap.width + "*" + outBitmap.height)
+            MusicLog.d(TAG, "out scale size:" + outBitmap.width + "*" + outBitmap.height)
 
             // Allocate memory for Renderscript to work with
 

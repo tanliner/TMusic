@@ -23,6 +23,7 @@ class RouterActivity : MusicBaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AccountUtil.init()
         if(hasLoginInfo()) {
             startActivity(Intent(baseContext, MainActivity::class.java))
         } else {

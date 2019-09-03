@@ -25,3 +25,4 @@
 -keep class * {
     public private *;
 }
+-printmapping Product/release/mapping.txt

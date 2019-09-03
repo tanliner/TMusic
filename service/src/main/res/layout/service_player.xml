@@ -77,8 +77,8 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/player_page_controller_height" />
 
-    <LinearLayout
-            android:id="@+id/ll_pager_container"
+    <RelativeLayout
+            android:id="@+id/rl_pager_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/service_pager_controller"
@@ -96,7 +96,16 @@
                 <!--android:layout_width="match_parent"-->
                 <!--android:layout_height="@dimen/player_service_cd_bg_height"-->
                 <!--/>-->
-    </LinearLayout>
+        <ImageView
+                android:id="@+id/iv_cd_sticker"
+                android:layout_width="114dp"
+                android:layout_height="202dp"
+                android:src="@drawable/play_stick"
+                android:layout_marginTop="-18dp"
+                android:scaleType="centerCrop"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true" />
+    </RelativeLayout>
 
     <ScrollView
             android:id="@+id/scroll_lyric"

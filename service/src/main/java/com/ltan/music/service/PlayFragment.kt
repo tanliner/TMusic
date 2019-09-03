@@ -16,6 +16,8 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.viewpager.widget.ViewPager
 import com.bumptech.glide.Glide
@@ -37,6 +39,7 @@ import com.ltan.music.service.adapter.CdClickListener
 import com.ltan.music.service.adapter.PlayerPageAdapter
 import com.ltan.music.service.contract.ServiceContract
 import com.ltan.music.service.presenter.ServicePresenter
+import com.ltan.music.service.provider.MusicProvider
 import com.ltan.music.service.widget.PlayerPageController
 import com.ltan.music.widget.constants.PlayListItemPreview
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -81,11 +84,13 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private val mSongPager: ViewPager by bindView(R.id.vp_song_playing)
     // todo slow down viewpager swipe
     // private val mSongPager: CdViewPager by bindView(R.id.vp_song_playing)
-    private val mPagerContainer: LinearLayout by bindView(R.id.ll_pager_container)
+    // private val mPagerContainer: LinearLayout by bindView(R.id.ll_pager_container)
+    private val mPagerContainer: RelativeLayout by bindView(R.id.rl_pager_container)
     private val mSongLyricSv: ScrollView by bindView(R.id.scroll_lyric)
     private val mLyricContainerRoot: LinearLayout by bindView(R.id.ll_song_text_container_root)
     private val mLyricContainer: LinearLayout by bindView(R.id.ll_song_text_container)
     private val mPlayerPageController: PlayerPageController by bindView(R.id.service_pager_controller)
+    private val mPlayerSticker: ImageView by bindView(R.id.iv_cd_sticker)
 
     private lateinit var adapter: PlayerPageAdapter
     private var mCurrentSongDetail: Track? = null
@@ -100,6 +105,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private var mLyric: LyricsObj? = null
 
     private lateinit var mPageChangeListener: PagerChangeListener
+    private lateinit var mStickerAnimIn: Animation
+    private lateinit var mStickerAnimOut: Animation
 
     @SuppressLint("HandlerLeak")
     inner class MyHandler : Handler() {
@@ -136,6 +143,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         initView()
         setLayoutBg(mCurSong.picUrl)
         bindService(mCurSong.url)
+        loadAnims()
+        MusicProvider()
     }
 
     private fun processArgs() {
@@ -192,6 +201,21 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         mSongLyricSv.setOnClickListener { showLyric() }
         mLyricContainerRoot.setOnClickListener { showLyric() }
         mPagerContainer.setOnClickListener { showLyric() }
+    }
+
+    private fun loadAnims() {
+        mStickerAnimIn = AnimationUtils.loadAnimation(requireContext(), R.anim.anim_cd_sticker_in)
+        mStickerAnimOut = AnimationUtils.loadAnimation(requireContext(), R.anim.anim_cd_sticker_out)
+    }
+
+    private fun playStickerAnim(anim: Animation) {
+        val lastAnim = mPlayerSticker.animation
+        if (lastAnim != null && !lastAnim.hasEnded()) {
+            lastAnim.cancel()
+        }
+        mPlayerSticker.animation = anim
+        mPlayerSticker.startAnimation(anim)
+        // anim.start()
     }
 
     override fun initPresenter() {
@@ -457,7 +481,16 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
     inner class PagerChangeListener(songList: ArrayList<SongItemObject>) : ViewPager.OnPageChangeListener {
         private val mSongList = songList
+        private var mLastState = 0
         override fun onPageScrollStateChanged(state: Int) {
+            if (state == ViewPager.SCROLL_STATE_IDLE && mLastState == ViewPager.SCROLL_STATE_SETTLING) {
+                playStickerAnim(mStickerAnimIn)
+            } else if (state == ViewPager.SCROLL_STATE_DRAGGING) {
+                playStickerAnim(mStickerAnimOut)
+            }
+            if (state == ViewPager.SCROLL_STATE_DRAGGING) {
+            }
+            mLastState = state
         }
 
         override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {

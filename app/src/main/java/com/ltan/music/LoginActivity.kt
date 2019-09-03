@@ -2,6 +2,7 @@ package com.ltan.music
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
 import com.ltan.music.basemvp.BaseMVPActivity
@@ -12,7 +13,6 @@ import com.ltan.music.presenter.LoginPresenter
 import kotterknife.bindView
 import java.math.BigInteger
 import java.security.MessageDigest
-import android.text.Editable as TextEditable
 
 /**
  * TMusic.com.ltan.music
@@ -49,8 +49,13 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
         // Kotlin lambda
         mLogin.setOnClickListener {
             val name = mUsrName.text.toString()
+            val pass = mUsrPass.text.toString()
+            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(pass)) {
+                ToastUtil.showToastShort(getString(R.string.app_act_input_tips))
+                return@setOnClickListener
+            }
             val md5 = MessageDigest.getInstance("MD5")
-            val hash = md5.digest(mUsrPass.text.toString().toByteArray())
+            val hash = md5.digest(pass.toByteArray())
             val bi = BigInteger(1, hash)
             val passHexString = bi.toString(16).padStart(32, '0')
 

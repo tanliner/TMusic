@@ -64,6 +64,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         private const val TAG = "PlayFragment"
         const val MSG_UPDATE_PREVIEW = 0x1000
         const val MSG_UPDATE_SEEKBAR_PROGRESS = 0x1001
+        const val MSG_PLAY_CD_ANIM = 0x1002
         const val FOCUS_COLOR = Color.GREEN
         const val DEFAULT_COLOR = Color.WHITE
     }
@@ -116,6 +117,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
                 // MSG_UPDATE_PREVIEW -> updateCurrentBg(msg.obj as SongItemObject)
                 MSG_UPDATE_PREVIEW -> onPageSelected(msg.obj as SongItemObject)
                 MSG_UPDATE_SEEKBAR_PROGRESS -> updateCurrentPos()
+                MSG_PLAY_CD_ANIM -> playCDAnim()
             }
         }
     }
@@ -257,6 +259,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             mPlayerPageController.setState(it.isPlaying)
             if (it.isPlaying) {
                 updateCurrentPos()
+                playCDAnim()
             }
             it.addCallback(mServiceConn.playerCallback)
         }
@@ -269,6 +272,27 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         mMusicBinder?.removeCallback(mServiceConn.playerCallback)
         mLastSongId = mCurSong.id
         mMusicBinder?.let { mCurSong = it.getCurrentSong() }
+        pauseCDAnim()
+    }
+
+    private fun playCDAnim() {
+        val fragment = adapter.getCurrentItem(mSongPager)
+        if (fragment is PlayerCDFragment) {
+            if (fragment.initialized) {
+                mHandler.removeMessages(MSG_PLAY_CD_ANIM)
+                fragment.rotateCD(true)
+            } else {
+                val msg = mHandler.obtainMessage(MSG_PLAY_CD_ANIM)
+                mHandler.sendMessageDelayed(msg, 1000);
+            }
+        }
+    }
+
+    private fun pauseCDAnim() {
+        val fragment = adapter.getCurrentItem(mSongPager)
+        if (fragment is PlayerCDFragment) {
+            fragment.rotateCD(false)
+        }
     }
 
     private fun updateServiceSong() {
@@ -314,6 +338,8 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         mCurrentSelectId = item.songId
         mCurSong.id = item.songId
         mCurSong.title = item.title
+        mCurSong.subtitle = item.subTitle
+        mCurSong.artists = item.artists
         mCurSong.picUrl = item.picUrl
         mCurSong.lyrics = item.lyrics
         item.songUrl?.let { mCurSong.url = it }
@@ -506,7 +532,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             mLyric = null
             mLastSongId = -1
             mHandler.removeMessages(MSG_UPDATE_PREVIEW)
-            val msg = Message.obtain(mHandler, MSG_UPDATE_PREVIEW)
+            val msg = mHandler.obtainMessage(MSG_UPDATE_PREVIEW)
             msg.obj = curItem
             mHandler.sendMessageDelayed(msg, 500)
         }
@@ -537,6 +563,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             // update seekbar position
             if (musicBinder.isPlaying) {
                 updateCurrentPos()
+                playCDAnim()
             }
         }
     }
@@ -584,10 +611,18 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             }
             mPlayerPageController.updateMax(binder.duration)
             mHandler.obtainMessage(MSG_UPDATE_SEEKBAR_PROGRESS).sendToTarget()
+            val item = adapter.getCurrentItem(mSongPager)
+            if (item is PlayerCDFragment) {
+                item.rotateCD(true)
+            }
         }
 
         override fun onPause() {
             mHandler.removeMessages(MSG_UPDATE_SEEKBAR_PROGRESS)
+            val item = adapter.getCurrentItem(mSongPager)
+            if (item is PlayerCDFragment) {
+                item.rotateCD(false)
+            }
         }
 
         override fun onComplete() {

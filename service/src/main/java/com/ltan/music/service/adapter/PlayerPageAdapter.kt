@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.viewpager.widget.ViewPager
 import com.ltan.music.common.bean.SongItemObject
 import com.ltan.music.service.PlayerCDFragment
 
@@ -34,6 +35,10 @@ class PlayerPageAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
     fun setOnClickListener(l: CdClickListener) {
         mCdClickListener = l
+    }
+
+    fun getCurrentItem(vp: ViewPager): Any {
+        return instantiateItem(vp, vp.currentItem)
     }
 
     override fun getItem(position: Int): Fragment {

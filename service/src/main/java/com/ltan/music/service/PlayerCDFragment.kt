@@ -1,7 +1,10 @@
 package com.ltan.music.service
 
+import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.View
+import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.bumptech.glide.Glide
@@ -40,6 +43,10 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
     private val mSongAlbumIv: ImageView by bindView(R.id.crliv_song_alb)
     private var mClickListener: CdClickListener? = null
 
+    private var mRotateAnim: Animator? = null
+    private var mInitialized: Boolean = false
+    val initialized: Boolean get() = mInitialized
+
     private lateinit var mCurrentSong: SongItemObject
 
     override fun initLayout(): Int {
@@ -58,6 +65,9 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
     override fun init(view: View) {
         super.init(view)
         initView(view)
+        initAnim()
+        // indicate anim initialized
+        mInitialized = true
     }
 
     override fun onResume() {
@@ -81,12 +91,30 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
     }
 
     override fun onSongUrl(songs: List<SongUrl>?) {
-        MusicLog.d(TAG, "onSongUrl returned $songs")
+        MusicLog.d(TAG, "onSongUrl http returned $songs")
         mCurrentSong.songUrl = songs?.get(0)?.url
     }
 
     fun setCdClickListener(clickListener: CdClickListener?) {
         mClickListener = clickListener
+    }
+
+    fun cancelCDAnim() {
+        val animator = mRotateAnim ?: return
+        animator.cancel()
+    }
+
+    fun rotateCD(playing: Boolean) {
+        val animator = mRotateAnim ?: return
+        if (playing) {
+            if (animator.isStarted || animator.isPaused) {
+                animator.resume()
+            } else {
+                animator.start()
+            }
+        } else {
+            animator.pause()
+        }
     }
 
     private fun querySongDetail(ids: String, collector: String) {
@@ -129,8 +157,22 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
         }
     }
 
+    private fun initAnim() {
+        val valueAnimator = ObjectAnimator.ofFloat(mSingerBgFl, "rotation", 0F, 360F)
+        valueAnimator.repeatCount = ObjectAnimator.INFINITE
+        valueAnimator.repeatMode = ObjectAnimator.RESTART
+        valueAnimator.interpolator = LinearInterpolator()
+        valueAnimator.duration = 10000
+
+        // valueAnimator.addUpdateListener(ValueAnimator.AnimatorUpdateListener {
+        //     val value = it.animatedValue as Float
+        //     mSingerBgFl.rotation = value
+        // })
+        mRotateAnim = valueAnimator
+    }
+
     private fun showPreviewImage(picUrl: String?) {
-        if(picUrl.isNullOrEmpty()) {
+        if (picUrl.isNullOrEmpty()) {
             return
         }
         Glide.with(requireContext().applicationContext)

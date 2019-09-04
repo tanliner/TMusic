@@ -1,6 +1,7 @@
 package com.ltan.music.account.utils
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.text.TextUtils
 import com.google.gson.Gson
 import com.ltan.music.account.beans.Account
@@ -19,13 +20,17 @@ import com.ltan.music.common.Constants
  * @Version: 1.0
  */
 object AccountUtil {
+    lateinit var sSharedPref: SharedPreferences
+    @JvmStatic
+    fun init() {
+        sSharedPref = BaseApplication.getAPPContext()
+            .getSharedPreferences(Constants.LOCAL_SP_ACCOUNT_NAME, Context.MODE_PRIVATE)
+    }
     @JvmStatic
     fun saveAccountInfo(account: Account?) {
         val gson = Gson()
-        val spf = BaseApplication.getAPPContext()
-            .getSharedPreferences(Constants.LOCAL_SP_ACCOUNT_NAME, Context.MODE_PRIVATE)
         val gsonStr = gson.toJson(account)
-        spf.edit()
+        sSharedPref.edit()
             .putString(Constants.LOCAL_SP_ACCOUNT_SECTION, gsonStr)
             .commit()
     }
@@ -33,10 +38,8 @@ object AccountUtil {
     @JvmStatic
     fun saveProfileInfo(profile: Profile?) {
         val gson = Gson()
-        val spf = BaseApplication.getAPPContext()
-            .getSharedPreferences(Constants.LOCAL_SP_ACCOUNT_NAME, Context.MODE_PRIVATE)
         val gsonStr = gson.toJson(profile)
-        spf.edit()
+        sSharedPref.edit()
             .putString(Constants.LOCAL_SP_PROFILE_SECTION, gsonStr)
             .commit()
     }
@@ -44,9 +47,7 @@ object AccountUtil {
     @JvmStatic
     fun getAccountInfo(): Account? {
         val gson = Gson()
-        val spf = BaseApplication.getAPPContext()
-            .getSharedPreferences(Constants.LOCAL_SP_ACCOUNT_NAME, Context.MODE_PRIVATE)
-        val str = spf.getString(Constants.LOCAL_SP_ACCOUNT_SECTION, "")
+        val str = sSharedPref.getString(Constants.LOCAL_SP_ACCOUNT_SECTION, "")
 
         if(TextUtils.isEmpty(str)) {
             return null
@@ -57,9 +58,7 @@ object AccountUtil {
     @JvmStatic
     fun getProfileInfo(): Profile? {
         val gson = Gson()
-        val spf = BaseApplication.getAPPContext()
-            .getSharedPreferences(Constants.LOCAL_SP_ACCOUNT_NAME, Context.MODE_PRIVATE)
-        val str = spf.getString(Constants.LOCAL_SP_PROFILE_SECTION, "")
+        val str = sSharedPref.getString(Constants.LOCAL_SP_PROFILE_SECTION, "")
 
         if(TextUtils.isEmpty(str)) {
             return null

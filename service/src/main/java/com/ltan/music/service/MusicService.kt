@@ -60,9 +60,9 @@ class MusicService : Service() {
 
         /**
          * Update new lyric line
-         * [title] of current song, [txt] lyric line, [index] of all lyrics
+         * [curSong] of current song, [txt] lyric line, [index] of all lyrics
          */
-        fun updateLyric(title: String?, txt: String?, index: Int = 0)
+        fun updateLyric(curSong: SongPlaying, txt: String?, index: Int = 0)
 
         /**
          * Usually to update the bottom MediaController view.
@@ -130,6 +130,8 @@ class MusicService : Service() {
         private var mCurPlayIndex = 0
         private val unavailableSongs = ConcurrentHashMap<Long, SongItemObject>()
         private val mServiceApiUtil = ApiUtil()
+        // For prevent (-38, 0)
+        private var mDuration = 0
 
         init {
             mUpdateThread.start()
@@ -180,6 +182,7 @@ class MusicService : Service() {
             }
             player.setOnPreparedListener {
                 // (-38,0), already in onPrepared
+                mDuration = it.duration
                 start()
             }
             player.setOnCompletionListener {
@@ -236,6 +239,8 @@ class MusicService : Service() {
          * Prepare play a new song, It's necessary to query lyrics if empty.
          */
         fun play(song: SongPlaying) {
+            // reset to 0
+            mDuration = 0
             play(song.url)
             if (!song.lyrics?.songTexts.isNullOrEmpty()) {
                 setLyrics(song.lyrics)
@@ -342,9 +347,10 @@ class MusicService : Service() {
             }
             val msgDelay: Long =
                 if (lyricPosition.nextDur >= MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
-            onCallBackUpdateLyric(mCurrentSong.title, lyricPosition)
+            onCallBackUpdateLyric(mCurrentSong, lyricPosition)
 
             // todo: SKIP if no callback exist
+            mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
             val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
             mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
             return true
@@ -366,8 +372,8 @@ class MusicService : Service() {
             mCallbacks.forEach { it.onBufferUpdated(per) }
         }
 
-        private fun onCallBackUpdateLyric(title: String?, lyricPosition: LyricPosition) {
-            mCallbacks.forEach { it.updateLyric(title, lyricPosition.txt, lyricPosition.index) }
+        private fun onCallBackUpdateLyric(curSong: SongPlaying, lyricPosition: LyricPosition) {
+            mCallbacks.forEach { it.updateLyric(curSong, lyricPosition.txt, lyricPosition.index) }
         }
 
         private fun onCallBackComplete(curSong: SongPlaying) {
@@ -399,7 +405,8 @@ class MusicService : Service() {
         }
 
         override fun getDuration(): Int {
-            return mPlayer.duration
+            // note: do not use player.duration directly, lead to wrong state (-38, 0)
+            return mDuration
         }
 
         override fun pause() {

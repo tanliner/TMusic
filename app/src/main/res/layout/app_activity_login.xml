@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/common_horizontal_edge"
+        android:orientation="vertical">
 
     <EditText
             android:id="@+id/et_app_usr_name"
@@ -11,21 +13,25 @@
             android:layout_height="wrap_content"
             android:hint="@string/app_act_login_email"
             android:inputType="textEmailAddress" />
+
     <EditText
             android:id="@+id/et_app_usr_pass"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/app_act_login_email_password"
             android:inputType="textPassword" />
-    <Button
-            android:text="@string/app_act_login_btn"
-            android:id="@+id/btn_app_login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
 
     <Button
-            android:text="@string/app_act_logout_btn"
+            android:id="@+id/btn_app_login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_act_login_btn" />
+
+    <Button
             android:id="@+id/btn_app_logout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            android:text="@string/app_act_logout_btn" />
 </LinearLayout>

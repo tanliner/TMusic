@@ -32,6 +32,13 @@
         <activity android:name=".service.PlayerActivity"/>
 
         <service android:name=".service.MusicService" android:exported="false"/>
+        <provider
+                android:authorities="${applicationId}.provider"
+                android:name=".service.provider.MusicProvider"
+                android:readPermission="${applicationId}.permission.provider.read"
+                android:writePermission="${applicationId}.permission.provider.write"
+                android:exported="true"
+                />
     </application>
 
 </manifest>

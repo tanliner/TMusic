@@ -1,5 +1,6 @@
 package com.ltan.music.mine
 
+import android.text.TextUtils
 import com.bumptech.glide.Glide
 import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.MusicLog
@@ -51,14 +52,22 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
     /**
      * call on sub thread
      */
-    override fun updateLyric(title: String?, txt: String?, index: Int) {
+    override fun updateLyric(curSong: SongPlaying, txt: String?, index: Int) {
         if (txt.isNullOrEmpty()) {
-            return
+            // return
         }
-        if (title != controller.getTitle()) {
-            controller.post { controller.updateTitle(title) }
+        if (curSong.title != controller.getTitle()) {
+            controller.post { controller.updateTitle(curSong.title) }
         }
-        controller.post { controller.updateSummary(txt) }
+        var summary = txt
+        if (TextUtils.isEmpty(txt)) {
+            summary = if (index > 1) {
+                curSong.lyrics?.songTexts?.get(index - 1)?.txt
+            } else {
+                curSong.subtitle
+            }
+        }
+        controller.post { controller.updateSummary(summary) }
     }
 
     /**

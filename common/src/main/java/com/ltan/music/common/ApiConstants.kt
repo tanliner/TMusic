@@ -10,6 +10,7 @@ package com.ltan.music.common
  * @Version: 1.0
  */
 object ApiConstants {
+    const val BASE_HOST = "music.163.com"
     const val BASE_URL = "https://music.163.com/"
     const val LINUX_API_BASE_URL = "https://music.163.com/api/linux/forward"
     const val CRYPTO_WEAPI = "weapi"

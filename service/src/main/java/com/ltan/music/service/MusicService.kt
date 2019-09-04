@@ -60,9 +60,9 @@ class MusicService : Service() {
 
         /**
          * Update new lyric line
-         * [title] of current song, [txt] lyric line, [index] of all lyrics
+         * [curSong] of current song, [txt] lyric line, [index] of all lyrics
          */
-        fun updateLyric(title: String?, txt: String?, index: Int = 0)
+        fun updateLyric(curSong: SongPlaying, txt: String?, index: Int = 0)
 
         /**
          * Usually to update the bottom MediaController view.
@@ -342,9 +342,10 @@ class MusicService : Service() {
             }
             val msgDelay: Long =
                 if (lyricPosition.nextDur >= MSG_UPDATE_GAP) lyricPosition.nextDur else lyricPosition.nextDur % MSG_UPDATE_GAP
-            onCallBackUpdateLyric(mCurrentSong.title, lyricPosition)
+            onCallBackUpdateLyric(mCurrentSong, lyricPosition)
 
             // todo: SKIP if no callback exist
+            mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
             val uMsg = mLyricsUpdater.obtainMessage(MSG_UPDATE_LYRIC)
             mLyricsUpdater.sendMessageDelayed(uMsg, msgDelay)
             return true
@@ -366,8 +367,8 @@ class MusicService : Service() {
             mCallbacks.forEach { it.onBufferUpdated(per) }
         }
 
-        private fun onCallBackUpdateLyric(title: String?, lyricPosition: LyricPosition) {
-            mCallbacks.forEach { it.updateLyric(title, lyricPosition.txt, lyricPosition.index) }
+        private fun onCallBackUpdateLyric(curSong: SongPlaying, lyricPosition: LyricPosition) {
+            mCallbacks.forEach { it.updateLyric(curSong, lyricPosition.txt, lyricPosition.index) }
         }
 
         private fun onCallBackComplete(curSong: SongPlaying) {

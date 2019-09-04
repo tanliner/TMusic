@@ -65,9 +65,9 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
     /**
      * call on sub thread
      */
-    override fun updateLyric(title: String?, txt: String?, index: Int) {
+    override fun updateLyric(curSong: SongPlaying, txt: String?, index: Int) {
         if (txt.isNullOrEmpty()) {
-            return
+            // return
         }
         lyricHighlight.onHighLight(txt, index)
     }

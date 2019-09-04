@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -295,6 +296,13 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         }
     }
 
+    private fun cancelCDAnim() {
+        val fragment = adapter.getCurrentItem(mSongPager)
+        if (fragment is PlayerCDFragment) {
+            fragment.cancelCDAnim()
+        }
+    }
+
     private fun updateServiceSong() {
         val song = mMusicBinder?.getCurrentSong() ?: return
         val curSong = mCurSong
@@ -527,7 +535,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
             // pause media player
             mMusicBinder?.pause()
-            mMusicBinder?.setCurrentIndex(mSongPager.currentItem)
+            mMusicBinder?.setCurrentIndex(position)
             mLyricContainer.removeAllViews()
             mLyric = null
             mLastSongId = -1
@@ -574,7 +582,14 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             if (mLyricContainer.childCount <= 0) {
                 return
             }
-            updateHighlight(index)
+            var realIndex = index
+            if (TextUtils.isEmpty(mMusicBinder?.getLyric()?.songTexts?.get(index)?.txt)) {
+                realIndex = index - 1
+                if (realIndex < 0) {
+                    realIndex = 0
+                }
+            }
+            updateHighlight(realIndex)
         }
 
         /**
@@ -611,23 +626,18 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             }
             mPlayerPageController.updateMax(binder.duration)
             mHandler.obtainMessage(MSG_UPDATE_SEEKBAR_PROGRESS).sendToTarget()
-            val item = adapter.getCurrentItem(mSongPager)
-            if (item is PlayerCDFragment) {
-                item.rotateCD(true)
-            }
+            playCDAnim()
         }
 
         override fun onPause() {
             mHandler.removeMessages(MSG_UPDATE_SEEKBAR_PROGRESS)
-            val item = adapter.getCurrentItem(mSongPager)
-            if (item is PlayerCDFragment) {
-                item.rotateCD(false)
-            }
+            pauseCDAnim()
         }
 
         override fun onComplete() {
             mLyricLastIndex = 0
             mHandler.removeMessages(MSG_UPDATE_SEEKBAR_PROGRESS)
+            cancelCDAnim()
         }
 
         override fun onLyric(lyric: LyricsObj?) {

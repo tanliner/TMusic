@@ -99,6 +99,11 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
         mClickListener = clickListener
     }
 
+    fun cancelCDAnim() {
+        val animator = mRotateAnim ?: return
+        animator.cancel()
+    }
+
     fun rotateCD(playing: Boolean) {
         MusicLog.w(TAG, "playing $playing, initialized? $mRotateAnim")
         val animator = mRotateAnim ?: return

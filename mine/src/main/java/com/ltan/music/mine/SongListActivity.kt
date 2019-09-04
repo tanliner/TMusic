@@ -343,6 +343,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         playing.subtitle = mCurrentSong.subTitle
         playing.artists =  mCurrentSong.artists
         playing.picUrl = mCurrentSong.picUrl
+        playing.lyrics = mCurrentSong.lyrics
     }
 
     private fun buildSubtitle(tracks: Track): String {
@@ -372,6 +373,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         mCurrentSong.title = song.title
         mCurrentSong.subTitle = song.subTitle
         mCurrentSong.artists = song.artists
+        mCurrentSong.lyrics = song.lyrics
     }
 
     /**
@@ -419,6 +421,8 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
             mControllerView.updateDisplay(itemObject.title, itemObject.subTitle)
 
             val musicBinder = mMusicBinder ?: return
+            // mRcyItems.size() = mHeaderSize + song.size() + mFooterSize
+            musicBinder.setCurrentIndex(position - mHeaderSize)
             musicBinder.setPlayingList(getPlayingList())
 
             // query song detail, picUrl

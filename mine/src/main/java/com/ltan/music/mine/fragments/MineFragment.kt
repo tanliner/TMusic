@@ -348,7 +348,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
             mPlayerCallback = PlayerCallbackImpl(mControllerView)
-            mMusicBinder?.addCallback(mPlayerCallback!!)
+            binder.addCallback(mPlayerCallback!!)
             mControllerView.setPlayer(binder)
             mControllerView.setOnClickListener {
                 val intent = Intent(context, PlayerActivity::class.java)

@@ -98,10 +98,10 @@
                 <!--/>-->
         <ImageView
                 android:id="@+id/iv_cd_sticker"
-                android:layout_width="114dp"
+                android:layout_width="120dp"
                 android:layout_height="202dp"
                 android:src="@drawable/play_stick"
-                android:layout_marginTop="-18dp"
+                android:layout_marginTop="-20dp"
                 android:scaleType="centerCrop"
                 android:layout_centerHorizontal="true"
                 android:layout_alignParentTop="true" />

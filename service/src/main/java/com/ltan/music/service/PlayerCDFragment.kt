@@ -91,7 +91,7 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
     }
 
     override fun onSongUrl(songs: List<SongUrl>?) {
-        MusicLog.d(TAG, "onSongUrl returned $songs")
+        MusicLog.d(TAG, "onSongUrl http returned $songs")
         mCurrentSong.songUrl = songs?.get(0)?.url
     }
 
@@ -105,7 +105,6 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
     }
 
     fun rotateCD(playing: Boolean) {
-        MusicLog.w(TAG, "playing $playing, initialized? $mRotateAnim")
         val animator = mRotateAnim ?: return
         if (playing) {
             if (animator.isStarted || animator.isPaused) {

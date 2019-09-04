@@ -130,6 +130,8 @@ class MusicService : Service() {
         private var mCurPlayIndex = 0
         private val unavailableSongs = ConcurrentHashMap<Long, SongItemObject>()
         private val mServiceApiUtil = ApiUtil()
+        // For prevent (-38, 0)
+        private var mDuration = 0
 
         init {
             mUpdateThread.start()
@@ -180,6 +182,7 @@ class MusicService : Service() {
             }
             player.setOnPreparedListener {
                 // (-38,0), already in onPrepared
+                mDuration = it.duration
                 start()
             }
             player.setOnCompletionListener {
@@ -236,6 +239,8 @@ class MusicService : Service() {
          * Prepare play a new song, It's necessary to query lyrics if empty.
          */
         fun play(song: SongPlaying) {
+            // reset to 0
+            mDuration = 0
             play(song.url)
             if (!song.lyrics?.songTexts.isNullOrEmpty()) {
                 setLyrics(song.lyrics)
@@ -400,7 +405,8 @@ class MusicService : Service() {
         }
 
         override fun getDuration(): Int {
-            return mPlayer.duration
+            // note: do not use player.duration directly, lead to wrong state (-38, 0)
+            return mDuration
         }
 
         override fun pause() {

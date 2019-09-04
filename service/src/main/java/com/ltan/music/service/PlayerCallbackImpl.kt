@@ -20,26 +20,15 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
     }
 
     private val controller = control
-    private lateinit var lyricHighlight: LyricHighLight
     private var mViewPagerUpdater: IViewPagerUpdate? = null
-
-    fun setLyricHighLight(highLight: LyricHighLight) {
-        this.lyricHighlight = highLight
-    }
-
-    fun setViewPagerUpdate(pagerUpdater: IViewPagerUpdate) {
-        mViewPagerUpdater = pagerUpdater
-    }
 
     override fun onStart() {
         controller.setState(true)
-        lyricHighlight.onStart()
     }
 
     override fun onPause() {
         MusicLog.w(TAG, "service PlayerCallbackImpl on pause")
         controller.setState(false)
-        lyricHighlight.onPause()
     }
 
     override fun onNext(index: Int, curSong: SongPlaying) {
@@ -59,7 +48,6 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
     }
 
     override fun onLyricComplete(lyric: LyricsObj?) {
-        lyricHighlight.onLyric(lyric)
     }
 
     /**
@@ -69,11 +57,9 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
         if (txt.isNullOrEmpty()) {
             // return
         }
-        lyricHighlight.onHighLight(txt, index)
     }
 
     override fun onSongPicUpdated(url: String?) {
-        lyricHighlight.onSongPreviewUpdate(url)
     }
 
     /**
@@ -81,6 +67,5 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
      */
     override fun updateTitle(title: String?, subtitle: String?, artist: String?) {
         // prevent compile error
-        lyricHighlight.onSongChange(title.toString(), artist.toString())
     }
 }

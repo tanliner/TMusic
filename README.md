@@ -31,3 +31,6 @@ adb logcat | grep 'TMusic'
 ---
 
 ![](https://raw.githubusercontent.com/tanliner/TMusic/master/app_structure.png)
+
+### From now on
+![](https://raw.githubusercontent.com/tanliner/TMusic/master/TMusic_preview.gif)

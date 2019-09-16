@@ -3,6 +3,7 @@ package com.ltan.music.basemvp
 import android.app.Activity
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import butterknife.ButterKnife
 import butterknife.Unbinder
@@ -27,6 +28,7 @@ abstract class MusicBaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initWindowFlag()
         val layoutId = initLayout()
         unBinder = ButterKnife.bind(this)
         if (layoutId <= 0) {
@@ -34,6 +36,17 @@ abstract class MusicBaseActivity : AppCompatActivity() {
             return
         }
         setContentView(layoutId)
+    }
+
+    /**
+     * for layout immersive
+     */
+    private fun initWindowFlag() {
+        // min_sdk = 22 > 21
+        // https://juejin.im/entry/59c62b8ef265da065476d827
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = resources.getColor(android.R.color.transparent)
     }
 
     override fun onDestroy() {

@@ -51,4 +51,6 @@
                 tools:text="summary-----" />
     </LinearLayout>
 
+    <View style="@style/AppHorizontalLine" android:layout_alignParentTop="true" />
+
 </merge>

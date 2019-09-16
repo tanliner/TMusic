@@ -5,13 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
-import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
-import com.jaeger.library.StatusBarUtil
 import com.ltan.music.adapter.MusicPagerAdapter
 import com.ltan.music.basemvp.BaseMVPActivity
 import com.ltan.music.contract.LoginContract
@@ -42,17 +40,7 @@ class MainActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        StatusBarUtil.setColor(this, resources.getColor(R.color.colorPrimary))
-        initWindowFlag()
         initView()
-    }
-
-    fun initWindowFlag() {
-        // min_sdk = 22 > 21
-        // https://juejin.im/entry/59c62b8ef265da065476d827
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = resources.getColor(android.R.color.transparent)
     }
 
     @SuppressLint("WrongConstant")

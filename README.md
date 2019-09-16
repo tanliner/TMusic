@@ -34,3 +34,6 @@ adb logcat | grep 'TMusic'
 
 ### From now on
 ![](https://raw.githubusercontent.com/tanliner/TMusic/master/TMusic_preview.gif)
+
+### Other Android client
+[Android-CloudReader](https://github.com/youlookwhat/CloudReader)

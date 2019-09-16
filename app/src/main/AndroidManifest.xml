@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity">
+        <activity android:name=".LoginActivity" android:launchMode="singleTask">
         </activity>
         <activity android:name=".RouterActivity">
             <intent-filter>

@@ -34,6 +34,7 @@ object Encryptor {
     const val ENCRYPT_TYPE_BASE64 = "base64"
     const val ENCRYPT_TYPE_DEF = ENCRYPT_TYPE_BASE64
 
+    // for AES private key
     val KEY = "0CoJUm6Qyw8W8jud".toByteArray()
     val LINUX_API_KEY = "rFgB&h#%2?^eDg:Q".toByteArray()
     private val ivx = "0102030405060708".toByteArray()

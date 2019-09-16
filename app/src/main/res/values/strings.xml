@@ -12,4 +12,8 @@
     <string name="app_act_login_btn" translatable="false">登录</string>
     <string name="app_act_logout_btn" translatable="false">退出</string>
     <string name="app_act_input_tips" translatable="false">请输入账号和密码</string>
+
+    <string name="app_drawer_dark_mode">Dark mode</string>
+    <string name="app_drawer_setting">Settings</string>
+    <string name="app_drawer_logout">Logout</string>
 </resources>

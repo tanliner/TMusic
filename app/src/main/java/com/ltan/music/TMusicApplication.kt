@@ -19,4 +19,8 @@ class TMusicApplication : Application() {
         // todo multi process check
         BaseApplication.initContext(this)
     }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+    }
 }

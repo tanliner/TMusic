@@ -83,6 +83,11 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
         // mUsrPass.setText("123456789aAd")
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        mUsrPass.text = null
+    }
+
     private fun onLoginSuccess() {
         startActivity(Intent(baseContext, MainActivity::class.java))
     }

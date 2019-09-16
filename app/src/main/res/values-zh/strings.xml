@@ -4,4 +4,8 @@
     <string name="app_vp_indicator_discoveries">发现</string>
     <string name="app_vp_indicator_friends">朋友</string>
     <string name="app_vp_indicator_videos">视频</string>
+
+    <string name="app_drawer_dark_mode">夜间模式</string>
+    <string name="app_drawer_setting">设置</string>
+    <string name="app_drawer_logout">退出</string>
 </resources>

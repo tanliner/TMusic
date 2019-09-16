@@ -43,20 +43,19 @@ class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presente
     }
 
     override fun logout() {
+        // clear first
+        AccountUtil.saveAccountInfo(null)
+        AccountUtil.saveProfileInfo(null)
         observe(ApiProxy.instance.getApi(UserApi::class.java)
             .logout())
             .safeSubscribe(object : NormalSubscriber<Any?>() {
                 override fun onNext(rsp: Any?) {
                     MusicLog.d(LoginPresenter.TAG, "logout, onNext $rsp")
-                    AccountUtil.saveAccountInfo(null)
-                    AccountUtil.saveProfileInfo(null)
                     mView.onLogoutSuccess()
                 }
 
                 override fun onError(errorCode: Int, errorMsg: String) {
                     MusicLog.d(LoginPresenter.TAG, "logout, error code $errorCode, msg: $errorMsg")
-                    AccountUtil.saveAccountInfo(null)
-                    AccountUtil.saveProfileInfo(null)
                 }
             })
     }

@@ -1,34 +1,103 @@
 package com.ltan.music
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
+import android.view.View
+import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.jaeger.library.StatusBarUtil
 import com.ltan.music.adapter.MusicPagerAdapter
-import com.ltan.music.basemvp.MusicBaseActivity
+import com.ltan.music.basemvp.BaseMVPActivity
+import com.ltan.music.contract.LoginContract
+import com.ltan.music.presenter.LoginPresenter
 import com.ltan.music.view.PageIndicator
 import com.ltan.music.widget.MenuItem
 import kotterknife.bindView
 
-class MainActivity : MusicBaseActivity() {
+class MainActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
 
     // I's works fine in Java
     // @BindView(R2.id.index_vp)
     // val mViewPager: ViewPager
     private val mViewPager: ViewPager by bindView(R.id.music_view_pager)
     private val mPageIndicator: PageIndicator by bindView(R.id.music_indicator)
+    private val mDrawerLayout: DrawerLayout by bindView(R.id.dl_app_root)
+    private val mMenuButton: ImageView by bindView(R.id.iv_app_drawer_menu)
+    private val mLogoutTv: TextView by bindView(R.id.tv_app_logout)
+    private val mDrawerItems: RecyclerView by bindView(R.id.rv_app_drawer_items)
 
     override fun initLayout(): Int {
         return R.layout.app_activity_main
     }
 
+    override fun initPresenter() {
+        mPresenter.attachView(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         StatusBarUtil.setColor(this, resources.getColor(R.color.colorPrimary))
+        initWindowFlag()
+        initView()
+    }
 
+    fun initWindowFlag() {
+        // min_sdk = 22 > 21
+        // https://juejin.im/entry/59c62b8ef265da065476d827
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = resources.getColor(android.R.color.transparent)
+    }
+
+    @SuppressLint("WrongConstant")
+    private fun initView() {
         val adapter = MusicPagerAdapter(this.supportFragmentManager)
         mPageIndicator.setViewPager(mViewPager)
         mPageIndicator.addIndicators(getIndicators())
         mViewPager.adapter = adapter
+
+        mMenuButton.setOnClickListener {
+            mDrawerLayout.openDrawer(Gravity.START)
+        }
+
+        mLogoutTv.setOnClickListener {
+            mPresenter.logout()
+        }
+
+        mDrawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            // menu rotation
+            val degree = 90
+            override fun onDrawerStateChanged(newState: Int) {
+            }
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                mMenuButton.rotation = getDegree(slideOffset)
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+            }
+
+            override fun onDrawerOpened(drawerView: View) {
+            }
+
+            fun getDegree(offset: Float): Float {
+                return degree * offset
+            }
+        })
+    }
+
+    override fun onLogoutSuccess() {
+        startActivity(Intent(baseContext, LoginActivity::class.java))
+        finish()
+    }
+
+    override fun onLoginStatus(code: Int) {
     }
 
     private fun getIndicators(): ArrayList<MenuItem> {

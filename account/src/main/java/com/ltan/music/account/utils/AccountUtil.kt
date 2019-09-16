@@ -21,6 +21,7 @@ import com.ltan.music.common.Constants
  */
 object AccountUtil {
     lateinit var sSharedPref: SharedPreferences
+    val gson = Gson()
     @JvmStatic
     fun init() {
         sSharedPref = BaseApplication.getAPPContext()
@@ -28,7 +29,6 @@ object AccountUtil {
     }
     @JvmStatic
     fun saveAccountInfo(account: Account?) {
-        val gson = Gson()
         val gsonStr = gson.toJson(account)
         sSharedPref.edit()
             .putString(Constants.LOCAL_SP_ACCOUNT_SECTION, gsonStr)
@@ -37,7 +37,6 @@ object AccountUtil {
 
     @JvmStatic
     fun saveProfileInfo(profile: Profile?) {
-        val gson = Gson()
         val gsonStr = gson.toJson(profile)
         sSharedPref.edit()
             .putString(Constants.LOCAL_SP_PROFILE_SECTION, gsonStr)
@@ -46,7 +45,6 @@ object AccountUtil {
 
     @JvmStatic
     fun getAccountInfo(): Account? {
-        val gson = Gson()
         val str = sSharedPref.getString(Constants.LOCAL_SP_ACCOUNT_SECTION, "")
 
         if(TextUtils.isEmpty(str)) {
@@ -57,7 +55,6 @@ object AccountUtil {
 
     @JvmStatic
     fun getProfileInfo(): Profile? {
-        val gson = Gson()
         val str = sSharedPref.getString(Constants.LOCAL_SP_PROFILE_SECTION, "")
 
         if(TextUtils.isEmpty(str)) {

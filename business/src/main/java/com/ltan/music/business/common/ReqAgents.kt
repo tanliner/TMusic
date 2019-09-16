@@ -1,5 +1,7 @@
 package com.ltan.music.business.common
 
+import kotlin.math.floor
+
 /**
  * TMusic.com.ltan.music.business.common
  *
@@ -40,11 +42,11 @@ object ReqAgents {
         val index: Int
         when (agent) {
             null -> {
-                index = Math.floor(Math.random() * userAgentList.size).toInt()
+                index = floor(Math.random() * userAgentList.size).toInt()
                 return userAgentList[index]
             }
-            UA_TYPE_MOBILE -> index = Math.floor(Math.random() * 7).toInt()
-            UA_TYPE_PC -> index = Math.floor(Math.random() * 5).toInt() + 8
+            UA_TYPE_MOBILE -> index = floor(Math.random() * 7).toInt()
+            UA_TYPE_PC -> index = floor(Math.random() * 5).toInt() + 8
             else -> return agent
         }
         return userAgentList[index]

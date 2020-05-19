@@ -15,15 +15,24 @@ dependencies {
     // kotlin, implementation in java
     kapt deps.butterknife.compiler
 
-    api deps.andromeda
-    api deps.okhttp.interceptor
-    api deps.cookie
+    api project(path: ':basemvp')
+
+    // business
+    api deps.eventbus.core
     // bugly report
     api deps.bugly_crashreport
     api deps.retrofit.retrofit
+    // base64
+    api deps.codec
+
+    api deps.andromeda
+    api deps.cookie
 
     api project(path: ':basemvp')
     api project(path: ':account')
+
+    debugImplementation deps.watchtower.debug_interceptor
+    releaseImplementation deps.watchtower.releas_interceptor
 
     testImplementation deps.junit
     androidTestImplementation deps.test.runner

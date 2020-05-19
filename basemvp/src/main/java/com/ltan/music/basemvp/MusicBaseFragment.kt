@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import butterknife.ButterKnife
 import butterknife.Unbinder
-import kotlin.reflect.KProperty
 
 /**
  * TMusic.com.ltan.music.index.fragments
@@ -53,8 +52,4 @@ abstract class MusicBaseFragment : Fragment() {
             manager.popBackStack()
         }
     }
-}
-// for butterknife in Kotlin
-operator fun Any.setValue(fragment: Fragment, property: KProperty<*>, v: View) {
-
 }

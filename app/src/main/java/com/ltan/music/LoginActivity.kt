@@ -5,12 +5,12 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
+import butterknife.BindView
 import com.ltan.music.basemvp.BaseMVPActivity
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.ToastUtil
 import com.ltan.music.contract.LoginContract
 import com.ltan.music.presenter.LoginPresenter
-import kotterknife.bindView
 import java.math.BigInteger
 import java.security.MessageDigest
 
@@ -38,10 +38,14 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
         mPresenter.attachView(this)
     }
 
-    private val mUsrName: EditText by bindView(R.id.et_app_usr_name)
-    private val mUsrPass: EditText by bindView(R.id.et_app_usr_pass)
-    private val mLogin: Button by bindView(R.id.btn_app_login)
-    private val mLogout: Button by bindView(R.id.btn_app_logout)
+    @BindView(R2.id.et_app_usr_name)
+    lateinit var mUsrName: EditText
+    @BindView(R2.id.et_app_usr_pass)
+    lateinit var mUsrPass: EditText
+    @BindView(R2.id.btn_app_login)
+    lateinit var mLogin: Button
+    @BindView(R2.id.btn_app_logout)
+    lateinit var mLogout: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

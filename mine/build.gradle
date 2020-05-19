@@ -9,7 +9,8 @@ dependencies {
     implementation project(path: ':business')
     implementation project(path: ':service')
 
-    // implementation 'com.android.support:appcompat-v7:28.0.0'
+    kapt deps.butterknife.compiler
+
     testImplementation deps.junit
     androidTestImplementation deps.test.runner
     androidTestImplementation deps.test.espresso

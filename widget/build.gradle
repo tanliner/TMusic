@@ -1,21 +1,18 @@
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    api deps.support.app_compat
-
     api deps.constraint_layout
+
+    api deps.support.app_compat
     api deps.support.recyclerview
+
     api deps.multitype
     // api deps.multitypekt
     api deps.SmartRefreshLayout
     api deps.SmartRefreshHeader
+    api deps.circleimage
+
     testImplementation deps.junit
     androidTestImplementation deps.test.runner
     androidTestImplementation deps.test.espresso
-}
-
-android {
-    lintOptions {
-        abortOnError false
-    }
 }

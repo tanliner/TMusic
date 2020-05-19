@@ -1,8 +1,12 @@
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation deps.support.recyclerview
-    implementation deps.support.app_compat
+    // implementation deps.support.recyclerview
+    // implementation deps.support.app_compat
 
     // for all module to use glide
     api deps.glide.runtime
@@ -14,10 +18,12 @@ dependencies {
 
     api deps.gson
     api deps.statusbar
-    api deps.reactivex.rx_android
-    api deps.rxbinding.rxbinding
-    api deps.rxlifecycle.rxlifecycle
+    api deps.mmkv
+    api deps.gson
     api deps.leakcanary.debug_android
+
+    debugImplementation deps.leakcanary.debug_android
+    releaseImplementation deps.leakcanary.release_android
 
     testImplementation deps.junit
     androidTestImplementation deps.test.runner

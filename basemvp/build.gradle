@@ -5,9 +5,18 @@ dependencies {
     // kotlin, implementation in java
     kapt deps.butterknife.compiler
 
+    implementation deps.autosize
+
+    // RxJava2
+    api deps.reactivex.rxjava2
+    api deps.reactivex.rx_android
+
+    // rx binding
+    api deps.rxbinding.rxbinding3
+    api deps.rxlifecycle.rxlifecycle
+
     api deps.kotlin.stdlib
     api deps.butterknife.core
-    api deps.kotterknife
     api deps.fragmentation
 
     api project(path: ':common')

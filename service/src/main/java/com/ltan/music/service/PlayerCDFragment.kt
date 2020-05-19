@@ -7,6 +7,7 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
+import butterknife.BindView
 import com.bumptech.glide.Glide
 import com.ltan.music.basemvp.BaseMVPFragment
 import com.ltan.music.business.bean.SongDetailRsp
@@ -18,7 +19,6 @@ import com.ltan.music.service.adapter.CdClickListener
 import com.ltan.music.service.contract.ServiceContract
 import com.ltan.music.service.presenter.ServicePresenter
 import com.ltan.music.widget.constants.PlayListItemPreview
-import kotterknife.bindView
 
 /**
  * TMusic.com.ltan.music.service
@@ -39,8 +39,10 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
         }
     }
 
-    private val mSingerBgFl: FrameLayout by bindView(R.id.fl_cd_singer_preview)
-    private val mSongAlbumIv: ImageView by bindView(R.id.crliv_song_alb)
+    @BindView(R2.id.fl_cd_singer_preview)
+    lateinit var mSingerBgFl: FrameLayout
+    @BindView(R2.id.crliv_song_alb)
+    lateinit var mSongAlbumIv: ImageView
     private var mClickListener: CdClickListener? = null
 
     private var mRotateAnim: Animator? = null

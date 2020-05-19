@@ -2,8 +2,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation deps.support.app_compat
-
-    api deps.support.recyclerview
+    implementation deps.support.design
 
     testImplementation deps.junit
     androidTestImplementation deps.test.runner

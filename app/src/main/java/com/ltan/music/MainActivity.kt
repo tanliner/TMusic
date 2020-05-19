@@ -10,25 +10,31 @@ import android.widget.TextView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
+import butterknife.BindView
 import com.ltan.music.adapter.MusicPagerAdapter
 import com.ltan.music.basemvp.BaseMVPActivity
 import com.ltan.music.contract.LoginContract
 import com.ltan.music.presenter.LoginPresenter
 import com.ltan.music.view.PageIndicator
 import com.ltan.music.widget.MenuItem
-import kotterknife.bindView
 
 class MainActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
 
     // I's works fine in Java
     // @BindView(R2.id.index_vp)
     // val mViewPager: ViewPager
-    private val mViewPager: ViewPager by bindView(R.id.music_view_pager)
-    private val mPageIndicator: PageIndicator by bindView(R.id.music_indicator)
-    private val mDrawerLayout: DrawerLayout by bindView(R.id.dl_app_root)
-    private val mMenuButton: ImageView by bindView(R.id.iv_app_drawer_menu)
-    private val mLogoutTv: TextView by bindView(R.id.tv_app_logout)
-    private val mDrawerItems: RecyclerView by bindView(R.id.rv_app_drawer_items)
+    @BindView(R2.id.music_view_pager)
+    lateinit var mViewPager: ViewPager
+    @BindView(R2.id.music_indicator)
+    lateinit var mPageIndicator: PageIndicator
+    @BindView(R2.id.dl_app_root)
+    lateinit var mDrawerLayout: DrawerLayout
+    @BindView(R2.id.iv_app_drawer_menu)
+    lateinit var mMenuButton: ImageView
+    @BindView(R2.id.tv_app_logout)
+    lateinit var mLogoutTv: TextView
+    @BindView(R2.id.rv_app_drawer_items)
+    lateinit var mDrawerItems: RecyclerView
 
     override fun initLayout(): Int {
         return R.layout.app_activity_main

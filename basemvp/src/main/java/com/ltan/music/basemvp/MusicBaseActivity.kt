@@ -22,7 +22,7 @@ import kotlin.reflect.KProperty
 abstract class MusicBaseActivity : AppCompatActivity() {
 
     protected val TAG: String = this::class.java.simpleName
-    private lateinit var unBinder: Unbinder
+    private var unBinder: Unbinder = Unbinder.EMPTY
 
     abstract fun initLayout(): Int
 
@@ -30,12 +30,12 @@ abstract class MusicBaseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initWindowFlag()
         val layoutId = initLayout()
-        unBinder = ButterKnife.bind(this)
         if (layoutId <= 0) {
             MusicLog.e(TAG, "must have a validate the layout")
             return
         }
         setContentView(layoutId)
+        unBinder = ButterKnife.bind(this)
     }
 
     /**

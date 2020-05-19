@@ -27,7 +27,7 @@
 
         <ImageView
                 android:id="@+id/iv_song_list_back"
-                android:layout_width="64dp"
+                android:layout_width="48dp"
                 android:src="@drawable/right_arrow"
                 android:scaleType="centerInside"
                 android:rotation="180"

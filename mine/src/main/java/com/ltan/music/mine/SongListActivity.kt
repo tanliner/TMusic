@@ -14,6 +14,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.collection.LongSparseArray
 import androidx.recyclerview.widget.LinearLayoutManager
+import butterknife.BindView
 import com.bumptech.glide.Glide
 import com.jaeger.library.StatusBarUtil
 import com.ltan.music.basemvp.BaseMVPActivity
@@ -40,7 +41,6 @@ import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.MusicPlayerController
 import com.ltan.music.widget.MusicRecycleView
 import com.ltan.music.widget.constants.PlayListItemPreview
-import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
 import kotlin.math.min
 
@@ -74,18 +74,27 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
     private var mCurrentSongDetail: Track? = null
 
     private var mSongListId: Long = 0L
-    private val mBackIcon: ImageView by bindView(R.id.iv_song_list_back)
-    private val mSongListName: TextView by bindView(R.id.tv_song_list_name)
+    @BindView(R2.id.iv_song_list_back)
+    lateinit var mBackIcon: ImageView
+    @BindView(R2.id.tv_song_list_name)
+    lateinit var mSongListName: TextView
 
-    private val mSongsRcyView: MusicRecycleView by bindView(R.id.rcy_mine_song_list)
-    private val mSongListToolbar: LinearLayout by bindView(R.id.ll_song_list_toolbar)
-    private val mFloatingToolbarBg: ImageView by bindView(R.id.iv_song_list_toolbar_bg)
+    @BindView(R2.id.rcy_mine_song_list)
+    lateinit var mSongsRcyView: MusicRecycleView
+    @BindView(R2.id.ll_song_list_toolbar)
+    lateinit var mSongListToolbar: LinearLayout
+    @BindView(R2.id.iv_song_list_toolbar_bg)
+    lateinit var mFloatingToolbarBg: ImageView
     // floating item view
-    private val mFloatingContainer: LinearLayout by bindView(R.id.ll_song_list_floating_play_all)
-    private val mFloatingPlayAll: TextView by bindView(R.id.tv_song_list_play_all)
-    private val mFloatingPlayAllCount: TextView by bindView(R.id.tv_song_list_play_all_count)
+    @BindView(R2.id.ll_song_list_floating_play_all)
+    lateinit var mFloatingContainer: LinearLayout
+    @BindView(R2.id.tv_song_list_play_all)
+    lateinit var mFloatingPlayAll: TextView
+    @BindView(R2.id.tv_song_list_play_all_count)
+    lateinit var mFloatingPlayAllCount: TextView
 
-    private val mControllerView: MusicPlayerController by bindView(R.id.mmp_controller)
+    @BindView(R2.id.mmp_controller)
+    lateinit var mControllerView: MusicPlayerController
     private val mRcyAdapter = MultiTypeAdapter()
 
     // floating args

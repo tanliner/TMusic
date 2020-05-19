@@ -3,10 +3,9 @@ package com.ltan.music.service
 import android.app.Service
 import android.content.Intent
 import android.media.MediaPlayer
-import android.os.Binder
-import android.os.Handler
-import android.os.HandlerThread
-import android.os.IBinder
+import android.media.session.MediaSession
+import android.media.session.PlaybackState
+import android.os.*
 import com.ltan.music.business.api.ApiProxy
 import com.ltan.music.business.api.NormalSubscriber
 import com.ltan.music.business.bean.SongUrl
@@ -89,12 +88,46 @@ class MusicService : Service() {
     }
 
     private lateinit var mBinder: MyBinder
+    private lateinit var mMediaSession: MediaSession
+
+    override fun onCreate() {
+        super.onCreate()
+        mMediaSession = MediaSession(this, "music-session-tag")
+        // MusicLog.e("a", "wtf ---> + $mMediaSession")
+        // mMediaSession.setCallback(SessionCallback(this, mBinder))
+    }
 
     override fun onBind(intent: Intent?): IBinder? {
         mBinder = MyBinder(this)
         mBinder.init(MediaPlayer())
         mBinder.checkThread()
         return mBinder
+    }
+
+    private fun updatePlaybackState(isPlaying: Boolean) {
+        val stateBuilder = PlaybackState.Builder()
+            .setActions(PlaybackState.ACTION_PLAY
+                    or PlaybackState.ACTION_PLAY_PAUSE
+                    or PlaybackState.ACTION_PLAY_FROM_MEDIA_ID
+                    or PlaybackState.ACTION_PAUSE
+                    or PlaybackState.ACTION_SKIP_TO_NEXT
+                    or PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                    or PlaybackState.CONTENTS_FILE_DESCRIPTOR.toLong()
+            )
+        if (isPlaying) {
+            stateBuilder.setState(
+                PlaybackState.STATE_PLAYING,
+                PlaybackState.PLAYBACK_POSITION_UNKNOWN,
+                SystemClock.elapsedRealtime().toFloat()
+            )
+        } else {
+            stateBuilder.setState(
+                PlaybackState.STATE_PAUSED,
+                PlaybackState.PLAYBACK_POSITION_UNKNOWN,
+                SystemClock.elapsedRealtime().toFloat()
+            )
+        }
+        mMediaSession.setPlaybackState(stateBuilder.build())
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -105,6 +138,40 @@ class MusicService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         mBinder.stop()
+        sessionRelease()
+    }
+
+    private fun sessionRelease() {
+        mMediaSession.setCallback(null)
+        mMediaSession.isActive = false
+        mMediaSession.release()
+    }
+
+    class SessionCallback(service: MusicService, controller: MusicController) : MediaSession.Callback() {
+        private val mController: MusicController = controller
+        private val mService: MusicService = service
+
+        override fun onCommand(command: String, args: Bundle?, cb: ResultReceiver?) {
+            super.onCommand(command, args, cb)
+        }
+
+        override fun onPause() {
+            mController.pause()
+            // mService.updatePlaybackState(false)
+        }
+
+        override fun onPlay() {
+            mController.start()
+            // mService.updatePlaybackState(true)
+        }
+
+        override fun onSkipToPrevious() {
+            mController.onLast()
+        }
+
+        override fun onSkipToNext() {
+            mController.onNext()
+        }
     }
 
     class MyBinder(service: MusicService) : Binder(), MusicController {
@@ -249,6 +316,9 @@ class MusicService : Service() {
                 // queryLyric(song)
                 mServiceApiUtil.getLyric(song)
             }
+            musicService.mMediaSession.isActive = true
+            // if (!musicService.mMediaSession.isActive) {
+            // }
         }
 
         fun getLyric(): LyricsObj? {

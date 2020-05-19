@@ -83,12 +83,15 @@ class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeader
 
         Glide.with(ctx)
             .load(item.previewUrl)
-            .transform(BlurTransformation(25, 38))
+            .skipMemoryCache(true)
+            .centerCrop()
+            // .transform(BlurTransformation(25, 38))
             .into(holder.bgImg)
         // floating header, out of the RecycleView
         Glide.with(ctx)
             .load(item.previewUrl)
-            .transform(BlurTransformation(25, 38))
+            .skipMemoryCache(true)
+            // .transform(BlurTransformation(25, 38))
             .into(mFloatingHeader)
     }
 

@@ -9,6 +9,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import butterknife.BindView
 import com.ltan.music.account.utils.AccountUtil
 import com.ltan.music.basemvp.BaseMVPFragment
 import com.ltan.music.business.bean.PlayList
@@ -25,7 +26,6 @@ import com.ltan.music.widget.ClickType
 import com.ltan.music.widget.ListItemClickListener
 import com.ltan.music.widget.MusicPlayerController
 import com.ltan.music.widget.constants.State
-import kotterknife.bindView
 import me.drakeet.multitype.MultiTypeAdapter
 import kotlin.math.min
 
@@ -57,8 +57,10 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
     // created song list, collected song list
     private lateinit var mSongCategoryList: ArrayList<SongListCategoryObject>
 
-    private val mRclView: RecyclerView by bindView(R.id.rclv_mine)
-    private val mControllerView: MusicPlayerController by bindView(R.id.mmp_controller)
+    @BindView(R2.id.rclv_mine)
+    lateinit var mRclView: RecyclerView
+    @BindView(R2.id.mmp_controller)
+    lateinit var mControllerView: MusicPlayerController
     // collection count
     private var mArtistCount = 0
     // song list / subscribe song list

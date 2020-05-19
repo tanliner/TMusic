@@ -1,11 +1,12 @@
 package com.ltan.music.friends.fragments
 
 import android.view.View
+import android.widget.FrameLayout
+import butterknife.BindView
 import com.ltan.music.basemvp.MusicBaseFragment
-import com.ltan.music.basemvp.setValue
 import com.ltan.music.common.MusicLog
 import com.ltan.music.friends.R
-import kotterknife.bindView
+import com.ltan.music.friends.R2
 
 /**
  * TMusic.com.ltan.music.friends.fragments
@@ -25,7 +26,8 @@ class FriendsFragment : MusicBaseFragment() {
         }
     }
 
-    var mHeader: View by bindView(R.id.page_header)
+    @BindView(R2.id.page_header)
+    lateinit var mHeader: FrameLayout
 
     override fun initLayout(): Int {
         return R.layout.friends_fragment

@@ -21,6 +21,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.viewpager.widget.ViewPager
+import butterknife.BindView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -44,7 +45,6 @@ import com.ltan.music.service.provider.MusicProvider
 import com.ltan.music.service.widget.PlayerPageController
 import com.ltan.music.widget.constants.PlayListItemPreview
 import jp.wasabeef.glide.transformations.BlurTransformation
-import kotterknife.bindView
 
 /**
  * TMusic.com.ltan.music.service
@@ -78,21 +78,33 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
     private lateinit var mCurSong: SongPlaying
     private var mLastSongId = -1L
     private lateinit var mSongList: ArrayList<SongItemObject>
-    private val mPreviewBg: ImageView by bindView(R.id.iv_play_service_bg)
-    private val mNavIcon: ImageView by bindView(R.id.iv_play_service_back)
-    private val mCDWhiteBg: ImageView by bindView(R.id.iv_cd_white_bg)
-    private val mSongName: TextView by bindView(R.id.tv_play_service_song_name)
-    private val mSongArtist: TextView by bindView(R.id.tv_play_service_song_artists)
-    private val mSongPager: ViewPager by bindView(R.id.vp_song_playing)
+    @BindView(R2.id.iv_play_service_bg)
+    lateinit var mPreviewBg: ImageView
+    @BindView(R2.id.iv_play_service_back)
+    lateinit var mNavIcon: ImageView
+    @BindView(R2.id.iv_cd_white_bg)
+    lateinit var mCDWhiteBg: ImageView
+    @BindView(R2.id.tv_play_service_song_name)
+    lateinit var mSongName: TextView
+    @BindView(R2.id.tv_play_service_song_artists)
+    lateinit var mSongArtist: TextView
+    @BindView(R2.id.vp_song_playing)
+    lateinit var mSongPager: ViewPager
     // todo slow down viewpager swipe
     // private val mSongPager: CdViewPager by bindView(R.id.vp_song_playing)
     // private val mPagerContainer: LinearLayout by bindView(R.id.ll_pager_container)
-    private val mPagerContainer: RelativeLayout by bindView(R.id.rl_pager_container)
-    private val mSongLyricSv: ScrollView by bindView(R.id.scroll_lyric)
-    private val mLyricContainerRoot: LinearLayout by bindView(R.id.ll_song_text_container_root)
-    private val mLyricContainer: LinearLayout by bindView(R.id.ll_song_text_container)
-    private val mPlayerPageController: PlayerPageController by bindView(R.id.service_pager_controller)
-    private val mPlayerSticker: ImageView by bindView(R.id.iv_cd_sticker)
+    @BindView(R2.id.rl_pager_container)
+    lateinit var mPagerContainer: RelativeLayout
+    @BindView(R2.id.scroll_lyric)
+    lateinit var mSongLyricSv: ScrollView
+    @BindView(R2.id.ll_song_text_container_root)
+    lateinit var mLyricContainerRoot: LinearLayout
+    @BindView(R2.id.ll_song_text_container)
+    lateinit var mLyricContainer: LinearLayout
+    @BindView(R2.id.service_pager_controller)
+    lateinit var mPlayerPageController: PlayerPageController
+    @BindView(R2.id.iv_cd_sticker)
+    lateinit var mPlayerSticker: ImageView
 
     private lateinit var adapter: PlayerPageAdapter
     private var mCurrentSongDetail: Track? = null

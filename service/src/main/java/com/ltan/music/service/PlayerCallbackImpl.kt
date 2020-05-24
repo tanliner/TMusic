@@ -27,7 +27,7 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
     }
 
     override fun onPause() {
-        MusicLog.w(TAG, "service PlayerCallbackImpl on pause")
+        MusicLog.w("service PlayerCallbackImpl on pause")
         controller.setState(false)
     }
 
@@ -44,7 +44,7 @@ class PlayerCallbackImpl(control: PlayerPageController) : MusicService.IPlayerCa
     }
 
     override fun onBufferUpdated(per: Int) {
-        MusicLog.v(TAG, "music source buffered $per")
+        MusicLog.v("music source buffered $per")
     }
 
     override fun onLyricComplete(lyric: LyricsObj?) {

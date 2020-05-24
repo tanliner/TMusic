@@ -150,7 +150,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
             ToastUtil.showToastShort(getString(R.string.mine_song_list_failed))
             return
         }
-        MusicLog.d(TAG, "data is: $data")
+        MusicLog.d("data is: $data")
         mArtistCount = data.artistCount
         mCreatedSongListCount = data.createdPlaylistCount
         mSubSongListCount = data.subPlaylistCount
@@ -168,7 +168,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
             ToastUtil.showToastShort(getString(R.string.mine_play_list_failed))
             return
         }
-        MusicLog.d(TAG, "play list is: $data")
+        MusicLog.d("play list is: $data")
         val imgId = R.drawable.page_header_item_search
 
         // category created
@@ -333,7 +333,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
         }
         private fun itemClick(position: Int, view: View) {
             val item = items[position] as SongListItemObject
-            MusicLog.d(TAG, "SongListClickListener/ item=$item")
+            MusicLog.d("SongListClickListener/ item=$item")
             val intent = Intent(frag.context, SongListActivity::class.java)
             intent.putExtra(SongListActivity.ARG_SONG, item)
             frag.startActivity(intent)
@@ -346,7 +346,7 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            MusicLog.i(TAG, "service connected...")
+            MusicLog.i("service connected...")
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
             mPlayerCallback = PlayerCallbackImpl(mControllerView)

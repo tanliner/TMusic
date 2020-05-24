@@ -35,7 +35,7 @@ class RouterActivity : MusicBaseActivity() {
     private fun hasLoginInfo(): Boolean {
         val account = AccountUtil.getAccountInfo()
         val profile = AccountUtil.getProfileInfo()
-        MusicLog.d(TAG, "account is: $account\tprofile is: $profile")
+        MusicLog.d("account is: $account\tprofile is: $profile")
         return account != null && profile != null
     }
 }

@@ -28,7 +28,7 @@ abstract class BaseMVPFragment<P : IBaseContract.Presenter<*>> : MusicBaseFragme
         val p: P? = PresenterUtil.getBasePresenter(this.javaClass)
         p?.let { mPresenter = it }
         if(p == null) {
-            MusicLog.e(TAG, "The MVP fragment must have a presenter")
+            MusicLog.e("The MVP fragment must have a presenter")
             return
         }
         mPresenter = p

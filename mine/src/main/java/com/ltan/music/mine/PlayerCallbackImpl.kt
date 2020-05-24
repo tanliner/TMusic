@@ -43,7 +43,7 @@ class PlayerCallbackImpl(control: MusicPlayerController) : MusicService.IPlayerC
     }
 
     override fun onBufferUpdated(per: Int) {
-        MusicLog.v(TAG, "music source buffered $per")
+        MusicLog.v("music source buffered $per")
     }
 
     override fun onLyricComplete(lyric: LyricsObj?) {

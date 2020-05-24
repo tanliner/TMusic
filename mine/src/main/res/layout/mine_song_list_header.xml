@@ -7,7 +7,6 @@
             android:id="@+id/iv_header_transform_test"
             android:scaleType="fitXY"
             android:layout_width="match_parent"
-            android:background="@color/colorAccent"
             android:layout_height="@dimen/mine_song_list_header_blur_bg" />
 
     <ImageView

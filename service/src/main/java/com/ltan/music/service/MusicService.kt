@@ -1,20 +1,20 @@
 package com.ltan.music.service
 
+import android.animation.Animator
+import android.animation.ValueAnimator
 import android.app.Service
 import android.content.Intent
 import android.media.MediaPlayer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.*
+import android.view.animation.LinearInterpolator
 import com.ltan.music.business.api.ApiProxy
 import com.ltan.music.business.api.NormalSubscriber
 import com.ltan.music.business.bean.SongUrl
 import com.ltan.music.business.bean.Track
 import com.ltan.music.business.common.CommonApi
-import com.ltan.music.common.LyricPosition
-import com.ltan.music.common.LyricsObj
-import com.ltan.music.common.LyricsUtil
-import com.ltan.music.common.MusicLog
+import com.ltan.music.common.*
 import com.ltan.music.common.bean.SongItemObject
 import com.ltan.music.common.song.MusicController
 import com.ltan.music.common.song.PlayMode
@@ -131,7 +131,7 @@ class MusicService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        MusicLog.d(TAG, "onStartCommand intent: $intent")
+        MusicLog.d("onStartCommand intent: $intent")
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -239,11 +239,11 @@ class MusicService : Service() {
             player.setOnBufferingUpdateListener { mp, percent ->
                 mBufferPercent = percent
                 onCallBackBuffer(percent)
-                MusicLog.v(TAG, "buffer percent.... $mBufferPercent")
+                MusicLog.v("buffer percent.... $mBufferPercent")
             }
             player.setOnErrorListener { mp, what, extra ->
                 // (-38,0) https://www.cnblogs.com/getherBlog/p/3939033.html
-                MusicLog.e(TAG, "mp:$mp , init what: $what, extra:$extra")
+                MusicLog.e("mp:$mp , init what: $what, extra:$extra")
                 // prevent completed
                 true
             }
@@ -283,6 +283,7 @@ class MusicService : Service() {
                 updateCallbackLyric(mLyrics)
             }
             cb.onSongPicUpdated(mCurrentSong.picUrl)
+            cb.updateTitle(mCurrentSong.title, mCurrentSong.subtitle)
         }
 
         fun removeCallback(cb: IPlayerCallback) {
@@ -394,7 +395,7 @@ class MusicService : Service() {
                 val t = iterator.next()
                 val state = t.state
                 val alive = t.isAlive
-                MusicLog.i(TAG, "watchThread : ${t.name}, state: $state, isAlive: $alive")
+                MusicLog.i( "watchThread : ${t.name}, state: $state, isAlive: $alive")
                 if (state == Thread.State.TERMINATED || !alive) {
                     iterator.remove()
                 }
@@ -480,7 +481,9 @@ class MusicService : Service() {
         }
 
         override fun pause() {
-            mPlayer.pause()
+            // mPlayer.setVolume(1.0F, 0F)
+            mPlayer.volumeGradient(1.0F, 0F, { mPlayer.pause() })
+            // mPlayer.pause()
             mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
             onCallBackPause()
         }
@@ -506,6 +509,7 @@ class MusicService : Service() {
 
         override fun start() {
             mPlayer.start()
+            mPlayer.volumeGradient(0.0F, 1.0F)
             onCallBackStart()
             updateCallbackLyric(mLyrics)
         }
@@ -631,6 +635,36 @@ class MusicService : Service() {
             }
             return handled
         }
+
+        /**
+         * volume growUp/dropDown
+         */
+        private fun MediaPlayer.volumeGradient(from: Float, to: Float,
+                                               doneCallback: (() -> Unit)? = null) {
+            val animator = ValueAnimator.ofFloat(from, to)
+            animator.duration = 600
+            animator.interpolator = LinearInterpolator()
+            animator.addUpdateListener {
+                val volume = it.animatedValue as Float
+                try {
+                    // prevent exception if state change
+                    setVolume(volume, volume)
+                } catch (e: Exception) {
+                    it.cancel()
+                }
+            }
+            animator.addListener(object : SimpleAnimator() {
+                override fun onAnimationCancel(animation: Animator?) {
+                    setVolume(from, from)
+                }
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    setVolume(from, from)
+                    doneCallback?.invoke()
+                }
+            })
+            animator.start()
+        }
     }
 
     /**
@@ -672,7 +706,7 @@ class MusicService : Service() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .safeSubscribe(object : NormalSubscriber<LyricsObj>() {
                     override fun onNext(t: LyricsObj?) {
-                        MusicLog.d(ApiUtil.TAG, "lyric of ${song.title}: $t")
+                        MusicLog.d("lyric of ${song.title}: $t")
                         mCallBackImpl?.onLyrics(t)
                     }
                 })
@@ -694,7 +728,7 @@ class MusicService : Service() {
                             if (track.id == song.id) {
                                 // just update the picUrl
                                 mCallBackImpl?.onPicUrl(track.al?.picUrl)
-                                MusicLog.d(ApiUtil.TAG, "onNext what a Rxjava2 picurl is:${track.al?.picUrl} ")
+                                MusicLog.d("onNext what a Rxjava2 picurl is:${track.al?.picUrl} ")
                                 break
                             }
                         }
@@ -712,7 +746,7 @@ class MusicService : Service() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .safeSubscribe(object : NormalSubscriber<SongUrl>() {
                     override fun onNext(t: SongUrl?) {
-                        MusicLog.d(ApiUtil.TAG, "onNext what a Rxjava2 songurl ${song.title} is$t\nurl:${t?.url}")
+                        MusicLog.d("onNext what a Rxjava2 songurl ${song.title} is$t\nurl:${t?.url}")
                         t ?: return
                         mCallBackImpl?.onSongUrl(t.url, nextOne, backward)
                     }
@@ -737,7 +771,7 @@ class MusicService : Service() {
                         for (track in tracks) {
                             if (track.id == song.id) {
                                 mCallBackImpl?.onPicUrl(track.al?.picUrl)
-                                MusicLog.d(TAG, "onNext what a Rxjava2 picurl is:${track.al?.picUrl} ")
+                                MusicLog.d("onNext what a Rxjava2 picurl is:${track.al?.picUrl} ")
                                 break
                             }
                         }
@@ -753,7 +787,7 @@ class MusicService : Service() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .safeSubscribe(object : NormalSubscriber<SongUrl>() {
                     override fun onNext(t: SongUrl?) {
-                        MusicLog.d(TAG, "onNext what a Rxjava2 songurl ${song.title} is$t\nurl:${t?.url}")
+                        MusicLog.d("onNext what a Rxjava2 songurl ${song.title} is$t\nurl:${t?.url}")
                         val reqSongUrl = t ?: return
                         mCallBackImpl?.onSongUrl(t.url, nextOne, backward = false)
                     }

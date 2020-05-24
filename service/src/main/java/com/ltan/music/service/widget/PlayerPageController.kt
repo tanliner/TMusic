@@ -78,7 +78,7 @@ class PlayerPageController @JvmOverloads constructor(
             mController.onNext()
         }
         mPlayListIv.setOnClickListener {
-            MusicLog.d(TAG, "init mPlayListIv click ${mDataSource.size}")
+            MusicLog.d("init mPlayListIv click ${mDataSource.size}")
             mController.showList()
         }
 
@@ -98,7 +98,7 @@ class PlayerPageController @JvmOverloads constructor(
                 seekBarFromUsr = false
                 val progress = seekBar.progress
                 if (progress > mController.currentPosition) {
-                    MusicLog.w(TAG, "onStopTrackingTouch progress not ready")
+                    MusicLog.w("onStopTrackingTouch progress not ready")
                 }
                 mController.seekTo(seekBar.progress)
             }

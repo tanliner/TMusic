@@ -63,7 +63,7 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
             val bi = BigInteger(1, hash)
             val passHexString = bi.toString(16).padStart(32, '0')
 
-            MusicLog.d(TAG, "onclick userName: $name $passHexString")
+            MusicLog.d("onclick userName: $name $passHexString")
 
             mPresenter.login(name, passHexString)
         }
@@ -104,7 +104,7 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
             501 -> ToastUtil.showToastShort(getString(R.string.app_act_login_user_not_found))
             502 -> ToastUtil.showToastShort(getString(R.string.app_act_login_user_pass_error))
             200 -> onLoginSuccess()
-            else -> MusicLog.i(TAG, "onLoginStatus, code: $code")
+            else -> MusicLog.i("onLoginStatus, code: $code")
         }
     }
 }

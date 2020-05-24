@@ -20,24 +20,20 @@ import com.ltan.music.contract.LoginContract
  */
 class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presenter {
 
-    companion object {
-        const val TAG = "Presenter/login"
-    }
-
     override fun login(name: String, pass: String) {
         observe(ApiProxy.instance.getApi(UserApi::class.java)
             .login(name, pass))
             .safeSubscribe(object : NormalSubscriber<LoginResult>() {
                 override fun onNext(t: LoginResult) {
 
-                    MusicLog.d(LoginPresenter.TAG, "login onNext   $t")
+                    MusicLog.d("login onNext   $t")
                     AccountUtil.saveAccountInfo(t.account)
                     AccountUtil.saveProfileInfo(t.profile)
                     mView.onLoginStatus(t.code)
                 }
 
                 override fun onError(errorCode: Int, errorMsg: String) {
-                    MusicLog.d(LoginPresenter.TAG, "login onError error code $errorCode")
+                    MusicLog.d("login onError error code $errorCode")
                 }
             })
     }
@@ -50,12 +46,12 @@ class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presente
             .logout())
             .safeSubscribe(object : NormalSubscriber<Any?>() {
                 override fun onNext(rsp: Any?) {
-                    MusicLog.d(LoginPresenter.TAG, "logout, onNext $rsp")
+                    MusicLog.d("logout, onNext $rsp")
                     mView.onLogoutSuccess()
                 }
 
                 override fun onError(errorCode: Int, errorMsg: String) {
-                    MusicLog.d(LoginPresenter.TAG, "logout, error code $errorCode, msg: $errorMsg")
+                    MusicLog.d("logout, error code $errorCode, msg: $errorMsg")
                 }
             })
     }
@@ -65,11 +61,11 @@ class LoginPresenter : RxPresenter<LoginContract.View>(), LoginContract.Presente
             .query())
             .safeSubscribe(object : NormalSubscriber<String>() {
                 override fun onNext(t: String) {
-                    MusicLog.d(LoginPresenter.TAG, "query onNext any\n$t ")
+                    MusicLog.d("query onNext any\n$t ")
                 }
 
                 override fun onComplete() {
-                    MusicLog.d(LoginPresenter.TAG, "query onComplete")
+                    MusicLog.d("query onComplete")
                 }
             })
     }

@@ -271,7 +271,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
             return
         }
 
-        MusicLog.d(TAG, "view onPlayListDetail: ${data.playlist}")
+        MusicLog.d("view onPlayListDetail: ${data.playlist}")
         val tracks = data.playlist.tracks
         if (tracks != null) {
             for (i in 0 until tracks.size) {
@@ -297,7 +297,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
             val songItem = indexMap.get(songs[i].id)
             songItem?.songUrl = songs[i].url
 
-            MusicLog.v(TAG, "url returned: ${mCurrentSong.songId} vs ${songs[i].id} ${songs[i].url}")
+            MusicLog.v("url returned: ${mCurrentSong.songId} vs ${songs[i].id} ${songs[i].url}")
             if (mDelayPlayingId == songs[i].id) {
                 songItem?.let { updateCurrentSong(it) }
                 mCurrentSong.songUrl = songs[i].url
@@ -314,7 +314,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
 
     override fun onSongDetail(songDetails: SongDetailRsp?) {
         // todo AsyncTask callback when destroyed
-        MusicLog.d(TAG, "onSongDetail: privileges${songDetails?.privileges}\ntracks: ${songDetails?.tracks}")
+        MusicLog.d("onSongDetail: privileges${songDetails?.privileges}\ntracks: ${songDetails?.tracks}")
         val tracks = songDetails?.tracks
         if (tracks == null || tracks.isNullOrEmpty()) {
             return
@@ -424,7 +424,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         private val TAG = "SongListAci/SongItemClick"
 
         override fun onItemClick(position: Int, v: View, type: ClickType) {
-            MusicLog.v(TAG, "item click $position $v $type")
+            MusicLog.v("item click $position $v $type")
             val itemObject = mRcyItems[position] as SongItemObject
             updateCurrentSong(itemObject)
             mControllerView.updateDisplay(itemObject.title, itemObject.subTitle)
@@ -473,7 +473,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            MusicLog.i(TAG, "service connected...")
+            MusicLog.i("service connected...")
             val binder = service as MusicService.MyBinder
             mMusicBinder = binder
             playerCallback = PlayerCallbackImpl(mControllerView)

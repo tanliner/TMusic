@@ -34,7 +34,6 @@ class ApiProxy private constructor() {
         // singleton
         val instance: ApiProxy by lazy (mode =  LazyThreadSafetyMode.SYNCHRONIZED) { ApiProxy() }
 
-        private val TAG = ApiProxy::class.java.simpleName
         private val TYPE = arrayOf(ReqAgents.UA_TYPE_PC, ReqAgents.UA_TYPE_MOBILE)
 
         const val BASE_URL = ApiConstants.BASE_URL
@@ -56,7 +55,7 @@ class ApiProxy private constructor() {
 
     init {
         httpLoggingInterceptor = HttpLoggingInterceptor(HttpLoggingInterceptor.Logger { message
-            -> MusicLog.v(TAG,"retrofit = $message")
+            -> MusicLog.v("retrofit = $message")
         })
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
 
@@ -120,9 +119,6 @@ class ApiProxy private constructor() {
 
     class AddCookiesInterceptor : Interceptor {
 
-        companion object {
-            val TAG = "${ApiProxy.TAG}/${AddCookiesInterceptor::class.java.simpleName}"
-        }
         private var baseCookie: String
 
         init {
@@ -157,9 +153,6 @@ class ApiProxy private constructor() {
     }
 
     class CSRTokenInterceptor : Interceptor {
-        companion object {
-            val TAG = "${ApiProxy.TAG}/${CSRTokenInterceptor::class.java.simpleName}"
-        }
         override fun intercept(chain: Interceptor.Chain): Response {
             val oldRequest = chain.request()
             val request: Request
@@ -168,7 +161,7 @@ class ApiProxy private constructor() {
             request = if (headers.size() > 0) {
                 val cookie = headers.get(HEADER_COOKIE)
                 val hasToken = cookie?.matches(Regex(HEADER_COOKIE_CSRF_PATTERN))
-                MusicLog.v(TAG, "CSRTokenInterceptor cookies: $cookie")
+                MusicLog.v("CSRTokenInterceptor cookies: $cookie")
                 if (hasToken != null) {
                     addParam(oldRequest, BODY_QUERY_CSRF, cookie.split(";")[1])
                 } else {
@@ -214,9 +207,6 @@ class ApiProxy private constructor() {
     }
 
     class ReqBodyModifyInterceptor : Interceptor {
-        companion object {
-            val TAG = "${ApiProxy.TAG}/${ReqBodyModifyInterceptor::class.java.simpleName}"
-        }
         override fun intercept(chain: Interceptor.Chain): Response {
             val oldRequest = chain.request()
             val method = oldRequest.method().toUpperCase()
@@ -239,7 +229,7 @@ class ApiProxy private constructor() {
 
                 json.addProperty(key, value)
             }
-            MusicLog.d(TAG, "selectGetParams json to string: $json")
+            MusicLog.d("selectGetParams json to string: $json")
 
             // random key, len = 16
             val secretKey = Encryptor.randomBytes(16)
@@ -259,13 +249,13 @@ class ApiProxy private constructor() {
 
         private fun selectPostParams(request: Request): Request {
             val json = JsonObject()
-            MusicLog.v(TAG, "request body: ${request.body()}")
+            MusicLog.v("request body: ${request.body()}")
             if (request.body() is FormBody) {
                 val oldFormBody = request.body() as FormBody
                 for (i in 0 until oldFormBody.size()) {
                     json.addProperty(oldFormBody.name(i), oldFormBody.value(i))
                 }
-                MusicLog.v(TAG, "params json string: $json")
+                MusicLog.v("params json string: $json")
             }
             return encryptParam(request, json)
         }
@@ -316,7 +306,7 @@ class ApiProxy private constructor() {
             encryptJson.addProperty("method", request.method())
             encryptJson.addProperty("url", url)
             encryptJson.add("params", json) // just add Json Element, do not use the method toString
-            MusicLog.v(TAG, "encryptJson: $encryptJson")
+            MusicLog.v("encryptJson: $encryptJson")
             val paramsTxt = Encryptor.encryptLinuxApi(encryptJson.toString(), Encryptor.LINUX_API_KEY)
 
             val builder = FormBody.Builder()

@@ -98,7 +98,7 @@ class PageIndicator @JvmOverloads constructor(
             }
 
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                MusicLog.v(TAG, "positionOffset: $positionOffset , positionOffsetPixels: $positionOffsetPixels")
+                MusicLog.v("positionOffset: $positionOffset , positionOffsetPixels: $positionOffsetPixels")
                 if (isMenuItemClicked) {
                     // click the menu item, do animation directly
                     return

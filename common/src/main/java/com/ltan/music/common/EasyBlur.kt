@@ -29,7 +29,6 @@ class EasyBlur private constructor() {
     private var mAlgorithm = BlurAlgorithm.RS_BLUR // default RenderScript
 
     companion object {
-        const val TAG = "EasyBlur"
         const val SCALE = 1 / 8.0F //default scale
         const val MAX_RADIUS = 25
         val sInstance: EasyBlur by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { EasyBlur() }
@@ -49,7 +48,7 @@ class EasyBlur private constructor() {
 
             val renderScript = RenderScript.create(ctx)
 
-            MusicLog.d(TAG, "out scale size:" + outBitmap.width + "*" + outBitmap.height)
+            MusicLog.d("out scale size: ${outBitmap.width} * ${outBitmap.height}")
 
             // Allocate memory for Renderscript to work with
 

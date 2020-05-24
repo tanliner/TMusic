@@ -21,10 +21,6 @@ import java.lang.reflect.Type
  * @Version: 1.0
  */
 class NullOnEmptyConverterFactory : Converter.Factory() {
-    companion object {
-        const val TAG = "Convert/Empty"
-    }
-
     override fun responseBodyConverter(
         type: Type?,
         annotations: Array<Annotation>?,
@@ -32,7 +28,7 @@ class NullOnEmptyConverterFactory : Converter.Factory() {
     ): Converter<ResponseBody, *>? {
         val delegate = retrofit.nextResponseBodyConverter<Any>(this, type!!, annotations!!)
         return Converter<ResponseBody, Any> { body ->
-            MusicLog.v(TAG, "response empty check length: ${body.contentLength()}")
+            MusicLog.v("response empty check length: ${body.contentLength()}")
             val any: Any?
             if (body.contentLength() == 0L) {
                 val j = JSONObject()

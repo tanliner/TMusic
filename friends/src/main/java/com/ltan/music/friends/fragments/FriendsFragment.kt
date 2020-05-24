@@ -39,7 +39,7 @@ class FriendsFragment : MusicBaseFragment() {
     }
 
     fun justTest(v: View) {
-        MusicLog.d(TAG, "\nthis is a test message from$this, and mHeader is:$v")
+        MusicLog.d("\nthis is a test message from$this, and mHeader is:$v")
     }
 }
 

@@ -15,68 +15,88 @@ object MusicLog {
     private const val TAG: String = "TMusic/"
 
     @JvmStatic
-    fun v(TAG: String, msg: String) {
+    private fun getTag(): String? {
+        val trace =
+            Throwable().fillInStackTrace().stackTrace
+        var callingClass = ""
+        for (i in 2 until trace.size) {
+            val clazz: Class<*> = trace[i].javaClass
+            if (clazz != MusicLog::class.java) {
+                callingClass = trace[i].className
+                callingClass = callingClass.substring(callingClass.lastIndexOf('.') + 1)
+                break
+            }
+        }
+        if (callingClass.contains("$")) {
+            val end = callingClass.lastIndexOf("$")
+            callingClass = callingClass.substring(0, end)
+        }
+        return "$callingClass: "
+    }
+
+    @JvmStatic
+    fun v(msg: String) {
         if (BuildConfig.DEBUG) {
             Log.v(this.TAG + TAG, msg)
         }
     }
 
     @JvmStatic
-    fun d(TAG: String, msg: String) {
+    fun d(msg: String) {
         if (BuildConfig.DEBUG) {
-            Log.d(this.TAG + TAG, msg)
+            Log.d(this.TAG, msg)
         }
     }
 
     @JvmStatic
-    fun i(TAG: String, msg: String) {
+    fun i(msg: String) {
         if (BuildConfig.DEBUG) {
             Log.i(this.TAG + TAG, msg)
         }
     }
 
     @JvmStatic
-    fun w(TAG: String, msg: String) {
+    fun w(msg: String) {
         if (BuildConfig.DEBUG) {
             Log.w(this.TAG + TAG, msg)
         }
     }
 
     @JvmStatic
-    fun e(TAG: String, msg: String) {
-        Log.e(this.TAG + TAG, msg)
+    fun e(msg: String) {
+        Log.e(this.TAG + getTag(), msg)
     }
 
     // -------------- log with throwable -------------- //
     @JvmStatic
-    fun v(TAG: String, msg: String, tr: Throwable) {
+    fun v(msg: String, tr: Throwable) {
         if (BuildConfig.DEBUG) {
             Log.v(this.TAG + TAG, msg, tr)
         }
     }
     @JvmStatic
-    fun d(TAG: String, msg: String, tr: Throwable) {
+    fun d(msg: String, tr: Throwable) {
         if (BuildConfig.DEBUG) {
             Log.d(this.TAG + TAG, msg, tr)
         }
     }
 
     @JvmStatic
-    fun i(TAG: String, msg: String, tr: Throwable) {
+    fun i(msg: String, tr: Throwable) {
         if (BuildConfig.DEBUG) {
             Log.i(this.TAG + TAG, msg, tr)
         }
     }
 
     @JvmStatic
-    fun w(TAG: String, msg: String, tr: Throwable) {
+    fun w(msg: String, tr: Throwable) {
         if (BuildConfig.DEBUG) {
             Log.w(this.TAG + TAG, msg, tr)
         }
     }
 
     @JvmStatic
-    fun e(TAG: String, msg: String, tr: Throwable) {
+    fun e(msg: String, tr: Throwable) {
         Log.e(this.TAG + TAG, msg, tr)
     }
 }

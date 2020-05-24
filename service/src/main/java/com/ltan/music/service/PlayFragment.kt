@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -16,22 +15,16 @@ import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.viewpager.widget.ViewPager
 import butterknife.BindView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.ltan.music.basemvp.BaseMVPFragment
 import com.ltan.music.business.bean.SongDetailRsp
 import com.ltan.music.business.bean.SongUrl
 import com.ltan.music.business.bean.Track
-import com.ltan.music.common.EasyBlur
 import com.ltan.music.common.LyricsObj
 import com.ltan.music.common.MusicLog
 import com.ltan.music.common.StatusBar
@@ -39,12 +32,13 @@ import com.ltan.music.common.bean.SongItemObject
 import com.ltan.music.common.song.SongUtils
 import com.ltan.music.service.adapter.CdClickListener
 import com.ltan.music.service.adapter.PlayerPageAdapter
+import com.ltan.music.service.blur.BlurRequestListener
+import com.ltan.music.service.blur.ImageBlur
 import com.ltan.music.service.contract.ServiceContract
 import com.ltan.music.service.presenter.ServicePresenter
 import com.ltan.music.service.provider.MusicProvider
 import com.ltan.music.service.widget.PlayerPageController
 import com.ltan.music.widget.constants.PlayListItemPreview
-import jp.wasabeef.glide.transformations.BlurTransformation
 
 /**
  * TMusic.com.ltan.music.service
@@ -68,11 +62,6 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         const val MSG_PLAY_CD_ANIM = 0x1002
         const val FOCUS_COLOR = Color.GREEN
         const val DEFAULT_COLOR = Color.WHITE
-    }
-
-    interface ResourceReady {
-        fun onFailed() {} /* default method */
-        fun onReady()
     }
 
     private lateinit var mCurSong: SongPlaying
@@ -127,7 +116,6 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
             when (msg.what) {
-                // MSG_UPDATE_PREVIEW -> updateCurrentBg(msg.obj as SongItemObject)
                 MSG_UPDATE_PREVIEW -> onPageSelected(msg.obj as SongItemObject)
                 MSG_UPDATE_SEEKBAR_PROGRESS -> updateCurrentPos()
                 MSG_PLAY_CD_ANIM -> playCDAnim()
@@ -204,7 +192,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
         adapter.setOnClickListener(object : CdClickListener {
             override fun onLongClick(): Boolean {
-                MusicLog.d(TAG, "onLongClick show original image")
+                MusicLog.d("onLongClick show original image")
                 return true
             }
 
@@ -259,7 +247,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         }
         mCurrentSongDetail = tracks[0]
         mCurrentSongDetail?.let {
-            MusicLog.d(TAG, "onSongDetail pic for ${mCurSong.title}: ${it.al?.picUrl}")
+            MusicLog.d("onSongDetail pic for ${mCurSong.title}: ${it.al?.picUrl}")
             setLayoutBg(it.al?.picUrl)
             mCurSong.picUrl = it.al?.picUrl
             updateServiceSong()
@@ -388,9 +376,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             .load(picUrl)
             .error(PlayListItemPreview.ERROR_IMG)
             .placeholder(PlayListItemPreview.PLACEHOLDER_IMG)
-            .listener(DefRequestListener(ImageBlur(appCtx, mPreviewBg)))
-            .transform(BlurTransformation(20, 25)) /* fast blur in Java layer */
-            .transform(BlurTransformation(20, 26))
+            .listener(BlurRequestListener(ImageBlur(appCtx, mPreviewBg, 25, 45)))
             .into(mPreviewBg)
     }
 
@@ -473,67 +459,11 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         return tv
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         requireContext().unbindService(mServiceConn)
+        mMusicBinder?.removeCallback(mUiUpdateImpl)
     }
-
-    /**
-     * Blur the whole layout background when resource ready
-     */
-    class ImageBlur constructor(appCtx: Context, target: ImageView) : ResourceReady {
-        private val ctx = appCtx
-        private val mPreviewBg = target
-
-        override fun onReady() {
-            mPreviewBg.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
-                override fun onPreDraw(): Boolean {
-                    mPreviewBg.isDrawingCacheEnabled = true
-                    val bitmap = mPreviewBg.drawingCache
-                    mPreviewBg.viewTreeObserver.removeOnPreDrawListener(this)
-                    val result = EasyBlur.sInstance
-                        .with(ctx)
-                        .bitmap(bitmap)
-                        .radius(25)
-                        .scale(45)
-                        .blur()
-                    // val result2 = FastBlur.blur(bitmap, 30, true)
-                    // mPreviewBg.setImageBitmap(result2)
-                    mPreviewBg.setImageBitmap(result)
-                    mPreviewBg.isDrawingCacheEnabled = false
-                    return false
-                }
-            })
-        }
-    }
-
-    /**
-     * Ignore the params, just use the call back
-     */
-    open class DefRequestListener(cb: ResourceReady) : RequestListener<Drawable> {
-        private val callback: ResourceReady = cb
-        override fun onLoadFailed(
-            e: GlideException?,
-            model: Any?,
-            target: Target<Drawable>?,
-            isFirstResource: Boolean
-        ): Boolean {
-            callback.onFailed()
-            return false
-        }
-
-        override fun onResourceReady(
-            resource: Drawable?,
-            model: Any?,
-            target: Target<Drawable>?,
-            dataSource: DataSource?,
-            isFirstResource: Boolean
-        ): Boolean {
-            callback.onReady()
-            return false
-        }
-    }
-
 
     inner class PagerChangeListener(songList: ArrayList<SongItemObject>) : ViewPager.OnPageChangeListener {
         private val mSongList = songList
@@ -604,6 +534,9 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         private var mLyricLastIndex = -10
 
         override fun updateLyric(curSong: SongPlaying, txt: String?, index: Int) {
+            if (!isAdded || context == null) {
+                return
+            }
             if (mLyricContainer.childCount <= 0) {
                 return
             }
@@ -663,10 +596,11 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             mLyricLastIndex = 0
             mHandler.removeMessages(MSG_UPDATE_SEEKBAR_PROGRESS)
             cancelCDAnim()
+            mMusicBinder?.onNext()
         }
 
         override fun onLyricComplete(lyric: LyricsObj?) {
-            MusicLog.d(TAG, "onLyric query completed:$lyric\n${mSongLyricSv.visibility}")
+            MusicLog.d("onLyric query completed:$lyric\n${mSongLyricSv.visibility}")
             mLyric = lyric
             if (mSongLyricSv.visibility == View.VISIBLE) {
                 mHandler.post {

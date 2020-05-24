@@ -78,7 +78,7 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
     }
 
     override fun onSongDetail(songDetails: SongDetailRsp?) {
-        MusicLog.d(TAG, "onSongDetail: privileges${songDetails?.privileges}\ntracks: ${songDetails?.tracks}")
+        MusicLog.d("onSongDetail: privileges${songDetails?.privileges}\ntracks: ${songDetails?.tracks}")
         val tracks = songDetails?.tracks
         if (tracks == null || tracks.isNullOrEmpty()) {
             return
@@ -93,7 +93,7 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
     }
 
     override fun onSongUrl(songs: List<SongUrl>?) {
-        MusicLog.d(TAG, "onSongUrl http returned $songs")
+        MusicLog.d("onSongUrl http returned $songs")
         mCurrentSong.songUrl = songs?.get(0)?.url
     }
 
@@ -133,7 +133,7 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
             return
         }
         mCurrentSong = args.getParcelable(ARGS_SONG) ?: throw IllegalArgumentException("Must process a SongItemObject")
-        MusicLog.v(TAG, "mCurrentSong : $mCurrentSong")
+        MusicLog.v("mCurrentSong : $mCurrentSong")
     }
 
     private fun initView(root: View) {

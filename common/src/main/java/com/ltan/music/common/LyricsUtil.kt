@@ -103,7 +103,7 @@ object LyricsUtil {
         // var fixLineStr = line, [0-1:59:20]/[00:56:99]/[01:32.000]
         val matcher = Pattern.compile("\\[(\\d{2,}:\\d{2}\\.\\d{2,3})\\]").matcher(line)
         if(!matcher.find()) {
-            MusicLog.e("LyricUtil/calStartTimeMillis", "error line: $line")
+            MusicLog.e("error line: $line")
             // fixLineStr = fixLine(index, line)
             return -1
         }

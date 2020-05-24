@@ -10,10 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.ltan.music.mine.R
 import com.ltan.music.mine.SongListHeaderObject
+import com.ltan.music.service.blur.BlurRequestListener
+import com.ltan.music.service.blur.ImageBlur
 import com.ltan.music.widget.MusicRecycleView
 import com.ltan.music.widget.constants.PlayListItemPreview
-import jp.wasabeef.glide.transformations.BlurTransformation
 import me.drakeet.multitype.ItemViewBinder
+
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 
 /**
  * TMusic.com.ltan.music.mine.adapter
@@ -83,15 +86,24 @@ class SongListHeaderBinder : ItemViewBinder<SongListHeaderObject, SongListHeader
 
         Glide.with(ctx)
             .load(item.previewUrl)
-            .skipMemoryCache(true)
-            .centerCrop()
-            // .transform(BlurTransformation(25, 38))
+            // .skipMemoryCache(true)
+            .listener(
+                BlurRequestListener(ImageBlur(ctx, holder.bgImg, 25, 30))
+            )
+            // .centerCrop()
+            // .transform(BlurTransformation(10, 5))
+            // .override(2080, 500)
+            .transition(withCrossFade())
             .into(holder.bgImg)
         // floating header, out of the RecycleView
         Glide.with(ctx)
             .load(item.previewUrl)
-            .skipMemoryCache(true)
-            // .transform(BlurTransformation(25, 38))
+            .listener(
+                BlurRequestListener(ImageBlur(ctx, mFloatingHeader, 25, 30))
+            )
+            // .skipMemoryCache(true)
+            // .transform(BlurTransformation(10, 5))
+            .transition(withCrossFade())
             .into(mFloatingHeader)
     }
 

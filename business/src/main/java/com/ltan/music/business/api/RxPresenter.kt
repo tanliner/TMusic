@@ -18,10 +18,6 @@ import io.reactivex.schedulers.Schedulers
 open class RxPresenter<V: IBaseContract.View<*>> : IBaseContract.Presenter<V> {
 // open class RxPresenter<V: IBaseContract.View<*>> : BaseMVPPresenter<V>() {
 
-    companion object {
-        const val TAG = "RxPresenter/"
-    }
-
     protected lateinit var mView: V
 
     /**
@@ -30,7 +26,7 @@ open class RxPresenter<V: IBaseContract.View<*>> : IBaseContract.Presenter<V> {
     protected var mViewAttached: Boolean = false
 
     override fun attachView(view: V) {
-        MusicLog.v(TAG, "attachView called $view")
+        MusicLog.v("attachView called $view")
         mView = view
         mViewAttached = true
     }

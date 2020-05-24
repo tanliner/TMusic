@@ -21,7 +21,6 @@ import kotlin.reflect.KProperty
  */
 abstract class MusicBaseActivity : AppCompatActivity() {
 
-    protected val TAG: String = this::class.java.simpleName
     private var unBinder: Unbinder = Unbinder.EMPTY
 
     abstract fun initLayout(): Int
@@ -31,7 +30,7 @@ abstract class MusicBaseActivity : AppCompatActivity() {
         initWindowFlag()
         val layoutId = initLayout()
         if (layoutId <= 0) {
-            MusicLog.e(TAG, "must have a validate the layout")
+            MusicLog.e("must have a validate the layout")
             return
         }
         setContentView(layoutId)

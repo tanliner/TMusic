@@ -15,14 +15,14 @@ import com.ltan.music.common.MusicLog
  * @Date:   2019-04-28
  * @Version: 1.0
  */
-abstract class BaseMVPFragment<P : IBaseContract.Presenter<*>> : MusicBaseFragment() {
+abstract class BaseMVPFragment<P : IBasePresenter<*>> : BaseFragment() {
 
     protected lateinit var mPresenter: P
 
     /**
      * init the presenter, such as attach the view
      */
-    abstract fun initPresenter()
+    abstract fun attachView()
 
     override fun init(view: View) {
         val p: P? = PresenterUtil.getBasePresenter(this.javaClass)
@@ -32,7 +32,7 @@ abstract class BaseMVPFragment<P : IBaseContract.Presenter<*>> : MusicBaseFragme
             return
         }
         mPresenter = p
-        initPresenter()
+        attachView()
     }
 
     override fun onDestroy() {

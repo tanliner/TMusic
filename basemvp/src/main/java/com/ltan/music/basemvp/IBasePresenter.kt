@@ -9,7 +9,7 @@ package com.ltan.music.basemvp
  * @Date:   2019-04-28
  * @Version: 1.0
  */
-interface IBasePresenter<V> {
+interface IBasePresenter<V: IBaseView> {
     /**
      * T? means, maybe no T, will be called after viewCreated
      * */

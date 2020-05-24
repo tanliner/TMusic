@@ -123,7 +123,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         }
     }
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.service_player
     }
 
@@ -221,7 +221,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         // anim.start()
     }
 
-    override fun initPresenter() {
+    override fun attachView() {
         mPresenter.attachView(this)
     }
 
@@ -596,7 +596,6 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
             mLyricLastIndex = 0
             mHandler.removeMessages(MSG_UPDATE_SEEKBAR_PROGRESS)
             cancelCDAnim()
-            mMusicBinder?.onNext()
         }
 
         override fun onLyricComplete(lyric: LyricsObj?) {

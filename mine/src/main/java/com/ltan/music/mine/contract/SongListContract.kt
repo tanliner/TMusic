@@ -1,6 +1,7 @@
 package com.ltan.music.mine.contract
 
-import com.ltan.music.basemvp.IBaseContract
+import com.ltan.music.basemvp.IBasePresenter
+import com.ltan.music.basemvp.IBaseView
 import com.ltan.music.business.bean.SongDetailRsp
 import com.ltan.music.business.bean.SongUrl
 import com.ltan.music.mine.beans.PlayListDetailRsp
@@ -15,12 +16,12 @@ import com.ltan.music.mine.beans.PlayListDetailRsp
  * @Version: 1.0
  */
 interface SongListContract {
-    interface View : IBaseContract.View<Presenter> {
+    interface View : IBaseView {
         fun onPlayListDetail(data: PlayListDetailRsp?)
         fun onSongUrl(songs: List<SongUrl>?)
         fun onSongDetail(songDetails: SongDetailRsp?)
     }
-    interface Presenter : IBaseContract.Presenter<View> {
+    interface Presenter : IBasePresenter<View> {
 
         /**
          * to get the current song list, favorite-song collection list

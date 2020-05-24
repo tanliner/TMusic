@@ -1,6 +1,7 @@
 package com.ltan.music.service.contract
 
-import com.ltan.music.basemvp.IBaseContract
+import com.ltan.music.basemvp.IBasePresenter
+import com.ltan.music.basemvp.IBaseView
 import com.ltan.music.business.bean.SongDetailRsp
 import com.ltan.music.business.bean.SongUrl
 
@@ -16,12 +17,12 @@ import com.ltan.music.business.bean.SongUrl
  */
 interface ServiceContract {
 
-    interface View : IBaseContract.View<Presenter> {
+    interface View : IBaseView {
         fun onSongUrl(songs: List<SongUrl>?)
         fun onSongDetail(songDetails: SongDetailRsp?)
     }
 
-    interface Presenter : IBaseContract.Presenter<View> {
+    interface Presenter : IBasePresenter<View> {
         fun getSongDetail(ids: String, collector: String)
         fun getSongUrl(ids: String)
     }

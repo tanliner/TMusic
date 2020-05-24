@@ -51,11 +51,11 @@ class PlayerCDFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.Vi
 
     private lateinit var mCurrentSong: SongItemObject
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.service_player_cd
     }
 
-    override fun initPresenter() {
+    override fun attachView() {
         mPresenter.attachView(this)
     }
 

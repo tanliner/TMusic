@@ -74,11 +74,11 @@ class MineFragment : BaseMVPFragment<MinePresenter>(), MineContract.View {
 
     private var mPlayerCallback: PlayerCallbackImpl? = null
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.mine_fragment
     }
 
-    override fun initPresenter() {
+    override fun attachView() {
         mPresenter.attachView(this)
     }
 

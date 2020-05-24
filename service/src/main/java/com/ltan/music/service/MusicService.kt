@@ -255,6 +255,8 @@ class MusicService : Service() {
             player.setOnCompletionListener {
                 onCallBackComplete(mCurrentSong)
                 mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
+                // TODO, play mode
+                onNext()
             }
             mLyricsUpdater = Handler(mUpdateThread.looper, Handler.Callback { msg ->
                 when (msg?.what) {
@@ -481,7 +483,6 @@ class MusicService : Service() {
         }
 
         override fun pause() {
-            // mPlayer.setVolume(1.0F, 0F)
             mPlayer.volumeGradient(1.0F, 0F, { mPlayer.pause() })
             // mPlayer.pause()
             mLyricsUpdater.removeMessages(MSG_UPDATE_LYRIC)
@@ -655,11 +656,15 @@ class MusicService : Service() {
             }
             animator.addListener(object : SimpleAnimator() {
                 override fun onAnimationCancel(animation: Animator?) {
-                    setVolume(from, from)
+                    try {
+                        setVolume(from, from)
+                    } catch (ignore: Exception) {}
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
-                    setVolume(from, from)
+                    try {
+                        setVolume(to, to)
+                    } catch (ignore: Exception) {}
                     doneCallback?.invoke()
                 }
             })
@@ -719,7 +724,7 @@ class MusicService : Service() {
 
             ApiProxy.instance.getApi(CommonApi::class.java).getSongDetail(ids, controllers)
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .map { it.tracks }
                 .safeSubscribe(object : NormalSubscriber<List<Track>>() {
                     override fun onNext(t: List<Track>?) {

@@ -3,7 +3,7 @@ package com.ltan.music.discovery.fragments
 import android.view.View
 import android.widget.FrameLayout
 import butterknife.BindView
-import com.ltan.music.basemvp.MusicBaseFragment
+import com.ltan.music.basemvp.BaseFragment
 import com.ltan.music.common.MusicLog
 import com.ltan.music.discovery.R
 import com.ltan.music.discovery.R2
@@ -18,7 +18,7 @@ import com.ltan.music.discovery.R2
  * @Date:   2019-04-27
  * @Version: 1.0
  */
-class DiscoveryFragment : MusicBaseFragment() {
+class DiscoveryFragment : BaseFragment() {
 
     companion object {
         const val TAG = "Disc/Frag"
@@ -30,7 +30,7 @@ class DiscoveryFragment : MusicBaseFragment() {
     @BindView(R2.id.page_header)
     lateinit var mHeader: FrameLayout
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.discovery_fragment
     }
 

@@ -3,7 +3,7 @@ package com.ltan.music.videos.fragments
 import android.view.View
 import android.widget.FrameLayout
 import butterknife.BindView
-import com.ltan.music.basemvp.MusicBaseFragment
+import com.ltan.music.basemvp.BaseFragment
 import com.ltan.music.common.MusicLog
 import com.ltan.music.videos.R
 import com.ltan.music.videos.R2
@@ -17,7 +17,7 @@ import com.ltan.music.videos.R2
  * @Date:   2019-04-27
  * @Version: 1.0
  */
-class VideosFragment : MusicBaseFragment() {
+class VideosFragment : BaseFragment() {
 
     companion object {
         const val TAG = "Videos/Frag"
@@ -29,7 +29,7 @@ class VideosFragment : MusicBaseFragment() {
     @BindView(R2.id.page_header)
     lateinit var mHeader: FrameLayout
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.videos_fragment
     }
 

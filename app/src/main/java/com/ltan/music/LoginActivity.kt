@@ -30,7 +30,7 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
         const val TAG = "Login/Act"
     }
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.app_activity_login
     }
 

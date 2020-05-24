@@ -5,6 +5,7 @@ import android.content.Context
 import com.ltan.music.common.BaseApplication
 import com.tencent.mmkv.MMKV
 import me.jessyan.autosize.AutoSizeConfig
+import me.yokeyword.fragmentation.Fragmentation
 
 /**
  * TMusic.com.ltan.music
@@ -28,6 +29,11 @@ class TMusicApplication : Application() {
         if (BuildConfig.AUTO_SIZE) {
             configAutoSize()
         }
+        Fragmentation.builder()
+            /* show stack view. Mode: BUBBLE, SHAKE, NONE */
+            .stackViewMode(Fragmentation.BUBBLE)
+            .debug(true)
+            .install()
     }
 
     private fun configAutoSize() {

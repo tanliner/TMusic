@@ -36,7 +36,7 @@ class MainActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View {
     @BindView(R2.id.rv_app_drawer_items)
     lateinit var mDrawerItems: RecyclerView
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.app_activity_main
     }
 

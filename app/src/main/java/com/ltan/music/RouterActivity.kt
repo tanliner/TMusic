@@ -3,7 +3,7 @@ package com.ltan.music
 import android.content.Intent
 import android.os.Bundle
 import com.ltan.music.account.utils.AccountUtil
-import com.ltan.music.basemvp.MusicBaseActivity
+import com.ltan.music.basemvp.BaseActivity
 import com.ltan.music.common.MusicLog
 
 /**
@@ -15,9 +15,9 @@ import com.ltan.music.common.MusicLog
  * @Date:   2019-05-18
  * @Version: 1.0
  */
-class RouterActivity : MusicBaseActivity() {
+class RouterActivity : BaseActivity() {
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return 0
     }
 

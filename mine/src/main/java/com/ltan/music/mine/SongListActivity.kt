@@ -60,7 +60,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
         const val ARG_SONG = "song_list"
     }
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.mine_activity_song_list
     }
 

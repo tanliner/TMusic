@@ -1,6 +1,7 @@
 package com.ltan.music.contract
 
-import com.ltan.music.basemvp.IBaseContract
+import com.ltan.music.basemvp.IBasePresenter
+import com.ltan.music.basemvp.IBaseView
 
 /**
  * TMusic.com.ltan.music.contract
@@ -12,12 +13,12 @@ import com.ltan.music.basemvp.IBaseContract
  * @Version: 1.0
  */
 interface LoginContract {
-    interface View : IBaseContract.View<Presenter> {
+    interface View : IBaseView {
         fun onLogoutSuccess()
         fun onLoginStatus(code: Int)
     }
 
-    interface Presenter : IBaseContract.Presenter<View> {
+    interface Presenter : IBasePresenter<View> {
         fun login(name: String, pass: String)
         /** Note: do http request */
         fun logout()

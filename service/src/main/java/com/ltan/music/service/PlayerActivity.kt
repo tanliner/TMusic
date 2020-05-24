@@ -2,7 +2,7 @@ package com.ltan.music.service
 
 import android.os.Bundle
 import com.jaeger.library.StatusBarUtil
-import com.ltan.music.basemvp.MusicBaseActivity
+import com.ltan.music.basemvp.BaseActivity
 import com.ltan.music.common.bean.SongItemObject
 
 /**
@@ -15,13 +15,13 @@ import com.ltan.music.common.bean.SongItemObject
  * @Date:   2019-06-17
  * @Version: 1.0
  */
-class PlayerActivity : MusicBaseActivity() {
+class PlayerActivity : BaseActivity() {
     companion object {
         const val ARG_OBJ = "song"
         const val ARG_SONG_LIST = "song_list"
     }
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.service_player_activity
     }
 

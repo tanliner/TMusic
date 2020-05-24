@@ -3,7 +3,7 @@ package com.ltan.music.friends.fragments
 import android.view.View
 import android.widget.FrameLayout
 import butterknife.BindView
-import com.ltan.music.basemvp.MusicBaseFragment
+import com.ltan.music.basemvp.BaseFragment
 import com.ltan.music.common.MusicLog
 import com.ltan.music.friends.R
 import com.ltan.music.friends.R2
@@ -17,7 +17,7 @@ import com.ltan.music.friends.R2
  * @Date:   2019-04-27
  * @Version: 1.0
  */
-class FriendsFragment : MusicBaseFragment() {
+class FriendsFragment : BaseFragment() {
 
     companion object {
         const val TAG = "Friends/Frag"
@@ -29,7 +29,7 @@ class FriendsFragment : MusicBaseFragment() {
     @BindView(R2.id.page_header)
     lateinit var mHeader: FrameLayout
 
-    override fun initLayout(): Int {
+    override fun contentLayout(): Int {
         return R.layout.friends_fragment
     }
 

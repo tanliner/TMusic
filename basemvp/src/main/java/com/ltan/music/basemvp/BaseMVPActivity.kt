@@ -12,7 +12,7 @@ import com.ltan.music.common.MusicLog
  * @Date:   2019-05-12
  * @Version: 1.0
  */
-abstract class BaseMVPActivity<P : IBaseContract.Presenter<*>> : MusicBaseActivity() {
+abstract class BaseMVPActivity<P : IBasePresenter<*>> : BaseActivity() {
 
     protected lateinit var mPresenter: P
 

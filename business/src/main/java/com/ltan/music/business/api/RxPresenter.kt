@@ -1,6 +1,7 @@
 package com.ltan.music.business.api
 
-import com.ltan.music.basemvp.IBaseContract
+import com.ltan.music.basemvp.IBasePresenter
+import com.ltan.music.basemvp.IBaseView
 import com.ltan.music.basemvp.RxUtils
 import com.ltan.music.common.MusicLog
 import io.reactivex.Flowable
@@ -15,8 +16,7 @@ import io.reactivex.schedulers.Schedulers
  * @Date:   2019-04-30
  * @Version: 1.0
  */
-open class RxPresenter<V: IBaseContract.View<*>> : IBaseContract.Presenter<V> {
-// open class RxPresenter<V: IBaseContract.View<*>> : BaseMVPPresenter<V>() {
+open class RxPresenter<V: IBaseView> : IBasePresenter<V> {
 
     protected lateinit var mView: V
 

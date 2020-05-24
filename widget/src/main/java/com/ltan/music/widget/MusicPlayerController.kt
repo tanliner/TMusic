@@ -60,12 +60,13 @@ class MusicPlayerController @JvmOverloads constructor(
         if(mPlayer == null) {
             return
         }
-        if (mPlayer!!.isPlaying) {
-            mPlayer?.pause()
+        val isPlaying = mPlayer!!.isPlaying
+        setState(!isPlaying)
+        if (isPlaying) {
+            mPlayer!!.pause()
         } else {
             mPlayer?.start()
         }
-        setState(mPlayer!!.isPlaying)
     }
 
     fun getTitle(): String {

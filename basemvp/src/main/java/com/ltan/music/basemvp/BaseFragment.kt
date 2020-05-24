@@ -4,9 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import butterknife.ButterKnife
 import butterknife.Unbinder
+import me.yokeyword.fragmentation.SupportFragment
 
 /**
  * TMusic.com.ltan.music.index.fragments
@@ -17,25 +17,24 @@ import butterknife.Unbinder
  * @Date:   2019-04-26
  * @Version: 1.0
  */
-abstract class MusicBaseFragment : Fragment() {
-
-    companion object {
-        var TAG: String = this::class.java.simpleName
-    }
+abstract class BaseFragment : SupportFragment() {
 
     private lateinit var unBinder: Unbinder
 
-    abstract fun initLayout(): Int
+    abstract fun contentLayout(): Int
     open fun init(view: View) {}
+    open fun init(view: View, savedInstanceState: Bundle?) {
+        init(view)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(initLayout(), container, false)
+        return inflater.inflate(contentLayout(), container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         unBinder = ButterKnife.bind(this, view)
-        init(view)
+        init(view, savedInstanceState)
     }
 
     override fun onDestroyView() {

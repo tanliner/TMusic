@@ -4,10 +4,10 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
-import androidx.appcompat.app.AppCompatActivity
 import butterknife.ButterKnife
 import butterknife.Unbinder
 import com.ltan.music.common.MusicLog
+import me.yokeyword.fragmentation.SupportActivity
 import kotlin.reflect.KProperty
 
 /**
@@ -19,16 +19,16 @@ import kotlin.reflect.KProperty
  * @Date:   2019-05-12
  * @Version: 1.0
  */
-abstract class MusicBaseActivity : AppCompatActivity() {
+abstract class BaseActivity : SupportActivity() {
 
     private var unBinder: Unbinder = Unbinder.EMPTY
 
-    abstract fun initLayout(): Int
+    abstract fun contentLayout(): Int
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initWindowFlag()
-        val layoutId = initLayout()
+        val layoutId = contentLayout()
         if (layoutId <= 0) {
             MusicLog.e("must have a validate the layout")
             return

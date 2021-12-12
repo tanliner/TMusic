@@ -13,11 +13,29 @@ package com.ltan.music.account.beans
 data class LoginResult(
     val loginType: Int = 0,
 
+    val clientId: String = "",
+
+    val effectTime: Long = 0,
+
     val code: Int = 0,
 
     val account: Account? = null,
 
+    val token: String = "",
+
     val profile: Profile? = null,
 
-    private val bindings: List<String>? = null
+    private val bindings: List<Binding>? = null
+)
+
+data class Binding(
+    val userId: Long = 0,
+    val url: String = "",
+    val tokenJsonStr: String = "{}",
+    val expiresIn: Long = 0,
+    val refreshTime: Long = 0,
+    val bindingTime: Long = 0,
+    val expired: Boolean = false,
+    val id: Long = 0,
+    val type: Int = 0,
 )

@@ -7,8 +7,7 @@ dependencies {
     api deps.support.recyclerview
     api deps.multitype
     // api deps.multitypekt
-    api deps.SmartRefreshLayout
-    api deps.SmartRefreshHeader
+    api deps.SmartRefresh
     testImplementation deps.junit
     androidTestImplementation deps.test.runner
     androidTestImplementation deps.test.espresso

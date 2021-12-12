@@ -154,7 +154,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
         val args = arguments ?: return
         mCurSong = args.get(PlayerActivity.ARG_OBJ) as SongPlaying
         // make sure not null
-        val songList: ArrayList<SongItemObject> = args.getParcelableArrayList(PlayerActivity.ARG_SONG_LIST)
+        val songList: ArrayList<SongItemObject>? = args.getParcelableArrayList(PlayerActivity.ARG_SONG_LIST)
         mSongList = if (songList.isNullOrEmpty()) {
             ArrayList()
         } else {

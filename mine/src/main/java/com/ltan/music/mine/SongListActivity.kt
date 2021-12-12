@@ -118,7 +118,7 @@ class SongListActivity : BaseMVPActivity<SongListPresenter>(), SongListContract.
     }
 
     private fun processArgs() {
-        songPlayListItem = intent.getParcelableExtra(ARG_SONG)
+        songPlayListItem = intent.getParcelableExtra(ARG_SONG) ?: return
         mSongListId = songPlayListItem.songId
 
         val header = SongListHeaderObject()

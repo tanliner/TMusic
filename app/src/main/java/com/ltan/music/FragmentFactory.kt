@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment
  * @Version: 1.0
  */
 object FragmentFactory  {
-    fun <T: Fragment> getInstance(t: Class<T>): Fragment? {
+    fun <T: Fragment> getInstance(t: Class<T>): Fragment {
         try {
             return t.newInstance()
         } catch (e: IllegalAccessException) {
@@ -22,6 +22,6 @@ object FragmentFactory  {
         } catch (e: InstantiationException) {
             e.printStackTrace()
         }
-        return null
+        return Fragment()
     }
 }

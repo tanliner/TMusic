@@ -32,7 +32,7 @@ class MusicPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     private val frag = arrayOf(MineFragment.newInstance(), DiscoveryFragment.newInstance(), FriendsFragment.newInstance(), VideosFragment.newInstance())
     private val fragClass = arrayOf(MineFragment::class.java, DiscoveryFragment::class.java, FriendsFragment::class.java, VideosFragment::class.java)
 
-    override fun getItem(position: Int): Fragment? {
+    override fun getItem(position: Int): Fragment {
         // return MusicBaseFragment.newInstance(pages[position])
         // return frag[position]
         return FragmentFactory.getInstance(fragClass[position])

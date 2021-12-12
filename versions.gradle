@@ -22,54 +22,56 @@
  **/
 ext.deps = [:]
 def versions = [:]
-versions.android_gradle_plugin = '3.3.2'
+versions.android_gradle_plugin = '7.0.2'
 versions.apache_commons = "2.5"
-versions.arch_core = "2.0.1"
-versions.atsl_rules = "1.1.1"
-versions.atsl_runner = "1.1.1"
-versions.atsl_junit = "1.1.0"
-versions.constraint_layout = "2.0.0-alpha2"
-versions.core_ktx = "1.0.0"
-versions.dagger = "2.16"
+versions.arch_core = "2.1.0"
+versions.atsl_rules = "1.4.0"
+versions.atsl_runner = "1.4.0"
+versions.atsl_junit = "1.1.3"
+versions.constraint_layout = "2.1.2"
+versions.core_ktx = "1.3.1"
+versions.dagger = "2.19"
 versions.dexmaker = "2.2.0"
-versions.espresso = "3.1.1"
-versions.fragment = "1.1.0-alpha05"
-versions.glide = "4.9.0"
-versions.glide_transform = "4.0.0"
+versions.espresso = "3.4.0"
+// versions.fragment = "1.1.0-alpha05"
+versions.glide = "4.12.0"
+versions.glide_transform = "4.3.0"
 versions.hamcrest = "1.3"
-versions.junit = "4.12"
-versions.kotlin = "1.3.31"
-versions.lifecycle = "2.0.0"
+versions.junit = "4.13"
+versions.kotlin = "1.5.21"
+versions.lifecycle = "2.2.0"
+// remove ?
 versions.rxlifecycle = "2.2.2"
-versions.rxbinding = "2.0.0"
-versions.butterknife = "10.0.0"
-versions.mockito = "2.25.0"
+// remove ?
+versions.rxbinding = "2.2.0"
+versions.butterknife = "10.2.0"
+versions.mockito = "3.3.0"
 versions.mockito_all = "1.10.19"
-versions.mockito_android = "2.25.0"
-versions.mockwebserver = "3.8.1"
-versions.navigation = "2.1.0-alpha01"
+versions.mockito_android = "3.3.0"
+versions.mockwebserver = "3.9.0"
+versions.navigation = "2.3.5"
 versions.okhttp_logging_interceptor = "3.9.0"
-versions.paging = "2.1.0-rc01"
+versions.paging = "3.1.0"
 versions.okhttp = "3.9.0"
-versions.retrofit = "2.5.0"
+versions.retrofit = "2.9.0"
 versions.cookie = "1.0.1"
-versions.robolectric = "4.2"
-versions.room = "2.1.0-alpha06"
-versions.rx_android = "2.1.0"
-versions.rxjava2 = "2.1.3"
+versions.robolectric = "4.6.1"
+versions.room = "2.3.0"
+versions.rx_android = "2.1.1"
+versions.rxjava2 = "2.2.21"
 versions.support = "1.0.0"
 versions.supportv7 = "28.0.0"
-versions.timber = "4.5.1"
-versions.work = "2.0.0-rc01"
+versions.timber = "5.0.1"
+versions.work = "2.7.0"
 versions.fragmentation = "1.3.6"
 versions.andromeda = "1.1.8"
 versions.mpchart = "v3.1.0-alpha"
 // 3.5.0 -> 4.0.0-alpha3
 versions.multitype = "4.0.0-alpha3"
 versions.multitypekt = "3.4.4"
-versions.SmartRefreshLayout = "1.0.5.1"
-versions.leakcanary = "1.6.1"
-versions.gson = "2.8.5"
+versions.SmartRefreshLayout = "2.0.5"
+versions.leakcanary = "2.7"
+versions.gson = "2.8.9"
 versions.bugly = "2.6.6.1"
 versions.multidex = "2.0.0"
 versions.multidexv7 = "1.0.3"
@@ -79,8 +81,9 @@ versions.statusbar = "1.5.1"
 def deps = [:]
 
 def test = [:]
-test.runner = 'androidx.test:runner:1.1.0-alpha4'
-test.espresso = 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
+test.runner = "androidx.test:runner:$versions.atsl_rules"
+test.espresso = "androidx.test.espresso:espresso-core:$versions.espresso"
+test.espresso = "androidx.test.espresso:espresso-contrib:$versions.espresso"
 deps.test = test
 
 def support = [:]
@@ -92,23 +95,6 @@ support.design = "com.google.android.material:material:$versions.support"
 support.v4 = "androidx.legacy:legacy-support-v4:$versions.support"
 support.core_utils = "androidx.legacy:legacy-support-core-utils:$versions.support"
 support.core_ktx = "androidx.core:core-ktx:$versions.core_ktx"
-support.fragment_runtime = "androidx.fragment:fragment:${versions.fragment}"
-support.fragment_runtime_ktx = "androidx.fragment:fragment-ktx:${versions.fragment}"
-support.fragment_testing = "androidx.fragment:fragment-testing:${versions.fragment}"
-// old support version, deprecated
-// support.exifinterface = "com.android.support:exifinterface:$versions.supportv7"
-// support.annotationsv7 = "com.android.support:support-annotations:$versions.supportv7"
-// support.app_compatv7 = "androidx.appcompat:appcompat:$versions.supportv7"
-// support.recyclerviewv7 = "com.android.support:recyclerview-v7:$versions.support"
-// support.cardviewv7 = "com.android.support:cardview-v7:$versions.supportv7"
-// support.designv7 = "com.android.support:design:$versions.supportv7"
-// support.v13 = "com.android.support:support-v13:$versions.supportv7"
-// support.core_utilsv7 = "com.android.support:support-core-utils:$versions.supportv7"
-// support.constraint_layout = "com.android.support:constraintlayout:$versions.constraint_layoutv7"
-// support.multidexv7 = "com.android.support:multidex:$versions.multidexv7"
-// support.core_utils = "com.android.support:support-core-utils:$versions.supportv7"
-// support.v13 = "com.android.support:support-v13:$versions.supportv13"
-
 deps.support = support
 
 deps.multidex = "androidx.multidex:multidex:$versions.multidex"
@@ -124,6 +110,7 @@ deps.room = room
 
 def lifecycle = [:]
 lifecycle.runtime = "androidx.lifecycle:lifecycle-runtime:$versions.lifecycle"
+lifecycle.runtime_ktx = "androidx.lifecycle:lifecycle-runtime-ktx:$versions.lifecycle"
 lifecycle.extensions = "androidx.lifecycle:lifecycle-extensions:$versions.lifecycle"
 lifecycle.java8 = "androidx.lifecycle:lifecycle-common-java8:$versions.lifecycle"
 lifecycle.compiler = "androidx.lifecycle:lifecycle-compiler:$versions.lifecycle"
@@ -232,8 +219,8 @@ ext.deps = deps
 def build_versions = [:]
 build_versions.min_sdk = 22
 build_versions.target_sdk = 26
-build_versions.compile_sdk = 28
-build_versions.build_tools = "28.0.3"
+build_versions.compile_sdk = 30
+build_versions.build_tools = "30.0.3"
 build_versions.version_code = 1
 build_versions.version_name = '0.1.0'
 build_versions.source_compatibility = 1.8
@@ -264,8 +251,7 @@ deps.andromeda = "org.qiyi.video.svg:core:$versions.andromeda"
 deps.mpchart = "com.github.PhilJay:MPAndroidChart:$versions.mpchart"
 deps.multitype = "me.drakeet.multitype:multitype:$versions.multitype"
 deps.multitypekt = "me.drakeet.multitype:multitype-kotlin:$versions.multitypekt"
-deps.SmartRefreshLayout = "com.scwang.smartrefresh:SmartRefreshLayout:$versions.SmartRefreshLayout"
-deps.SmartRefreshHeader =  "com.scwang.smartrefresh:SmartRefreshHeader:$versions.SmartRefreshLayout"
+deps.SmartRefresh =  "io.github.scwang90:refresh-layout-kernel:$versions.SmartRefreshLayout"
 
 deps.andromeda_plugin = "org.qiyi.video.svg:plugin:1.1.1"
 deps.butterknife_gradle_plugin = "com.jakewharton:butterknife-gradle-plugin:9.0.0-rc2"
@@ -279,8 +265,9 @@ deps.flexbox = "com.google.android:flexbox:1.0.0"
 
 ext.deps = deps
 
-def addRepos(RepositoryHandler handler) {
+def addRepos(handler) {
     handler.google()
+    handler.mavenCentral()
     handler.jcenter()
     handler.maven { url "https://jitpack.io" } // for BottomNavigationViewEx
     // handler.maven { url "https://maven.fabric.io/public" }

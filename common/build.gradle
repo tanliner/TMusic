@@ -10,7 +10,7 @@ dependencies {
     // must add annotationProcessor
     kapt deps.glide.compiler
 
-    api deps.SmartRefreshLayout
+    api deps.SmartRefresh
 
     api deps.gson
     api deps.statusbar

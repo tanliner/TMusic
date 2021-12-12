@@ -15,7 +15,7 @@ dependencies {
     // kotlin, implementation in java
     kapt deps.butterknife.compiler
 
-    api deps.andromeda
+    // api deps.andromeda
     api deps.okhttp.interceptor
     api deps.cookie
     // bugly report

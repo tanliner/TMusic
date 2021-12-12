@@ -25,8 +25,8 @@ class PlayerActivity : MusicBaseActivity() {
         return R.layout.service_player_activity
     }
 
-    private lateinit var mCurSong: SongPlaying
-    private lateinit var mSongList: ArrayList<SongItemObject>
+    private var mCurSong: SongPlaying? = null
+    private var mSongList: ArrayList<SongItemObject>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         StatusBarUtil.setTransparent(this)

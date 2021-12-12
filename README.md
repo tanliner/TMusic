@@ -1,8 +1,8 @@
 ### Env
 
-Android Studio: 3.3.2<br>
-Gradle: 4.10.1<br>
-Gradle-plugin: 3.3.2<br>
+Android Studio: 2020.3.1<br>
+Gradle: 7.1<br>
+Gradle-plugin: 7.0.2<br>
 Language: Kotlin<br>
 
 `Netease Music` is so greate that how can I build up a App like?<br>

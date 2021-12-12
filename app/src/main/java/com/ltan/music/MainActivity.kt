@@ -32,19 +32,24 @@ class MainActivity : MusicBaseActivity() {
     }
 
     private fun getIndicators(): ArrayList<MenuItem> {
+        val itemRadio = MenuItem(this)
         val itemMine = MenuItem(this)
         val itemDisc = MenuItem(this)
-        val itemFriend = MenuItem(this)
-        val itemVideo = MenuItem(this)
+        val itemFollow = MenuItem(this)
+        val itemCloud = MenuItem(this)
         val items = ArrayList<MenuItem>()
-        itemMine.setTitle(getString(R.string.app_vp_indicator_mine))
+
         itemDisc.setTitle(getString(R.string.app_vp_indicator_discoveries))
-        itemFriend.setTitle(getString(R.string.app_vp_indicator_friends))
-        itemVideo.setTitle(getString(R.string.app_vp_indicator_videos))
-        items.add(itemMine)
+        itemRadio.setTitle(getString(R.string.app_vp_indicator_live))
+        itemMine.setTitle(getString(R.string.app_vp_indicator_mine))
+
+        itemFollow.setTitle(getString(R.string.app_vp_indicator_follow))
+        itemCloud.setTitle(getString(R.string.app_vp_indicator_cloud))
         items.add(itemDisc)
-        items.add(itemFriend)
-        items.add(itemVideo)
+        items.add(itemRadio)
+        items.add(itemMine)
+        items.add(itemFollow)
+        items.add(itemCloud)
         return items
     }
 }

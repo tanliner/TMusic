@@ -1,3 +1,4 @@
 <resources>
     <string name="friends_name">Friends</string>
+    <string name="follower_name">Follower</string>
 </resources>

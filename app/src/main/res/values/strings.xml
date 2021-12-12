@@ -1,9 +1,10 @@
 <resources>
-    <string name="app_name">Music</string>
-    <string name="app_vp_indicator_mine">Mine</string>
+    <string name="app_name">TMusic</string>
     <string name="app_vp_indicator_discoveries">Wow</string>
-    <string name="app_vp_indicator_friends">Friend</string>
-    <string name="app_vp_indicator_videos">Video</string>
+    <string name="app_vp_indicator_live">Live</string>
+    <string name="app_vp_indicator_mine">Mine</string>
+    <string name="app_vp_indicator_follow">Follow</string>
+    <string name="app_vp_indicator_cloud">Cloud</string>
 
     <string name="app_act_login_email" translatable="false">输入网易邮箱地址</string>
     <string name="app_act_login_email_password" translatable="false">输入邮箱密码</string>

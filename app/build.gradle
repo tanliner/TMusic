@@ -60,6 +60,8 @@ dependencies {
 
     implementation deps.room.rxjava2
 
+    implementation project(path: ':live')
+    implementation project(path: ':cloud')
     implementation project(path: ':mine')
     implementation project(path: ':discovery')
     implementation project(path: ':friends')

@@ -1,6 +1,7 @@
 package com.ltan.music.view
 
 import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
@@ -44,11 +45,11 @@ class PageIndicator @JvmOverloads constructor(
     // like a constructor in java
     init {
         // init center items
-        mIndicator.layoutParams = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        mIndicator.layoutParams = LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         mIndicator.gravity = Gravity.CENTER
         mIndicator.orientation = LinearLayout.HORIZONTAL
-        val lp = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-        lp.addRule(CENTER_HORIZONTAL)
+        val lp = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        // lp.addRule(CENTER_HORIZONTAL)
         addView(mIndicator, lp)
         isMenuItemClicked = false
     }
@@ -58,7 +59,7 @@ class PageIndicator @JvmOverloads constructor(
         mIndicators?.clear()
         for ((index, it) in menus.withIndex()) {
             it.setOnClickListener(HeaderClickListener(this, mViewPager, index))
-            mIndicator.addView(it)
+            mIndicator.addView(it, LinearLayout.LayoutParams(-2, -1).also { it.weight = 1F })
         }
         mIndicators = menus
     }

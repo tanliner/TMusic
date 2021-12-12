@@ -1,7 +1,8 @@
 <resources>
-    <string name="app_name">音乐</string>
-    <string name="app_vp_indicator_mine">我的</string>
+    <string name="app_name">TMusic</string>
     <string name="app_vp_indicator_discoveries">发现</string>
-    <string name="app_vp_indicator_friends">朋友</string>
-    <string name="app_vp_indicator_videos">视频</string>
+    <string name="app_vp_indicator_live">播客</string>
+    <string name="app_vp_indicator_mine">我的</string>
+    <string name="app_vp_indicator_follow">关注</string>
+    <string name="app_vp_indicator_cloud">云村</string>
 </resources>

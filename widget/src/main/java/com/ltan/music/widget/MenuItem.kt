@@ -52,7 +52,10 @@ class MenuItem @JvmOverloads constructor(
     }
 
     fun setActiveState(status: Float) {
-        mTitleTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, resources.getInteger(R.integer.menu_item_text_size) + (status * 2))
-        mTitleTv.alpha = DEFAULT_TITLE_ALPHA + status * (1 - DEFAULT_TITLE_ALPHA)
+        if (status >= 0.5F) {
+            mTitleTv.setTextColor(resources.getColor(android.R.color.holo_red_dark))
+        } else {
+            mTitleTv.setTextColor(resources.getColor(android.R.color.black))
+        }
     }
 }

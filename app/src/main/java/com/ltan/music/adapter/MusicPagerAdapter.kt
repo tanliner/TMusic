@@ -5,8 +5,11 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.ltan.music.FragmentFactory
 import com.ltan.music.R
+import com.ltan.music.cloud.CloudFragment
 import com.ltan.music.discovery.fragments.DiscoveryFragment
+import com.ltan.music.friends.fragments.FollowersFragment
 import com.ltan.music.friends.fragments.FriendsFragment
+import com.ltan.music.live.LiveFragment
 import com.ltan.music.mine.fragments.MineFragment
 import com.ltan.music.videos.fragments.VideosFragment
 
@@ -27,10 +30,10 @@ class MusicPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     }
 
     private val pages: IntArray =
-        intArrayOf(R.layout.mine_fragment, R.layout.discovery_fragment, R.layout.friends_fragment, R.layout.videos_fragment)
+        intArrayOf(R.layout.discovery_fragment, R.layout.live_fragment, R.layout.mine_fragment, R.layout.followers_fragment, R.layout.cloud_fragment)
     // todo factory pattern generate the fragment instance
     private val frag = arrayOf(MineFragment.newInstance(), DiscoveryFragment.newInstance(), FriendsFragment.newInstance(), VideosFragment.newInstance())
-    private val fragClass = arrayOf(MineFragment::class.java, DiscoveryFragment::class.java, FriendsFragment::class.java, VideosFragment::class.java)
+    private val fragClass = arrayOf(DiscoveryFragment::class.java, LiveFragment::class.java, MineFragment::class.java, FollowersFragment::class.java, CloudFragment::class.java)
 
     override fun getItem(position: Int): Fragment {
         // return MusicBaseFragment.newInstance(pages[position])

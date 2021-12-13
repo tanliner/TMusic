@@ -59,6 +59,7 @@ dependencies {
     implementation deps.support.cardview
 
     implementation deps.room.rxjava2
+    implementation deps.viewpager
 
     implementation project(path: ':live')
     implementation project(path: ':cloud')

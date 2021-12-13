@@ -1,22 +1,23 @@
 package com.ltan.music
 
 import android.os.Bundle
-import androidx.viewpager.widget.ViewPager
+import android.widget.TextView
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayoutMediator
 import com.jaeger.library.StatusBarUtil
-import com.ltan.music.adapter.MusicPagerAdapter
+import com.ltan.music.adapter.MusicPager2Adapter
 import com.ltan.music.basemvp.MusicBaseActivity
-import com.ltan.music.view.PageIndicator
+import com.ltan.music.cloud.CloudFragment
+import com.ltan.music.discovery.fragments.DiscoveryFragment
+import com.ltan.music.friends.fragments.FollowersFragment
+import com.ltan.music.live.LiveFragment
+import com.ltan.music.mine.fragments.MineFragment
 import com.ltan.music.widget.MenuItem
-import kotterknife.bindView
+import kotlinx.android.synthetic.main.app_activity_main.*
 
 class MainActivity : MusicBaseActivity() {
 
-    // I's works fine in Java
-    // @BindView(R2.id.index_vp)
-    // val mViewPager: ViewPager
-    private val mViewPager: ViewPager by bindView(R.id.music_view_pager)
-    private val mPageIndicator: PageIndicator by bindView(R.id.music_indicator)
-
+    private var lastPagerPosition = 0
     override fun initLayout(): Int {
         return R.layout.app_activity_main
     }
@@ -24,32 +25,46 @@ class MainActivity : MusicBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         StatusBarUtil.setColor(this, resources.getColor(R.color.colorPrimary))
-
-        val adapter = MusicPagerAdapter(this.supportFragmentManager)
-        mPageIndicator.setViewPager(mViewPager)
-        mPageIndicator.addIndicators(getIndicators())
-        mViewPager.adapter = adapter
+        initPager()
+        setupTabCustomView()
     }
 
-    private fun getIndicators(): ArrayList<MenuItem> {
+    private fun initPager() {
+        val adapter = MusicPager2Adapter(this)
+        adapter.fragClass = arrayOf(
+            DiscoveryFragment::class.java,
+            LiveFragment::class.java,
+            MineFragment::class.java,
+            FollowersFragment::class.java,
+            CloudFragment::class.java
+        )
+        music_view_pager2.adapter = adapter
+        music_view_pager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                tabLayout.getTabAt(lastPagerPosition)?.customView?.findViewById<TextView>(R.id.tv_menu_item_title)?.setTextColor(resources.getColor(android.R.color.black))
+                tabLayout.getTabAt(position)?.customView?.findViewById<TextView>(R.id.tv_menu_item_title)?.setTextColor(resources.getColor(android.R.color.holo_red_dark))
+                lastPagerPosition = position
+            }
+        })
+    }
+
+    private fun setupTabCustomView() {
+        TabLayoutMediator(tabLayout, music_view_pager2) { _, _ -> }.attach()
         val itemRadio = MenuItem(this)
         val itemMine = MenuItem(this)
         val itemDisc = MenuItem(this)
         val itemFollow = MenuItem(this)
         val itemCloud = MenuItem(this)
-        val items = ArrayList<MenuItem>()
-
         itemDisc.setTitle(getString(R.string.app_vp_indicator_discoveries))
         itemRadio.setTitle(getString(R.string.app_vp_indicator_live))
         itemMine.setTitle(getString(R.string.app_vp_indicator_mine))
-
         itemFollow.setTitle(getString(R.string.app_vp_indicator_follow))
         itemCloud.setTitle(getString(R.string.app_vp_indicator_cloud))
-        items.add(itemDisc)
-        items.add(itemRadio)
-        items.add(itemMine)
-        items.add(itemFollow)
-        items.add(itemCloud)
-        return items
+
+        tabLayout.getTabAt(0)?.customView = itemDisc
+        tabLayout.getTabAt(1)?.customView = itemRadio
+        tabLayout.getTabAt(2)?.customView = itemMine
+        tabLayout.getTabAt(3)?.customView = itemFollow
+        tabLayout.getTabAt(4)?.customView = itemCloud
     }
 }

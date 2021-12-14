@@ -60,6 +60,7 @@ dependencies {
 
     implementation deps.room.rxjava2
     implementation deps.viewpager
+    implementation deps.navigation.fragment_ktx
 
     implementation project(path: ':live')
     implementation project(path: ':cloud')

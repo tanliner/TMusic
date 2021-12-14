@@ -5,7 +5,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.ltan.music.FragmentFactory
 
-class MusicPager2Adapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
+class MusicPager2Adapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
 
     var fragClass: Array<Class<out Fragment>> = arrayOf()
 

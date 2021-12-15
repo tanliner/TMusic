@@ -5,9 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import butterknife.ButterKnife
-import butterknife.Unbinder
-import kotlin.reflect.KProperty
 
 /**
  * TMusic.com.ltan.music.index.fragments
@@ -24,7 +21,6 @@ abstract class MusicBaseFragment : Fragment() {
         var TAG: String = this::class.java.simpleName
     }
 
-    private lateinit var unBinder: Unbinder
 
     abstract fun initLayout(): Int
     open fun init(view: View) {}
@@ -35,13 +31,7 @@ abstract class MusicBaseFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        unBinder = ButterKnife.bind(this, view)
         init(view)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        unBinder.unbind()
     }
 
     open fun onBack() {
@@ -53,8 +43,4 @@ abstract class MusicBaseFragment : Fragment() {
             manager.popBackStack()
         }
     }
-}
-// for butterknife in Kotlin
-operator fun Any.setValue(fragment: Fragment, property: KProperty<*>, v: View) {
-
 }

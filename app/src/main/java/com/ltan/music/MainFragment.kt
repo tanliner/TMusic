@@ -1,11 +1,18 @@
 package com.ltan.music
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
+import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import com.ltan.music.adapter.MusicPager2Adapter
@@ -30,6 +37,17 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initPager()
         setupTabCustomView()
+        LocalBroadcastManager.getInstance(view.context)
+            .registerReceiver(object : BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    drawerLayout.openDrawer(Gravity.LEFT)
+                }
+            }, IntentFilter(DiscoveryFragment.DRAWER_ACTION))
+
+        drawerNavigation.setNavigationItemSelectedListener {
+            Log.i("ltan/MainFragment", "setNavigationItemSelectedListener: ${it.title}")
+            false
+        }
     }
 
     private var lastPagerPosition = 0
@@ -46,8 +64,10 @@ class MainFragment : Fragment() {
         music_view_pager2.adapter = adapter
         music_view_pager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                tabLayout.getTabAt(lastPagerPosition)?.customView?.findViewById<TextView>(R.id.tv_menu_item_title)?.setTextColor(resources.getColor(android.R.color.black))
-                tabLayout.getTabAt(position)?.customView?.findViewById<TextView>(R.id.tv_menu_item_title)?.setTextColor(resources.getColor(android.R.color.holo_red_dark))
+                tabLayout.getTabAt(lastPagerPosition)?.customView?.findViewById<TextView>(R.id.tv_menu_item_title)
+                    ?.setTextColor(resources.getColor(android.R.color.black))
+                tabLayout.getTabAt(position)?.customView?.findViewById<TextView>(R.id.tv_menu_item_title)
+                    ?.setTextColor(resources.getColor(android.R.color.holo_red_dark))
                 lastPagerPosition = position
             }
         })

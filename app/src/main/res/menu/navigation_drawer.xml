@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/message_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/message"
+            android:title="Messages">
+            <menu>
+                <item
+                    android:id="@+id/message_mine"
+                    android:icon="@drawable/icon_player_page_play"
+                    android:title="message_mine" />
+
+                <item
+                    android:id="@+id/message_cloud"
+                    android:icon="@drawable/icon_player_page_pause"
+                    android:title="message_cloud" />
+
+            </menu>
+        </item>
+    </group>
+    <group android:id="@+id/service_group">
+        <item
+            android:id="@+id/service"
+            android:title="Service">
+            <menu>
+                <item android:title="@string/app_name" />
+            </menu>
+        </item>
+    </group>
+
+</menu>

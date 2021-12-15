@@ -1,11 +1,11 @@
 package com.ltan.music.discovery.fragments
 
+import android.content.Intent
 import android.view.View
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.ltan.music.basemvp.MusicBaseFragment
-import com.ltan.music.basemvp.setValue
-import com.ltan.music.common.MusicLog
 import com.ltan.music.discovery.R
-import kotterknife.bindView
+import kotlinx.android.synthetic.main.discovery_fragment.*
 
 /**
  * TMusic.com.ltan.music.discovery.fragments
@@ -20,24 +20,20 @@ class DiscoveryFragment : MusicBaseFragment() {
 
     companion object {
         const val TAG = "Disc/Frag"
+        const val DRAWER_ACTION = "action_test_drawer"
+
         fun newInstance(): DiscoveryFragment {
             return DiscoveryFragment()
         }
     }
-
-    var mHeader: View by bindView(R.id.page_header)
 
     override fun initLayout(): Int {
         return R.layout.discovery_fragment
     }
 
     override fun init(view: View) {
-        mHeader = view.findViewById(R.id.page_header)
-        mHeader.setOnClickListener { v -> justTest(v); justTest(mHeader) }
-    }
-
-    fun justTest(v: View) {
-        MusicLog.d(TAG, "\nthis is a test message from$this, and mHeader is:$v")
+        drawerTest.setOnClickListener {
+            LocalBroadcastManager.getInstance(view.context).sendBroadcast(Intent(DRAWER_ACTION))
+        }
     }
 }
-

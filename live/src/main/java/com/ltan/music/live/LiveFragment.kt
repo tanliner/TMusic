@@ -2,10 +2,8 @@ package com.ltan.music.live
 
 import android.view.View
 import com.ltan.music.basemvp.MusicBaseFragment
-import com.ltan.music.basemvp.setValue
 import com.ltan.music.common.MusicLog
-import com.ltan.music.live.R
-import kotterknife.bindView
+import kotlinx.android.synthetic.main.live_fragment.*
 
 /**
  * TMusic.com.ltan.music.cloud
@@ -25,15 +23,12 @@ class LiveFragment : MusicBaseFragment() {
         }
     }
 
-    var mHeader: View by bindView(R.id.page_header)
-
     override fun initLayout(): Int {
         return R.layout.live_fragment
     }
 
     override fun init(view: View) {
-        mHeader = view.findViewById(R.id.page_header)
-        mHeader.setOnClickListener { v -> justTest(v); justTest(mHeader) }
+        page_header.setOnClickListener { v -> justTest(v); justTest(page_header) }
     }
 
     fun justTest(v: View) {

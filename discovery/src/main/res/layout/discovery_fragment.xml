@@ -19,7 +19,7 @@
         android:id="@+id/drawerTest"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/icon_app_default"
+        android:src="@drawable/e1g"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.viewpager2.widget.ViewPager2
@@ -25,11 +26,16 @@ import com.ltan.music.widget.MenuItem
 import kotlinx.android.synthetic.main.app_fragment_main.*
 
 class MainFragment : Fragment() {
+    lateinit var menuContainer: ComposeView
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        menuContainer = inflater.inflate(R.layout.setting_drawer_menu, container, false) as ComposeView
+        menuContainer.setContent {
+            SettingScreen()
+        }
         return inflater.inflate(R.layout.app_fragment_main, container, false)
     }
 
@@ -48,6 +54,8 @@ class MainFragment : Fragment() {
             Log.i("ltan/MainFragment", "setNavigationItemSelectedListener: ${it.title}")
             false
         }
+
+        drawerNavigation.addHeaderView(menuContainer)
     }
 
     private var lastPagerPosition = 0

@@ -19,7 +19,11 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import android.widget.ScrollView
+import android.widget.TextView
 import androidx.viewpager.widget.ViewPager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -136,7 +140,7 @@ class PlayFragment : BaseMVPFragment<ServicePresenter>(), ServiceContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appCtx = context!!.applicationContext
+        appCtx = requireContext().applicationContext
     }
 
     override fun init(view: View) {
